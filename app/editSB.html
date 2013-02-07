@@ -1,0 +1,169 @@
+<!-- Buttons -->
+<input type="button" ng-click="put()" value="Update Item" />
+<input type="button" ng-click="post()" value="Create New Item from Form" />
+<input type="button" ng-click="clone()" value="Clone Item" />
+<br /><br />
+
+<a href="#/">Edit in Project Mode</a>
+<a href="#/sbFields">Edit in ScienceBase Mode</a>
+<br /><br />
+
+<!-- ItemId -->
+<label for="id" id="id_label">Item Id <span style="text-decoration: line-through;">or URL</span></label>
+<input type="text" ng-model="json.id" name="id" id="id" size="60" class="text-input" />
+<input type="button" ng-click="get()" value="Retreive Item Details" />
+<br />
+
+<!-- ParentId -->
+<p style="font-weight: bold;">
+<label for="parentId" id="parentId_label">Parent Id or URL</label>
+<input type="text" ng-model="json.parentId" name="parentId" id="parentId" size="60" class="text-input" /> <b>Parent ID is required to create new items</b>
+<br />
+
+<!-- Title -->
+<label for="title" id="title_label">Title</label>
+<input type="text" ng-model="json.title" name="title" id="title" size="60" class="text-input" />
+<br />
+
+<!-- SubTitle -->
+<label for="subTitle" id="subTitle_label">SubTitle</label>
+<input type="text" ng-model="json.subTitle" name="subTitle" id="subTitle" size="60" class="text-input" />
+<br />
+
+<!-- Body -->
+<label for="body" id="body_label">Body</label>
+<input type="text" ng-model="json.body" name="body" id="body" size="600" class="text-input" />
+<br />
+
+<!-- Purpose -->
+<label for="purpose" id="purpose_label">Purpose</label>
+<input type="text" ng-model="json.purpose" name="purpose" id="purpose" size="600" class="text-input" />
+<br />
+
+<!-- Rights -->
+<label for="rights" id="rights_label">Rights</label>
+<input type="text" ng-model="json.rights" name="rights" id="rights" size="600" class="text-input" />
+<br />
+
+<!-- Provenance -->
+<label for="provenance" id="provenance_label">Provenance</label>
+<input type="text" ng-model="json.provenance.html" name="provenance" size="60" class="text-input" id="provenance" />
+<br />
+
+<!-- Material Request Instructions -->
+<label for="materialRequestInstructions" id="materialRequestInstructions_label">Material Request Instructions</label>
+<input type="text" ng-model="json.materialRequestInstructions" name="materialRequestInstructions" size="60" class="text-input" id="materialRequestInstructions" />
+<br />
+
+<!-- Alternate Titles -->
+<label for="altTitles" id="altTitles_label">Alternate Titles ({{json.alternateTitles.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="altTitle in json.alternateTitles">
+    {{altTitle}}
+    <!-- <input type="text" size="60" placeholder="Alternate Title" ng-model="altTitle" /> -->
+    <a ng-click="deleteAltTitle()">[X]</a>
+  </li>
+</ul>
+<form ng-submit="addAltTitle()">
+  <input type="text" ng-model="altTitles" id="altTitles" name="altTitles" size="60" placeholder="Alternate Title" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<!-- Contacts -->
+<label for="contacts" id="contacts_label">Contacts ({{json.contacts.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="contact in json.contacts" ng-controller="ContactsCtrl">
+    <input type="text" size="60" placeholder="contact type" ng-model="contact.type" />
+    <input type="text" size="60" placeholder="contact name" ng-model="contact.name" />
+    <input type="text" size="60" placeholder="contact's organization" ng-model="contact.personsOrganization" />
+    <a ng-click="deleteContact()">[X]</a>
+  </li>
+</ul>
+<form ng-submit="addContact()">
+  <input type="text" ng-model="contact.type" id="contact" name="contact" size="60" placeholder="contact type" />
+  <input type="text" ng-model="contact.name" id="contactName" size="60" placeholder="contact name" />
+  <input type="text" ng-model="contact.personsOrganization" id="contact.personsOrganization" size="60" placeholder="organization" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<!-- identifier -->
+<label for="identifiers" id="identifiers_label">Identifiers ({{json.identifiers.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="identifier in json.identifiers">
+    <input type="text" size="60" placeholder="identifier scheme" ng-model="identifier.scheme" />
+    <input type="text" size="60" placeholder="identifier type" ng-model="identifier.type" />
+    <input type="text" size="60" placeholder="identifier key" ng-model="identifier.key" />
+    <a ng-click="deleteIdentifier()">[X]</a>
+  </li>
+</ul>
+<form ng-submit="addIdentifier()">
+  <input type="text" ng-model="identifier.scheme" id="identifiers" name="identifiers" size="60" placeholder="identifier scheme" />
+  <input type="text" ng-model="identifier.type" size="60" placeholder="identifier type" />
+  <input type="text" ng-model="idKey" size="60" placeholder="identifier key" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<!-- tags -->
+<label for="tags" id="tags_label">Tags ({{json.tags.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="tag in json.tags">
+    <input type="text" size="60" placeholder="tag type (optional)" ng-model="tag.type" />
+    <input type="text" size="60" placeholder="tag scheme (optional)" ng-model="tag.scheme" />
+    <input type="text" size="60" placeholder="tag name (required)" ng-model="tag.name" />
+    <a ng-click="deleteTag()">[X]</a>
+  </li>
+</ul>
+<form ng-submit="addTag()">
+  <input type="text" ng-model="tag.type" id="tags" name="tags" size="60" placeholder="tag type (optional)" />
+  <input type="text" ng-model="tag.scheme" size="60" placeholder="tag scheme (optional)" />
+  <input type="text" ng-model="tag.name" size="60" placeholder="tag name (required)" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<!-- dates -->
+<label for="dates" id="dates_label">Dates ({{json.dates.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="date in json.dates">
+    <input type="text" size="60" placeholder="date type" ng-model="date.type" />
+    <input type="text" size="60" placeholder="date (YYYY, YYYY-MM, or YYYY-MM-DD only)" ng-model="date.dateString" />
+    <input type="text" size="60" placeholder="date label" ng-model="date.label" />
+    <a ng-click="deleteDate()">[X]</a>
+  </li>
+</ul>
+<form ng-submit="addDate()">
+  <input type="text" size="60" placeholder="date type" ng-model="date.type" id="contacts" name="contacts" />
+  <input type="text" size="60" placeholder="date (YYYY, YYYY-MM, or YYYY-MM-DD only)" ng-model="date.dateString" />
+  <input type="text" size="60" placeholder="date label" ng-model="date.label" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<!-- Facets -->
+<label for="facets" id="facets_label">Extensions ({{json.facets.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="facet in json.facets" ng-controller="FacetsCtrl">
+    {{facetType()}}
+    <a ng-click="deleteFacet()">[X]</a>
+  </li>
+</ul>
+<form ng-submit="addFacet()">
+  <input type="text" ng-model="facetType" id="facets" name="facets" size="60" placeholder="extension type" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<!-- Buttons -->
+<input type="button" ng-click="put()" value="Update Item" />
+<input type="button" ng-click="post()" value="Create New Item from Form" />
+<input type="button" ng-click="clone()" value="Clone Item" />
+<br /><br />
+
+<!-- JSON -->
+<input type="button" id="show-json" value="Show JSON" onclick="show('json'); return false;" />
+<div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+  <pre>{{prettyPrint(json)}}</pre>
+</div>

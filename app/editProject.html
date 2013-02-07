@@ -1,0 +1,125 @@
+<input type="button" ng-click="put()" value="Update Item" />
+<input type="button" ng-click="post()" value="Create New Item from Form" />
+<input type="button" ng-click="clone()" value="Clone Item" />
+<br /><br />
+
+<a href="#/">Edit in Project Mode</a>
+<a href="#/sbFields">Edit in ScienceBase Mode</a>
+<br /><br />
+
+<label for="id" id="id_label">Item Id <span style="text-decoration: line-through;">or URL</span></label>
+<input type="text" ng-model="json.id" name="id" id="id" size="60" class="text-input" />
+<input type="button" ng-click="get()" value="Retreive Item Details" />
+<br />
+
+<p style="font-weight: bold;">
+<label for="parentId" id="parentId_label">Parent Id or URL</label>
+<input type="text" ng-model="json.parentId" name="parentId" id="parentId" size="60" class="text-input" /> <b>Parent ID is required to create new items</b>
+<br />
+
+<label for="title" id="title_label">Project Title</label>
+<input type="text" ng-model="json.title" name="title" id="title" size="60" class="text-input" />
+<br />
+
+<label for="body" id="body_label">Abstract</label>
+<input type="text" ng-model="json.body" name="body" id="body" size="600" class="text-input" />
+<br />
+
+<!-- <label for="contacts" id="contacts_label">Contacts ({{json.contacts.length}})</label> -->
+<span ng-controller="ContactsCtrl">
+<label for="contacts" id="contacts_label">Contacts ({{sum()}})</label>
+<br /><br />
+<ul class="unstyled">
+  <!-- <li ng-repeat="contact in json.contacts" ng-controller="ContactsCtrl"> -->
+  <li ng-repeat="contact in json.contacts">
+    <!-- <p><b>{{getContactType(contact)}}</b> {{contact.name}} <i>{{contact.personsOrganization}}</i> <a ng-click="deleteContact()">[X]</a>{{emailPhone()}}</p> -->
+    <!-- <br /> -->
+    <input type="text" size="60" placeholder="contact type" ng-model="contact.type" />
+    <input type="text" size="60" placeholder="contact name" ng-model="contact.name" />
+    <input type="text" size="60" placeholder="organization" ng-model="contact.personsOrganization" />
+    <a ng-click="deleteContact()">[X]</a>
+  </li>
+</ul>
+</span>
+<!-- <form ng-submit="addContact()">
+  <input type="text" ng-model="contact.type" id="contact" name="contact" size="60" placeholder="contact type" focus-on="submitted-contact" />
+  <input type="text" ng-model="contact.name" id="contactName" size="60" placeholder="contact name" />
+  <input type="text" ng-model="contact.personsOrganization" id="contact.personsOrganization" size="60" placeholder="organization" />
+  <input class="button" type="submit" value="add" />
+</form> -->
+
+<!-- tags -->
+<span ng-controller="TagsCtrl">
+<label for="tags" id="tags_label">Tags ({{sum()}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="tag in json.tags">
+    <input type="text" size="60" placeholder="tag name (required)" ng-model="tag.name" />
+    <a ng-click="deleteTag()">[X]</a>
+  </li>
+</ul>
+</span>
+<!-- <form ng-submit="addTag()">
+  <input type="text" ng-model="tag.name" size="60" placeholder="tag name (required)" id="tags" name="tags" />
+  <input class="button" type="submit" value="add" />
+</form> -->
+
+<!-- dates -->
+<span ng-controller="DatesCtrl">
+<label for="dates" id="dates_label">Dates ({{sum()}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="date in json.dates">
+    <input type="text" size="60" placeholder="date type" ng-model="date.type" />
+    <input type="text" size="60" placeholder="date (YYYY, YYYY-MM, or YYYY-MM-DD only)" ng-model="date.dateString" />
+    <input type="text" size="60" placeholder="date label" ng-model="date.label" />
+    <a ng-click="deleteDate()">[X]</a>
+  </li>
+</ul>
+</span>
+<!-- <form ng-submit="addDate()">
+  <input type="text" size="60" placeholder="date type" ng-model="date.type" id="contacts" name="contacts" />
+  <input type="text" size="60" placeholder="date (YYYY, YYYY-MM, or YYYY-MM-DD only)" ng-model="date.dateString" />
+  <input type="text" size="60" placeholder="date label" ng-model="date.label" />
+  <input class="button" type="submit" value="add" />
+</form> -->
+
+<!-- Facets -->
+<label for="facets" id="facets_label">Extensions ({{json.facets.length}})</label>
+<br /><br />
+<ul class="unstyled">
+  <li ng-repeat="facet in json.facets" ng-controller="FacetsCtrl">
+    {{facetType()}} : {{isProject}}
+    <a ng-click="deleteFacet()">[X]</a>
+    <br />
+
+    Project Status: <input type="text" ng-model="facet.projectStatus" size="60" placeholder="Project Status" /><br />
+    Start Date: <input type="text" ng-model="facet.startDate" size="60" placeHolder="start date" /><br />
+    End Date: <input type="text" ng-model="facet.endDate" size="60" placeHolder="end date" /><br />
+    Project Type: <input type="text" ng-model="facet.projectType" size="60" placeHolder="project type" /><br />
+
+    <label for="parts" id="parts_label">Parts ({{facet.parts.length}})</label>
+    <br /><br />
+    <ul class="unstyled">
+      <li ng-repeat="part in facet.parts">
+        Year Number <input type="text" ng-model="part.type" size="60" placeHolder="Year Number" /><br />
+        Dollar Value <input type="text" ng-model="part.value" size="60" placeHolder="$$$$" />
+      </li>
+    </ul>
+
+  </li>
+</ul>
+<form ng-submit="addFacet()">
+  <input type="text" ng-model="facetType" id="facets" name="facets" size="60" placeholder="extension type" />
+  <input class="button" type="submit" value="add" />
+</form>
+
+<input type="button" ng-click="put()" value="Update Item" />
+<input type="button" ng-click="post()" value="Create New Item from Form" />
+<input type="button" ng-click="clone()" value="Clone Item" />
+<br /><br />
+
+<input type="button" id="show-json" value="Show JSON" onclick="show('json'); return false;" />
+<div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+  <pre>{{prettyPrint(json)}}</pre>
+</div>

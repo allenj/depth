@@ -1,0 +1,169 @@
+/* ===STANDARD HEADER===*/
+
+#usgscoop {
+    padding-left: 18px;
+    position: relative;
+    float: left;
+    height: 5.14em;
+    background-color: black;
+    min-height: 72px;
+}
+
+#usgscoop img {
+    margin-right: 3px;
+    border: none;
+}
+
+#usgstitle {
+    background-color: #006633;
+    clear: both;
+    width: 99%;
+    border-bottom: 1px solid #ffffff;
+    border-top: 1px solid #ffffff;
+    font: 14px Verdana, Arial, Helvetica, sans-serif;
+}
+
+#usgscolorband {
+    font: 14px Verdana, Arial, Helvetica, sans-serif;
+    width: 100%;
+    height: 5.14em;
+    min-height: 72px;
+}
+
+#usgsbanner {
+    width: 100%;
+    height: 72px;
+}
+
+#usgsidentifier {
+    background-color: black;
+    width: 178px;
+    height: 5.14em;
+    float: left;
+}
+
+#usgsidentifier img {
+    border: none;
+}
+
+/* ===STANDARD CUSTOMER SERVICE AREA===*/
+#usgsccsabox {
+    float: right;
+    background-color: #000000;
+    min-height: 72px;
+}
+
+#usgsccsa {
+    font: 1em / .5em Verdana, Arial, Helvetica, sans-serif;
+    height: 5.14em;
+    width: 10.5em;
+}
+
+#usgsccsa a:link, #usgsccsa a:visited {
+    font: bold 1em / 1.3em Verdana, Arial, Helvetica, sans-serif;
+    color: #ffffff;
+    margin-left: 4px;
+    text-decoration: none;
+}
+
+#usgsccsa a:hover {
+    font: bold 1em / 1.3em Verdana, Arial, Helvetica, sans-serif;
+    color: #ffffff;
+    text-decoration: underline;
+    margin-left: 4px;
+}
+
+#usgsccsa a:active {
+    font: bold 1em / 1.3em Verdana, Arial, Helvetica, sans-serif;
+    color: #ffffff;
+    margin-left: 4px;
+    text-decoration: none;
+}
+
+/* ====== ScienceBase Customizations ========= */
+.image-float {
+    position: absolute;
+    top: 2px;
+    left: 400px;
+    z-index: 1000;
+}
+
+#usgscolorband {
+    background: #000 url(../img/usgs/sciencebase_background.jpg) 178px 0px repeat;
+}
+
+#usgstitle {
+    background-color: #014647;
+    color: #ffffff;
+    font-size: medium;
+    font-weight: bold;
+    padding: 5px;
+}
+
+#header {
+    background-color: #669999;
+}
+
+#footer {
+    font-size: x-small;
+    padding-left: 1%;
+    padding-bottom: 1%;
+}
+
+/* ---===---===--- */
+
+.customContainer a {
+    font-size: x-small;
+}
+
+#usgsfooterbar {
+    margin-top: 13px;
+    margin-right: 0;
+    margin-bottom: 0px;
+    margin-left: 0;
+    background-color: #666666;
+    padding: 4px;
+}
+
+#usgsfooterbar a:link, #usgsfooterbar a:visited {
+    margin-right: 40px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+#usgsfooterbar a:hover {
+    margin-right: 40px;
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+#usgsfooterbar a:active {
+    margin-right: 40px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+#usgsfootertext {
+    padding: 4px;
+}
+
+#usgsfootertext img {
+    border: none;
+    float: right;
+    margin-right: .3em;
+}
+
+.itemTitleBar {
+    background: #e3e9ff;
+    padding: 2px 8px;
+    border-bottom: 1px solid gray;
+}
+
+/* form stuff to make it pretty */
+
+label {
+    float: left;
+    width: 150px;
+    margin: 5px;
+}
+
