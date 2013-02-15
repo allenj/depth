@@ -8,7 +8,7 @@ function get_login($headerName1) {
 	$username = "depth";
     $password = "3l3ctricSheep-";
     // $loginUrl = "http://localhost:8090/catalog/?josso_username=$username&josso_password=$password";
-    $loginUrl = "https://beta.sciencebase.gov/catalog/?josso_username=$username&josso_password=$password";
+    $loginUrl = "https://my-beta.usgs.gov/catalog/?josso_username=$username&josso_password=$password";
     // $loginUrl = "https://my-beta.usgs.gov/catalog/?josso_username=$username&josso_password=$password";
     // $loginUrl = "https://my.usgs.gov/josso/logon/?josso_username=$username&josso_password=$password";
 	file_get_contents($loginUrl);

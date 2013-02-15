@@ -31,7 +31,7 @@ function checkCookie()
 function getItem(id)
 {
   var josso = checkCookie();
-  var itemUrl = "https://beta.sciencebase.gov/catalog/item/" + id + "?josso=" + josso + "&format=json";
+  var itemUrl = "https://my-beta.usgs.gov/catalog/item/" + id + "?josso=" + josso + "&format=json";
   // var itemUrl = "https://my-beta.usgs.gov/catalog/item/" + id + "?josso=" + josso + "&format=json";
   // var itemUrl = "http://localhost:8090/catalog/item/" + id + "?josso=" + josso + "&format=json";
 
@@ -69,7 +69,7 @@ function upsert(type, id, json)
     return false;
   }
 
-  var itemUrl = "https://beta.sciencebase.gov/catalog/item/";
+  var itemUrl = "https://my-beta.usgs.gov/catalog/item/";
   // var itemUrl = "https://my-beta.usgs.gov/cataog/item/"
   // var itemUrl = "http://localhost:8090/catalog/item/";
   itemUrl += id;

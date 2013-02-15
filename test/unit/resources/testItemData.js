@@ -1,11 +1,11 @@
 var testItem1 = {
     "link": {
         "rel": "self",
-        "url": "https://beta.sciencebase.gov/catalog/item/4f85cd90e4b01c0325950736"
+        "url": "https://my-beta.usgs.gov/catalog/item/4f85cd90e4b01c0325950736"
     },
     "relatedItems": {
         "link": {
-            "url": "https://beta.sciencebase.gov/catalog/itemLinks?json.id=4f85cd90e4b01c0325950736",
+            "url": "https://my-beta.usgs.gov/catalog/itemLinks?json.id=4f85cd90e4b01c0325950736",
             "rel": "related"
         }
     },
