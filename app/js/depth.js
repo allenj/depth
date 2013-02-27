@@ -4,58 +4,125 @@ Depth.config(function($routeProvider) {
     $routeProvider.
       when('/', {controller:depthCtrl, templateUrl:'editProject.html'}).
       when('/sbFields', {controller:depthCtrl, templateUrl:'editSB.html'}).
+      when('/view', {controller:depthCtrl, templateUrl:'viewProjects.html'}).
       otherwise({redirectTo:'/'});
   });
 
-function depthCtrl($scope, filterFilter) {
+function depthCtrl($scope, filterFilter, $http) {
+  $scope.josso = checkCookie();
+
   $scope.json = {};
-  // $scope.json.id = "5006e94ee4b0abf7ce733f56";
-  $scope.json.id = "51102503e4b0eea71f706101";
-  $scope.json.parentId = "51102464e4b0eea71f7060fd";
+  $scope.json.id = "";
+  $scope.json.parentId = "";
   $scope.json.contacts = [];
   $scope.json.alternateTitles = [];
   $scope.json.facets = [];
   $scope.json.identifiers = [];
   $scope.json.tags = [];
   $scope.json.dates = [];
-  $scope.json.webLinks = [];
+  $scope.json.webLinks = [{}];
 
-  $scope.addRequiredFields = function() {
+  $scope.orgTypes = [
+    {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
+    {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
+    {title: "Other Project Community", org: "Other", id: "51240771e4b00784769a6432"}];
+  $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
+  $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other"}];
+
+  $scope.orgType = "";
+  $scope.fiscalYear = "";
+  $scope.projectType = "";
+  $scope.project = "";
+  $scope.organization = "";
+
+  $scope.allProjects = [];
+  $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
+    success(function(data, status) {
+      $scope.allProjects = data.items;
+    });
+
+  $scope.organizations = [];
+  $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+    success(function(data, status) {
+      $scope.organizations = data.items;
+    });
+
+  $scope.refresh = function() {
+    $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
+      success(function(data, status) {
+        $scope.allProjects = data.items;
+        // set project
+        $scope.project = filterFilter($scope.allProjects, {id: $scope.json.id})[0];
+      });
+
+    var hasTags = $scope.json && $scope.json.tags;
+    $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+      success(function(data, status) {
+        $scope.organizations = data.items;
+        // set organization
+        if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Name"})[0]) {
+          $scope.organization = organization.name;
+        }
+      });
+
+    // set org type
+    if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Type"})[0]) {
+      $scope.orgType.org = orgType.name;
+    }
+    
+    // set fiscal year
+    if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Fiscal Year"})[0]) {
+      $scope.fiscalYear = fiscalYear.name;
+    }
+    // set project type
+    if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Project Type"})[0]) {
+      $scope.projectType = projectType.name;
+    } 
+  };
+
+  $scope.persistNecessaryData = function() {
+    // all json
+    if (!$scope.json) $scope.json = {};
+    // arrays
+    if (!$scope.json.alternateTitles) $scope.json.alternateTitles = [];
+    if (!$scope.json.contacts) $scope.json.contacts = [];
+    if (!$scope.json.dates) $scope.json.dates = [];
+    if (!$scope.json.identifiers) $scope.json.identifiers = [];
+    if (!$scope.json.facets) $scope.json.facets = [];
+    if (!$scope.json.tags) $scope.json.tags = [];
+    if (!$scope.json.webLinks) $scope.json.webLinks = [{}];
+
     // Contacts
-    var pis = filterFilter($scope.json.contacts, {type: "Principal Investigator"});
-    if (pis.length < 1) {
-      $scope.json.contacts.push({type:"Principal Investigator"});
-    }
-
-    var fas = filterFilter($scope.json.contacts, {type: "Funding Agency"});
-    if (fas.length < 1) {
-      $scope.json.contacts.push({type: "Funding Agency"});
-    }
+    $scope.persistContacts(["Principal Investigator", "Funding Agency", "Cooperator/Partner"]);
 
     var coops = filterFilter($scope.json.contacts, {type: "Cooperator/Partner"});
-    if(coops.length === 0 || coops[coops.length-1].name){
+    if(coops[coops.length-1].name){
       $scope.json.contacts.push({type: "Cooperator/Partner"});
     }
 
     // Tags
-    var fys = filterFilter($scope.json.tags, {scheme: "Project", type: "Fiscal Year"});
-    if(fys.length === 0) {
-      $scope.json.tags.push({scheme: "Project", type: "Fiscal Year"});
-    }
+    $scope.persistTags(["Fiscal Year", "Organization Type", "Organization Name", "Project Type", "Keyword", "Location"]);
 
-    var orgTypes = filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Type"});
-    if(orgTypes.length === 0) {
-      $scope.json.tags.push({scheme: "Project", type: "Organization Type"});
-    }
+    // if(filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Type"}).length < 
+    //    filterFilter($scope.json.contacts, {type: "Principal Investigator"}).length) {
+    //   $scope.json.tags.push({scheme: "Project", type: "Organization Type"});
+    // }
 
     var kws = filterFilter($scope.json.tags, {scheme: "Project", type: "Keyword"});
-    if(kws.length === 0 || kws[kws.length-1].name) {
+    if(kws[kws.length-1].name) {
       $scope.json.tags.push({scheme: "Project", type: "Keyword"});
     }
 
     var locs = filterFilter($scope.json.tags, {scheme: "Project", type: "Location"});
-    if(locs.length === 0 || locs[locs.length-1].name) {
+    if(locs[locs.length-1].name) {
       $scope.json.tags.push({scheme: "Project", type: "Location"});
+    }
+
+    // Weblinks
+    if ($scope.json.webLinks.length === 0 || 
+        $scope.json.webLinks[$scope.json.webLinks.length-1].uri ||
+        $scope.json.webLinks[$scope.json.webLinks.length-1].title) {
+      $scope.json.webLinks.push({});
     }
 
     // Facets
@@ -98,6 +165,23 @@ function depthCtrl($scope, filterFilter) {
     return "";
   };
 
+  $scope.persistContacts = function(contactTypes) {
+    for (var i = 0; i < contactTypes.length; i++) {
+      if (filterFilter($scope.json.contacts, {type: contactTypes[i]}).length === 0) {
+        $scope.json.contacts.push({type: contactTypes[i]});
+      }
+    }
+
+  };
+
+  $scope.persistTags = function(tagTypes) {
+    for (var i = 0; i < tagTypes.length; i++) {
+      if (filterFilter($scope.json.tags, {scheme: "Project", type: tagTypes[i]}).length === 0) {
+        $scope.json.tags.push({scheme: "Project", type: tagTypes[i]});
+      }
+    }
+  };
+
   //Need to figure out how to make this persistant
   $scope.indexOfProject = function() {
     return $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
@@ -112,18 +196,6 @@ function depthCtrl($scope, filterFilter) {
     return -1;
   };
 
-  $scope.fiscalYears = [{fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
-
-  $scope.projects = [
-    {projectId: "5006e94ee4b0abf7ce733f56", projectName: "Climate Change and Peak Flows"},
-    {projectId: "51102503e4b0eea71f706101", projectName: "depthTesting"}
-  ];
-
-  $scope.folders = [
-    {folderId: "5048dfdae4b0ec4a6c8198bd", folderName: "NCCWSC Science Projects"},
-    {folderId: "51102464e4b0eea71f7060fd", folderName: "depth"}
-  ];
-
   //Adds on arrays - these are unnecessary now
   $scope.addContact = function() {
     $scope.json.contacts.push({type:$scope.contact.type, name:$scope.contact.name, personsOrganization:$scope.contact.personsOrganization});
@@ -135,9 +207,9 @@ function depthCtrl($scope, filterFilter) {
 
   $scope.addBlankContact = function(type) {
     $scope.json.contacts.push({type: type});
-    if(type === "Principal Investigator") {
-      $scope.json.tags.push({scheme: "Project", type: "Organization Type"});
-    }
+    // if(type === "Principal Investigator") {
+      // $scope.json.tags.push({scheme: "Project", type: "Organization Type"});
+    // }
   };
 
   $scope.addAltTitle = function() {
@@ -209,12 +281,36 @@ function depthCtrl($scope, filterFilter) {
     $scope.json.facets[projIdx].funding.splice($scope.json.facets[projIdx].funding.indexOf(this.fund), 1);
   }
 
+  $scope.prodToBeta = function() {
+    for (var i = 0; i < $scope.allProjects.length; i++) {
+
+      var prodItem = getItemProd($scope.allProjects[i].id);
+
+      try
+      {
+        $scope.json = prodItem;
+        $scope.persistNecessaryData();
+      }
+      catch(exception)
+      {
+        alert(exception);
+      }
+      $scope.put();
+    }
+
+  };
+
   $scope.get = function() {
-    var json = getItem($scope.json.id);
+    var json = getItem($scope.id);
+    show("edit-fields", false);
 
     try
     {
       $scope.json = json;
+      
+      $scope.refresh();
+
+      //clean body
     }
     catch(exception)
     {
@@ -222,11 +318,103 @@ function depthCtrl($scope, filterFilter) {
     }
   };
 
+  $scope.copy = function() {
+    show("copy-fields", true); 
+  };
+
+  $scope.createOrg = function() {
+    show("create-org", true);
+  }
+
+  $scope.createCopy = function() {
+
+    var parentId = String($scope.newProjectParent);
+    var title = $scope.newProjectTitle;
+
+    if (!parentId) {
+      alert("You need to choose an organization to copy the item into.");
+      return false;
+    }
+    if (!$scope.id) {
+      alert("You need to choose a project to copy.");
+      return false;
+    }
+    if (!title) {
+      alert("You need a new title for the project.");
+      return false;
+    }
+
+    show("edit-fields", false);
+
+    var json = getItem(String($scope.id));
+
+    //remove things that we don't want to clone, parentId and id
+    delete json.parentId;
+    delete json.id;
+
+    // Change the appropriate fields
+    json.title = title;
+
+    var returnedJson = upsert('POST', parentId, json);
+
+    try
+    {
+      $scope.json = returnedJson;
+
+      $scope.refresh();
+    }
+    catch(exception)
+    {
+      alert(exception);
+    } 
+    show("copy-fields", true);
+    show("sort-fields", true);
+  };
+
+  $scope.createOrganization = function() {
+
+    var json = {};
+    json.parentId = $scope.newOrgParent.id;
+    json.title = $scope.newOrgTitle;
+    json.tags = [{scheme: "Project", type:"Label", name: $scope.newOrgParent.org}];
+
+    if (!json.parentId) {
+      alert("You need to choose an organization type to put the organization in.");
+      return false;
+    }
+    if (!title) {
+      alert("You need a new title for the organization.");
+      return false;
+    }
+
+    show("edit-fields", false);
+
+    var returnedJson = upsert('POST', json.parentId, json);
+
+    try
+    {
+      $scope.json = returnedJson;
+      $scope.refresh();
+    }
+    catch(exception)
+    {
+      alert(exception);
+    } 
+    show("create-org", true);
+    show("sort-fields", true); 
+  };
+
+  $scope.create = function() {
+    show("edit-fields", false);
+  };
+
   $scope.post = function() {
     var json = $scope.json;
     json = $scope.prepareJson(json);
-    if (!json.parentId) {
-      alert("Parent Id required create new items");
+    var org = filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Name"})[0].name;
+    var orgId = filterFilter($scope.organizations, {title: org})[0].id;
+    if (!org || !orgId) {
+      alert("Organization required create new items org = " + org + " orgId = " + orgId);
       return false;
     }
     if(!json.title) {
@@ -234,11 +422,14 @@ function depthCtrl($scope, filterFilter) {
       return false;
     }
     delete json.id;
-    var returnedJson = upsert('POST', $scope.json.parentId, json);
+    json.parentId = orgId;
+    var returnedJson = upsert('POST', orgId, json);
 
     try
     {
       $scope.json = returnedJson;
+
+      $scope.refresh();
     }
     catch(exception)
     {
@@ -248,6 +439,8 @@ function depthCtrl($scope, filterFilter) {
   };
 
   $scope.put = function() {
+    if (!$scope.json.id) 
+      return $scope.post();
     var json = $scope.json;
     json = $scope.prepareJson(json);
     //delete the parent id so we don't move the item.
@@ -258,6 +451,8 @@ function depthCtrl($scope, filterFilter) {
     try
     {
       $scope.json = returnedJson;
+
+      $scope.refresh();
     }
     catch(exception)
     {
@@ -267,28 +462,7 @@ function depthCtrl($scope, filterFilter) {
   };
 
   $scope.clone = function() {
-    var parentId = $scope.json.parentId;
-    if (!parentId) {
-      alert("You need a parent id to create new items");
-      return false;
-    }
 
-    var json = getItem($scope.json.id);
-
-    //remove things that we don't want to clone, parentId and id
-    delete json.parentId;
-    delete json.id;
-
-    var returnedJson = upsert('POST', parentId, json);
-
-    try
-    {
-      $scope.json = returnedJson;
-    }
-    catch(exception)
-    {
-      alert(exception);
-    }
   };
 
   $scope.prepareJson = function(json) {
@@ -326,6 +500,93 @@ function depthCtrl($scope, filterFilter) {
     return (fund.fundingAmount != null && fund.fundingAmount != "");
   }
 
+  $scope.filterProjects = function(project) {
+    if ($scope.orgType && 
+        $scope.orgType.org && 
+        $scope.orgType.org !== "" && 
+        filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType.org}).length === 0) {
+      return false;
+    }
+
+    var fyTag = {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear};
+    if ($scope.fiscalYear && $scope.fiscalYear !== "" && filterFilter(project.tags, fyTag).length === 0) {
+      return false;
+    }
+
+    var projTypeTag = {scheme: "Project", type: "Project Type", name: $scope.projectType};
+    if ($scope.projectType && $scope.projectType !== "" && filterFilter(project.tags, projTypeTag).length === 0) {
+      return false;
+    }
+
+    if ($scope.organization &&
+        $scope.organization.title && 
+        $scope.organization.title !== "" && 
+        filterFilter(project.tags, {scheme: "Project", type: "Organization Name", name: $scope.organization.title}).length === 0) {
+      return false;
+    }
+
+    return true;
+  };
+
+  $scope.filterProjectsView = function(project) {
+    if ($scope.orgType && 
+        $scope.orgType.org && 
+        $scope.orgType.org !== "" && 
+        filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType.org}).length === 0) {
+      return false;
+    }
+
+    var fyTag = {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear};
+    if ($scope.fiscalYear && $scope.fiscalYear !== "" && filterFilter(project.tags, fyTag).length === 0) {
+      return false;
+    }
+
+    var projTypeTag = {scheme: "Project", type: "Project Type", name: $scope.projectType};
+    if ($scope.projectType && $scope.projectType !== "" && filterFilter(project.tags, projTypeTag).length === 0) {
+      return false;
+    }
+
+    var organizationTag = {scheme: "Project", type: "Organization Name", name: $scope.organization.title};
+    if ($scope.organization.title && $scope.organization.title !== "" && filterFilter(project.tags, organizationTag).length === 0) {
+      return false;
+    }
+
+    if ($scope.project && $scope.project !== "" && project !== $scope.project) {
+      return false;
+    }
+
+    return true;
+  };
+
+  $scope.filterOrganizations = function(org) {
+    if ($scope.orgType && 
+        $scope.orgType.org && 
+        $scope.orgType.org !== "" && 
+        filterFilter(org.tags, {scheme: "Project", type: "Label", name: $scope.orgType.org}).length === 0) {
+      return false;
+    }
+    return true;
+  };
+
+  $scope.totalFunding = function() {
+    var funding = 0;
+    var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
+    for (var i = 0; i < filteredProjects.length; i++) {
+      var projs = filterFilter(filteredProjects[i].facets, {className: "ProjectFacet"});
+      // alert($scope.prettyPrint(filteredProjects[i].facets));
+      if (projs && projs.length > 0 && projs[0].parts) {
+        for (var j = 0; j < projs[0].parts.length; j++) {
+          var value = parseInt(projs[0].parts[j].value);
+          if (value) {
+            funding += parseInt(projs[0].parts[j].value);
+          }
+          // alert(projs[0].parts[j].value);
+        }
+      }
+    }
+    return funding;
+  };
+
   $scope.prettyPrint = function(json) {
     return JSON.stringify(json, undefined, 2);
   };
@@ -333,21 +594,6 @@ function depthCtrl($scope, filterFilter) {
 }
 
 function ContactsCtrl($scope, filterFilter) {
-  $scope.getContactType = function(contact) {
-    switch (contact.type) {
-        case "Principal Investigator":
-          return "PI";
-          break;
-        case "Cooperator/Partner":
-          return "Cooperator";
-          break;
-        default:
-          return $contact.type;
-          break;
-        //TODO: add more contact type here
-      }
-  };
-
   $scope.isFundingAgency = function(contact) {
     return (contact.type === "Funding Agency");
   };
@@ -357,7 +603,7 @@ function ContactsCtrl($scope, filterFilter) {
   };
 
   $scope.isCooperator = function(contact) {
-    return (contact.type == "Cooperator/Partner");
+    return (contact.type == "Cooperator/Partner" || contact.type == "Co-Investigator");
   };
 
   $scope.fundingAgencies = function() {
@@ -413,7 +659,15 @@ function TagsCtrl($scope) {
 
   $scope.isOrganizationType = function(tag) {
     return (tag.type === "Organization Type");
-  }
+  };
+
+  $scope.isOrganizationName = function(tag) {
+    return (tag.type === "Organization Name");
+  };
+
+  $scope.isProjectType = function(tag) {
+    return (tag.type === "Project Type");
+  };
 
 }
 
@@ -472,12 +726,4 @@ function FacetsCtrl($scope) {
     return (product.status === "Delivered");
   }
 }
-
-// function SbRestCtrl($scope) {
-
-
-//   $scope.post = function() {
-//     $http.post('/someUrl', data).success(successCallback);
-//   };
-// }
 

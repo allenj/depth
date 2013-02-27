@@ -1,246 +1,381 @@
-<input type="button" ng-click="put()" value="Update Item" />
-<input type="button" ng-click="post()" value="Create New Item from Form" />
-<input type="button" ng-click="clone()" value="Clone Item" />
-<br /><br />
+<legend>Choose Project <button class="btn" onclick="show('sort-fields', true); return false;"><i class="icon-chevron-down"></i></button></legend>
 
-<div class="btn-group" ng-class='{open: open}'>
-  <button class="btn">Edit Mode</button>
-  <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click='open=!open'><span class="caret"></span></button>
-  <ul class="dropdown-menu">
-    <li><a href="#/">Edit in Project Mode</a></li>
-    <li><a href="#/sbFields">Edit in ScienceBase Mode</a></li>
-  </ul>
-</div>
-<br /><br />
+<div id="sort-fields" class="form-horizontal" style="display: block;">
+  <!-- Organization Type -->
+  <div class="control-group">
+    <label class="control-label" for="orgType">Organization Type</label>
+    <div class="controls">
+      <select id="orgType" ng-model="orgType" ng-options="orgType as orgType.title for orgType in orgTypes" class="input-xxlarge" placeholder="organization type">
+        <option value="" >all organization types</option>
+      </select>
+      <a class="btn" ng-show="orgType.id"href="https://my-beta.usgs.gov/catalog/item/{{orgType.id}}" target="_blank">View in SB</a>
+    </div>
+  </div>
 
-<label for="loc" id="loc_label">Project</label>
-<select ng-model="json.id" ng-options="loc.projectId as loc.projectName for loc in projects"></select>
-<input type="button" ng-click="get()" value="Retreive Item Details" />
-<br />
-<label></label><a href="https://my-beta.usgs.gov/catalog/item/{{json.id}}" target="_blank">View Project in Sciencebase</a>
-<br />
+  <!-- Organization -->
+  <div class="control-group">
+    <label class="control-label" for="organization">Organization <!--({{(organizations | filter:filterOrganizations).length}})--></label>
+    <div class="controls">
+      <select id="organization" ng-model="organization" ng-options="organization as organization.title for organization in organizations | filter:filterOrganizations | orderBy: 'title'" class="input-xxlarge">
+        <option value="">all organizations</option>
+      </select>
+      <a class="btn" ng-show="organization.id"href="https://my-beta.usgs.gov/catalog/item/{{organization.id}}" target="_blank">View in SB</a>
+    </div>
+  </div>
 
-<label for="parentLoc" id="parentLoc_label">Folder</label>
-<select ng-model="json.parentId" ng-options="parentLoc.folderId as parentLoc.folderName for parentLoc in folders"></select>
-<br />
-<label></label><a href="https://my-beta.usgs.gov/catalog/item/{{json.parentId}}" target="_blank">View Folder in Sciencebase</a>
-<br />
+  <!-- Fiscal Year -->
+  <div class="control-group">
+    <label class="control-label" for="fiscalYear">Fiscal Year</label>
+    <div class="controls">
+      <select id="fiscalYear" ng-model="fiscalYear" ng-options="fiscalYear.fy as fiscalYear.fy for fiscalYear in fiscalYears" class="input-xxlarge">
+        <option value="">all fiscal years</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Project Type -->
+  <div class="control-group">
+    <label class="control-label" for="projectType">Project Type</label>
+    <div class="controls">
+      <select id="projectType" ng-model="projectType" ng-options="projType.type as projType.type for projType in projectTypes" class="input-xxlarge">
+        <option value="">all project types</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Project -->
+  <div class="control-group">
+    <label class="control-label" for="project">Project ({{(allProjects | filter:filterProjects).length}})</label>
+    <div class="controls">
+      <select id="project" ng-model="id" ng-options="proj.id as proj.title for proj in allProjects | filter:filterProjects | orderBy:'title'" class="input-xxlarge">
+        <option value="">all projects</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Item id -->
+  <div class="control-group">
+    <label class="control-label" for="id">Manually Enter</label>
+    <div class="controls">
+      <input type="text" ng-model="id"  id="id" placeholder="item id" class="text-input" />
+      <a class="btn" ng-show="id" href="https://my-beta.usgs.gov/catalog/item/{{id}}" target="_blank">View Project in SB</a>
+    </div>
+  </div>
+
+  <!-- Edit, Copy, Create Proj, Create Org -->
+  <div class="control-group">
+    <button class="btn btn-primary offset2" ng-click="get()">Edit</button>
+    <button class="btn" ng-click="copy()">Copy To...</button>
+    <button class="btn" ng-click="create()">Create New Project</button>
+    <button class="btn" ng-click="createOrg()">Create New Organization</button>
+    <!-- <input type="button" ng-click="prodToBeta()" value="Prod to Beta" /> -->
+  </div>
+
+  <!-- Copy Project fields -->
+  <div id="copy-fields" class="copy-fields offset2" style="display: none;">
+    <div class="control-group">
+      <label class="control-label span2" for="newProjectTitle">New Project Name</label>
+      <div class="controls">
+        <input ng-model="newProjectTitle" type="text" class="span6" placeholder="new project title" />
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label span2" for="newOrg">Project's Organization</label>
+      <div class="controls">
+        <select id="newProjectParent" ng-model="newProjectParent" ng-options="organization.id as organization.title for organization in organizations | orderBy: 'title'" class="span6">
+          <option value=""></option>
+        </select>
+        <span class="help-inline">This will be the parent item in ScienceBase.</span>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn offset2" ng-click="createCopy()">Create Copy</button>
+    </div>
+  </div>
+
+  <div id="create-org" class="create-org offset2" style="display: none;">
+    <div class="control-group">
+      <label class="control-label" for="newOrgTitle">New Organization Title</label>
+      <div class="controls">
+        <input ng-model="newOrgTitle" type="text" class="span6" placeholder="new organization title" />
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="newOrgParent">New Organization's Type</label>
+      <div class="controls">
+        <select id="newOrgParent" ng-model="newOrgParent" ng-options="orgType as orgType.title for orgType in orgTypes | orderBy: 'title'" class="span6">
+          <option value=""></option>
+        </select>
+        <span class="help-inline">This will be the parent item in ScienceBase.</span>
+      </div>
+    </div>
+    <button class="btn offset2" ng-click="createOrganization()">Create Organization</button>
+  </div>
 
 
-<!-- <label for="id" id="id_label">Item Id <span style="text-decoration: line-through;">or URL</span></label>
-<input type="text" ng-model="json.id" name="id" id="id" size="60" class="text-input" />
-<input type="button" ng-click="get()" value="Retreive Item Details" />
-<br />
+</div> <!-- /sort-fields -->
 
-<p style="font-weight: bold;">
-<label for="parentId" id="parentId_label">Parent Id or URL</label>
-<input type="text" ng-model="json.parentId" name="parentId" id="parentId" size="60" class="text-input" /> <b>Parent ID is required to create new items</b>
+<!-- <p style="font-weight: bold;">
+<label class="control-label" for="parentId" id="parentId_label">Parent Id or URL</label>
+<input type="text" ng-model="json.parentId" name="parentId" id="parentId" class="text-input" /> <b>Parent ID is required to create new items</b>
 <br /> -->
 
-<span>{{addRequiredFields()}}</span>
-<br />
+<span>{{persistNecessaryData()}}</span>
 
-<!-- Funding Agency -->
-<span ng-controller="ContactsCtrl">
-  <ul class="unstyled">
-    <li ng-repeat="contact in json.contacts | filter:isFundingAgency">
-      <label for="fundingAgency_{{$index}}" id="fundingAgency_{{$index}}_label">{{contact.type}}</label>
-      <input id="fundingAgency_{{$index}}" type="text" size="60" placeholder="contact name" ng-model="contact.name" />
-      <a ng-show="$last" ng-click="addBlankContact('Funding Agency')">Add Funding Agency</a>
-      <a ng-show="!$last" ng-click="deleteContact()">[X]</a>
+<div id="edit-fields" class="form-horizontal" style="display: none;">
+
+  <legend>Project<!--: {{json.title}}--></legend>
+
+  <!-- Create, Save -->
+  <button class="btn btn-primary offset2" ng-show="json.id" ng-click="put()">Save Changes</button>
+  <button class="btn btn-primary offset2" ng-show="!json.id" ng-click="put()">Create</button>
+
+  <!-- Item id -->
+  <div class="control-group">
+    <label class="control-label" for="id">
+      ScienceBase Item Id
+    </label>
+    <div class="controls">
+      <span id="id" class="uneditable-input">{{json.id}}</span>
+      <a class="btn" ng-show="json.id"href="https://my-beta.usgs.gov/catalog/item/{{json.id}}" target="_blank">View in SB</a>
+    </div>
+  </div>
+
+  <!-- Organization Type -->
+  <ul class="unstyled" ng-controller="TagsCtrl">
+    <li ng-repeat="tag in json.tags | filter:isOrganizationType" class="control-group">
+      <label class="control-label" for="orgType_{{$index}}">{{tag.type}}</label>
+      <div class="controls">
+        <select id="orgType_{{$index}}" ng-model="tag.name" ng-options="orgType.org as orgType.title for orgType in orgTypes" class="span6">
+          <option value="" ></option>
+        </select>
+        <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Type')">Add Organization Type</a>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- Fiscal Year -->
-<span ng-controller="TagsCtrl">
-  <ul class="unstyled">
-    <li ng-repeat="tag in json.tags | filter:isFiscalYear">
-      <label for="fiscalYear_{{$index}}" id="fiscalYear_{{$index}}_label">{{tag.type}}</label>
-      <input id="fiscalYear_{{$index}}" type="text" size="60" placeholder="fiscal year" ng-model="tag.name" />
-      <a ng-show="$last" ng-click="addBlankTag('Fiscal Year')">Add Fiscal Year</a>
-      <a ng-show="!$last" ng-click="deleteTag()">[X]</a>
+  <!-- Organization Name -->
+  <ul class="unstyled" ng-controller="TagsCtrl">
+    <li ng-repeat="tag in json.tags | filter:isOrganizationName" class="control-group">
+      <label class="control-label" for="organization_{{$index}}">{{tag.type}}</label>
+      <div class="controls">
+        <select id="organization_{{$index}}" ng-model="tag.name" ng-options="organization.title as organization.title for organization in organizations | orderBy: 'title'" class="span6">
+          <option value=""></option>
+        </select>
+        <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Name')">Add Organization</a>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+        <span class="help-inline">This is the parent item in ScienceBase.</span>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- Project Title -->
-<label for="title" id="title_label">Project Title</label>
-<input type="text" ng-model="json.title" name="title" id="title" size="60" class="text-input" placeholder="project title" />
-<br />
-
-<!-- Project Type -->
-<label for="projectType" id="projectType_label">Project Type</label>
-<input id="projectType" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].projectType" placeholder="project type" />
-<br />
-
-<!-- Principal Investigator -->
-<span ng-controller="ContactsCtrl">
-  <ul class="unstyled">
-    <li ng-repeat="contact in json.contacts | filter:isPrincipalInvestigator">
-      <label for="principalInvestigator_{{$index}}" id="principalInvestigator_{{$index}}_label">{{contact.type}}</label>
-      <input id="principalInvestigator_{{$index}}" type="text" size="60" placeholder="contact name" ng-model="contact.name" />
-      <input type="text" size="60" placeholder="email" ng-model="contact.email" />
-      <br />
-      <label for="piOrg_{{$index}}" id="piOrg_{{$index}}_label">PI Organization</label>
-      <input id="piOrg_{{$index}}" type="text" size="60" placeholder="affiliation" ng-model="contact.personsOrganization" />
-      <input ng-controller="TagsCtrl" type="text" size="60" placeholder="organization type" ng-model="(json.tags | filter:isOrganizationType)[$index].name" />
-      <a ng-show="$last" ng-click="addBlankContact('Principal Investigator')">Add Principal Investigator</a>
-      <a ng-show="!$last" ng-click="deleteContact()">[X]</a>
+  <!-- Fiscal Year -->
+  <ul class="unstyled" ng-controller="TagsCtrl">
+    <li ng-repeat="tag in json.tags | filter:isFiscalYear" class="control-group">
+      <label class="control-label" for="fiscalYear_{{$index}}">{{tag.type}}</label>
+      <div class="controls">
+        <select id="fiscalYear_{{$index}}" ng-model="tag.name" ng-options="fiscalYear.fy as fiscalYear.fy for fiscalYear in fiscalYears" >
+          <option value="" ></option>
+        </select>
+        <a class="btn" ng-show="$last" ng-click="addBlankTag('Fiscal Year')">Add Fiscal Year</a>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- Cooperators -->
-<span ng-controller="ContactsCtrl">
-  <!-- <label for="contacts" id="contacts_label">Cooperators ({{cooperators()}})</label> -->
+  <!-- Project Type -->
+  <ul class="unstyled" ng-controller="TagsCtrl">
+    <li ng-repeat="tag in json.tags | filter:isProjectType" class="control-group">
+      <label class="control-label" for="projectType_{{$index}}">{{tag.type}}</label>
+      <div class="controls">
+        <select id="projectType_{{$index}}" ng-model="tag.name" ng-options="projType.type as projType.type for projType in projectTypes" >
+          <option value="" ></option>
+        </select>
+        <a class="btn" ng-show="$last" ng-click="addBlankTag('Project Type')">Add Project Type</a>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+      </div>
+    </li>
+  </ul>
+
+
+  <!-- Project Title -->
+  <div class="control-group">
+    <label class="control-label" for="title">Project Title</label>
+    <div class="controls">
+      <input type="text" ng-model="json.title" id="title" class="input-xxlarge" placeholder="project title" />
+    </div>
+  </div>
+
+  <!-- Funding Agency -->
+  <ul class="unstyled" ng-controller="ContactsCtrl">
+    <li ng-repeat="contact in json.contacts | filter:isFundingAgency" class="control-group">
+      <label class="control-label" for="fundingAgency_{{$index}}">{{contact.type}}</label>
+      <div class="controls">
+        <input id="fundingAgency_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
+        <a class="btn" ng-show="$last" ng-click="addBlankContact('Funding Agency')">Add Funding Agency</a>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
+      </div>
+    </li>
+  </ul>
+
+  <!-- Project Type -->
+  <!-- <label class="control-label" for="projectType">Project Type</label>
+  <input id="projectType" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].projectType" placeholder="project type" />
+  <br /> -->
+
+  <!-- Principal Investigator -->
+  <ul class="unstyled" ng-controller="ContactsCtrl">
+      <li ng-repeat="contact in json.contacts | filter:isPrincipalInvestigator">
+        <div class="control-group">
+          <label class="control-label" for="principalInvestigator_{{$index}}">{{contact.type}}</label>
+          <div class="controls">
+            <input id="principalInvestigator_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
+            <input type="text" placeholder="email" ng-model="contact.email" />
+            <a class="btn" ng-show="$last" ng-click="addBlankContact('Principal Investigator')">Add Principal Investigator</a>
+            <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="piOrg_{{$index}}">PI Organization</label>
+          <div class="controls">
+            <input id="piOrg_{{$index}}" type="text" placeholder="affiliation" ng-model="contact.personsOrganization" />
+            <!-- <input ng-controller="TagsCtrl" type="text" placeholder="organization type" ng-model="(json.tags | filter:isOrganizationType)[$index].name" /> -->
+          </div>
+        </div>
+      </li>
+  </ul>
+
+  <!-- Cooperators -->
+  <!-- <label class="control-label" for="contacts">Cooperators ({{cooperators()}})</label> -->
   <!-- <br /><br /> -->
-  <ul class="unstyled">
-    <li ng-repeat="contact in json.contacts | filter:isCooperator">
-      <label for="contact_{{$index}}" id="contact_{{$index}}_label">{{contact.type}}</label>
-      <input id="contact_{{$index}}" type="text" size="60" placeholder="contact name" ng-model="contact.name" />
-      <input type="text" size="60" placeholder="organization" ng-model="contact.personsOrganization" />
-      <a ng-show="!$last" ng-click="deleteContact()">[X]</a>
+  <ul class="unstyled" ng-controller="ContactsCtrl">
+    <li ng-repeat="contact in json.contacts | filter:isCooperator" class="control-group">
+      <label class="control-label" for="contact_{{$index}}">{{contact.type}}</label>
+      <div class="controls">
+        <input id="contact_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
+        <input type="text" placeholder="organization" ng-model="contact.personsOrganization" />
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- FY Funding -->
-<span ng-controller="FacetsCtrl">
-  <ul class="unstyled">
-    <li ng-repeat="fund in json.facets[0].funding">
-      <label for="fund_{{$index}}" id="fund_{{$index}}_label">Funding</label>
-      <input id="fund_{{$index}}" type="text" size="60" placeholder="fiscal year" ng-model="fund.fiscalYear" />
-      $<input type="text" size="60" placeholder="funding amount" ng-model="fund.fundingAmount" />
-      <a ng-show="!$last" ng-click="deleteFund()">[X]</a>
+  <!-- FY Funding -->
+  <ul class="unstyled" ng-controller="FacetsCtrl">
+    <li ng-repeat="fund in json.facets[0].funding" class="control-group">
+      <label class="control-label" for="fund_{{$index}}">Funding</label>
+      <div class="controls">
+        <input id="fund_{{$index}}" type="text" placeholder="fiscal year" ng-model="fund.fiscalYear" />
+        <div class="input-prepend">
+          <span class="add-on">$</span>
+          <input class="span3" type="text" placeholder="funding amount" ng-model="fund.fundingAmount" />
+        </div>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteFund()">X</a>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- Webpage -->
-<span ng-controller="WeblinksCtrl">
-  <ul class="unstyled">
-    <li ng-repeat="weblink in json.webLinks">
-      <label for="webpage_{{$index}}" id="webpage_{{$index}}_label">Webpage {{$index+1}}</label>
-      <input id="webpage_{{$index}}" type="text" size="60" placeholder="webpage {{$index + 1}}" ng-model="weblink.uri" />
-      <input type="text" size="60" placeholder="webpage name" ng-model="weblink.title" />
-      <a ng-show="!$last" ng-click="deleteWeblink()">[X]</a>
+  <!-- Webpage -->
+  <ul class="unstyled" ng-controller="WeblinksCtrl">
+    <li ng-repeat="weblink in json.webLinks" class="control-group">
+      <label class="control-label" for="webpage_{{$index}}">Webpage {{$index+1}}</label>
+      <div class="controls">
+        <input id="webpage_{{$index}}" type="text" placeholder="webpage {{$index + 1}}" ng-model="weblink.uri" />
+        <input type="text" placeholder="webpage name" ng-model="weblink.title" />
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteWeblink()">X</a>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- Abstract -->
-<!-- <label for="body" id="body_label">Abstract</label>
-<input type="text" ng-model="json.body" name="body" id="body" size="600" class="text-input" />
-<br /> -->
+  <!-- Abstract -->
+  <div class="control-group">
+    <label class="control-label" for="body">Abstract</label>
+    <div class="controls">
+      <textarea type="text" ng-model="json.body" id="body" class="input-largeBox" placeholder="abstract"></textarea>
+    </div>
+  </div>
 
-<!-- Project Objectives -->
-<label for="projectObjectives" id="projectObjectives_label">Project Objectives</label>
-<input id="projectObjectives" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].objectives" placeholder="project objectives" />
-<br />
+  <!-- Project Objectives -->
+  <div class="control-group">
+    <label class="control-label" for="projectObjectives">Project Objectives</label>
+    <div class="controls">
+      <textarea id="projectObjectives" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].objectives" placeholder="project objectives" class="input-largeBox"></textarea>
+    </div>
+  </div>
 
-<!-- keywords & locations -->
-<span ng-controller="TagsCtrl">
+  <!-- keywords & locations -->
   <!-- keywords -->
-  <ul class="unstyled">
-    <li ng-repeat="tag in json.tags | filter:isKeyword">
-      <label for="keyword_{{$index}}" id="keyword_{{$index}}_label">{{tag.type}}</label>
-      <input id="keyword_{{$index}}" type="text" size="60" placeholder="keyword" ng-model="tag.name" />
-      <a ng-show="!$last" ng-click="deleteTag()">[X]</a>
+  <ul class="unstyled" ng-controller="TagsCtrl">
+    <li ng-repeat="tag in json.tags | filter:isKeyword" class="control-group">
+      <label class="control-label" for="keyword_{{$index}}">{{tag.type}}</label>
+      <div class="controls">
+        <input id="keyword_{{$index}}" type="text" placeholder="keyword" ng-model="tag.name" class="input-xxlarge" />
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+      </div>
     </li>
   </ul>
 
   <!-- locations -->
-  <ul class="unstyled">
-    <li ng-repeat="tag in json.tags | filter:isLocation">
-      <label for="location_{{$index}}" id="location_{{$index}}_label">{{tag.type}}</label>
-      <input id="location_{{$index}}" type="text" size="60" placeholder="location" ng-model="tag.name" />
-      <a ng-show="!$last" ng-click="deleteTag()">[X]</a>
-    </li>
-  </ul>
-</span>
-
-<!-- products -->
-<span ng-controller="FacetsCtrl">
-<!-- Expected Products -->
-  <ul class="unstyled">
-    <li ng-repeat="product in (json.facets | filter:isProject)[0].projectProducts | filter:isExpectedProduct">
-      <label for="expectedProduct_{{$index}}" id="expectedProduct_{{$index}}_label">Expected Product</label>
-      <input id="expectedProduct_{{$index}}" type="text" size="60" placeholder="product description" ng-model="product.productDescription" />
-      <a ng-show="!$last" ng-click="deleteProduct()">[X]</a>
+  <ul class="unstyled" ng-controller="TagsCtrl">
+    <li ng-repeat="tag in json.tags | filter:isLocation" class="control-group">
+      <label class="control-label" for="location_{{$index}}">{{tag.type}}</label>
+      <div class="controls">
+        <input id="location_{{$index}}" type="text" placeholder="location" ng-model="tag.name" />
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+      </div>
     </li>
   </ul>
 
-<!-- Delivered Products -->
-  <ul class="unstyled">
-    <li ng-repeat="product in (json.facets | filter:isProject)[0].projectProducts | filter:isDeliveredProduct">
-      <label for="deliveredProduct_{{$index}}" id="deliveredProduct_{{$index}}_label">Delivered Product</label>
-      <input id="deliveredProduct_{{$index}}" type="text" size="60" placeholder="product description" ng-model="product.productDescription" />
-      <a ng-show="!$last" ng-click="deleteProduct()">[X]</a>
+  <!-- Expected Products -->
+  <ul class="unstyled" ng-controller="FacetsCtrl">
+    <li ng-repeat="product in (json.facets | filter:isProject)[0].projectProducts | filter:isExpectedProduct" class="control-group">
+      <label class="control-label" for="expectedProduct_{{$index}}">Expected Product</label>
+      <div class="controls">
+        <input id="expectedProduct_{{$index}}" type="text" class="input-xxlarge" placeholder="product description" ng-model="product.productDescription" />
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteProduct()">X</a>
+      </div>
     </li>
   </ul>
-</span>
 
-<!-- Summary of Results -->
-<label for="summary" id="summary_label">Summary of Results</label>
-<input id="summary" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].summaryOfResults" placeholder="summary of results" />
-<br />
+  <!-- Delivered Products -->
+  <ul class="unstyled" ng-controller="FacetsCtrl">
+    <li ng-repeat="product in (json.facets | filter:isProject)[0].projectProducts | filter:isDeliveredProduct" class="control-group">
+      <label class="control-label" for="deliveredProduct_{{$index}}">Delivered Product</label>
+      <div class="controls">
+        <input id="deliveredProduct_{{$index}}" type="text" class="input-xxlarge" placeholder="product description" ng-model="product.productDescription" />
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteProduct()">X</a>
+      </div>
+    </li>
+  </ul>
 
-<!-- dates -->
-<!-- <span ng-controller="DatesCtrl">
-<label for="dates" id="dates_label">Dates ({{sum()}})</label>
-<br /><br />
-<ul class="unstyled">
-  <li ng-repeat="date in json.dates">
-    <input type="text" size="60" placeholder="date type" ng-model="date.type" />
-    <input type="text" size="60" placeholder="date (YYYY, YYYY-MM, or YYYY-MM-DD only)" ng-model="date.dateString" />
-    <input type="text" size="60" placeholder="date label" ng-model="date.label" />
-    <a ng-show="!$last" ng-click="deleteDate()">[X]</a>
-  </li>
-</ul>
-</span> -->
+  <!-- Project Status -->
+  <div class="control-group" ng-controller="FacetsCtrl">
+    <label class="control-label" for="projectStatus">Project Status</label>
+    <div class="controls">
+      <input id="projectStatus" type="text" ng-model="(json.facets | filter:isProject)[0].projectStatus" placeholder="project status" />
+    </div>
+  </div>
 
-<!-- Facets -->
-<!-- <label for="facets" id="facets_label">Extensions ({{json.facets.length}})</label>
-<br /><br />
-<ul class="unstyled">
-  <li ng-repeat="facet in json.facets | filter:isProject" ng-controller="FacetsCtrl">
-    {{facetType()}} : {{isProject}}
-    <a ng-click="deleteFacet()">[X]</a>
-    <br />
+  <!-- Summary of Results -->
+  <div class="control-group" ng-controller="FacetsCtrl">
+    <label class="control-label" for="summary">Summary of Results</label>
+    <div class="controls">
+      <textarea id="summary" ng-model="(json.facets | filter:isProject)[0].summaryOfResults" placeholder="summary of results" class="input-largeBox"></textarea>
+    </div>
+  </div>
 
-    Project Status: <input type="text" ng-model="facet.projectStatus" size="60" placeholder="Project Status" /><br />
-    Start Date: <input type="text" ng-model="facet.startDate" size="60" placeHolder="start date" /><br />
-    End Date: <input type="text" ng-model="facet.endDate" size="60" placeHolder="end date" /><br />
-    Project Type: <input type="text" ng-model="facet.projectType" size="60" placeHolder="project type" /><br />
+  <!-- Save, Create -->
+  <button class="btn btn-primary offset2" ng-show="json.id" ng-click="put()">Save Changes</button>
+  <button class="btn btn-primary offset2" ng-show="!json.id" ng-click="put()">Create</button>
 
-    <label for="parts" id="parts_label">Parts ({{facet.parts.length}})</label>
-    <br /><br />
-    <ul class="unstyled">
-      <li ng-repeat="part in facet.parts">
-        <input type="text" ng-model="part.type" size="60" placeHolder="Year Number" />
-        $<input type="text" ng-model="part.value" size="60" placeHolder="$$$$" />
-      </li>
-    </ul>
+</div> <!-- /edit-fields -->
 
-  </li>
-</ul>
-<form ng-submit="addFacet()">
-  <input type="text" ng-model="facetType" id="facets" name="facets" size="60" placeholder="extension type" />
-  <input class="button" type="submit" value="add" />
-</form> -->
-
-<input type="button" ng-click="put()" value="Update Item" />
-<input type="button" ng-click="post()" value="Create New Item from Form" />
-<input type="button" ng-click="clone()" value="Clone Item" />
-<br /><br />
-
-<input type="button" id="show-json" value="Show JSON" onclick="show('json'); return false;" />
+<button class="btn text-right" id="show-json" onclick="show('json', true); return false;">Show JSON</button>
 <div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
   <pre>{{prettyPrint(json)}}</pre>
 </div>
 
-<input type="button" id="show-cleanedjson" value="Show cleaned JSON" onclick="show('cleanedjson'); return false;" />
+<!-- <input type="button" id="show-cleanedjson" value="Show cleaned JSON" onclick="show('cleanedjson', true); return false;" />
 <div id="cleanedjson" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
   <pre>{{prettyPrint(prepareJson(json))}}</pre>
-</div>
+</div> -->

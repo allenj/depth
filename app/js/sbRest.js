@@ -56,12 +56,40 @@ function getItem(id)
   return json;  
 }
 
+function getItemProd(id)
+{
+  var josso = checkCookie();
+  var itemUrl = "https://my.usgs.gov/catalog/item/" + id + "?josso=" + josso + "&format=json";
+  // var itemUrl = "https://my-beta.usgs.gov/catalog/item/" + id + "?josso=" + josso + "&format=json";
+  // var itemUrl = "http://localhost:8090/catalog/item/" + id + "?josso=" + josso + "&format=json";
+
+  var json;
+
+  $.ajax({
+    type: 'GET',
+    url: itemUrl,
+    crossDomain: true,
+    dataType: 'json',
+    async: false,
+    success: function(data) { 
+      json = jQuery.extend(true, {}, data);
+    },
+    failure: function(data) { json = {"error": data}; },
+    beforeSend: function(request)
+    {
+      request.setRequestHeader("Accept", "application/json");
+      request.setRequestHeader("Content-Type", "application/json");
+    } 
+  });
+  return json;  
+}
+
 function upsert(type, id, json)
 {
   var josso = checkCookie();
 
   if (!josso) {
-    alert("Could not get josso");
+    alert("Please log in again.");
     return false;
   }
   if (!json) {
@@ -97,9 +125,12 @@ function upsert(type, id, json)
   return json;
 }
 
-function show(id)
+function show(id, hide)
 {
   var display = document.getElementById(id).style.display;
-  document.getElementById(id).style.display = display === 'none'? 'block': 'none';
+  if (hide)
+    document.getElementById(id).style.display = display === 'none'? 'block': 'none';
+  else
+    document.getElementById(id).style.display = 'block';
 }
 

@@ -1,15 +1,13 @@
 <!doctype html>
 <html lang="en" ng-app="depth">
 <head>
-    <title>depth</title>
+    <title>DEPTH</title>
     <link href="css/standardHeader.css" rel="stylesheet">
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/bootstrap-lightbox.min.css" rel="stylesheet">
+    <link href="css/depth.css" rel="stylesheet">
     <link href="img/favicon.jpg" rel="shortcut icon">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular-resource.min.js"></script>
-    <script src="js/sbRest.js"></script>
-    <script src="js/depth.js"></script>
+    
     <style>
       .fornav {
           position:relative;
@@ -51,11 +49,12 @@
     <img src="img/usgs/sciencebase_earth.png" class="image-float"/><!-- / usgscolorband -->
     <div class="navbar navbar-static-top navbar-inverse">
       <div class="navbar-inner">
-        <a class="brand" href="">Catalog of USGS Data</a>
+        <a class="brand" href="#">DEPTH Project Editor</a>
         <ul class="nav" style="float: right;">
             <!-- <li class="active"><a href="#">Home</a></li> -->
             <!-- <li><a href="https://www.sciencebase.gov/confluence/display/sciencebase/ScienceBase/">About</a></li> -->
         <a href="/depth/login.html">Login</a>
+        <!-- <a href="/depth/loginProd.html">LoginProd</a> -->
         <a href="https://my-beta.usgs.gov/josso/signon/logout.do?josso_back_to=http://localhost/depth/index.html">Log Out</a>
           </ul>
       </div>
@@ -63,8 +62,19 @@
     <div style="margin-top: 5px;">
       <div id="welcome" class="container">
         <div class="hero-unit">
-          <h1>USGS depth <small>Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></small></h1>
-          -- <p>Search for USGS data using the box below.</p>
+          <h1>
+            DEPTH
+            <div class="btn-group" ng-class='{open: open}'>
+              <button class="btn">Edit Mode</button>
+              <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click='open=!open'><span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                <li><a href="#/">Edit in Project Mode</a></li>
+                <li><a href="#/sbFields">Edit in ScienceBase Mode</a></li>
+                <li><a href="#/view">View Projects</a></li>
+              </ul>
+            </div>
+          </h1>
+          <p>Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
         </div>
       </div><!-- /welcome -->
       <div style="margin-left: auto; margin-right: auto; width: 940px;">
@@ -72,67 +82,8 @@
             <div ng-view></div>
             <br />
 
-            <input type="button" id="show-hiddenFields" value="Show Unimplemented Fields" onclick="show('hiddenFields'); return false;"/>
+            <!-- <input type="button" id="show-hiddenFields" value="Show Unimplemented Fields" onclick="show('hiddenFields', true); return false;"/> -->
             <div id="hiddenFields" style="display: none;">
-
-            <label for="fundingAgency" id="fundingAgency_label">Funding Agency</label>
-            <input type="text" name="fundingAgency" id="fundingAgency" size="60" value="" class="text-input" />
-            <br />
-            
-            <label for="fy" id="fy_label">Fiscal Year</label>
-            <input type="text" name="fy" id="fy" size="60" value="" class="text-input" />
-            <br />
-            
-            <label for="projType" id="projType_label">Project Type</label>
-            <input type="text" name="projType" id="projType" size="60" value="" class="text-input" />
-            <br />
-
-            
-            <label for="contactAffil" id="contactAffil_label">Affiliation</label>
-            <input type="text" name="contactAffil" id="contactAffil" size="60" value="" class="text-input" />
-            <br />
-            
-            <label for="contactOrg" id="contactOrg_label">Organization</label>
-            <input type="text" name="contactOrg" id="contactOrg" size="60" value="" class="text-input" />
-            <br />
-            
-            <label for="fundingAlloc" id="fundingAlloc_label">Funding Allocation</label>
-            <input type="text" name="title" id="title" size="60" value="" class="text-input" />
-            -- Need multiple of these with a year field
-            <br />
-
-            <label for="webpage" id="webpage_label">Webpage</label>
-            <input type="text" name="webpage" id="webpage" size="60" value="" class="text-input" />
-            -- Need to have multiple of these
-            <br />
-            
-            <label for="keywords" id="keywords_label">Keywords</label>
-            <input type="text" name="keywords" id="keywords" size="60" value="" class="text-input" />
-            -- Need to have multiple of these
-            <br />
-            
-            <label for="projObjectives" id="projObjectives_label">Project Objectives</label>
-            <input type="text" name="projObjectives" id="projObjectives" size="60" value="" class="text-input" />
-            <br />
-
-            <label for="location" id="location_label">Locations</label>
-            <input type="text" name="location" id="location" size="60" value="" class="text-input" />
-            -- Need to have multiple of these
-            <br />
-            
-            <label for="expectedProducts" id="expectedProducts_label">Expected Products</label>
-            <input type="text" name="expectedProducts" id="expectedProducts" size="60" value="" class="text-input" />
-            -- Need to have multiple of these?
-            <br />
-           
-            <label for="deliveredProducts" id="deliveredProducts_label">Delivered Products</label>
-            <input type="text" name="deliveredProducts" id="deliveredProducts" size="60" value="" class="text-input" />
-            -- Need to have multiple of these?
-            <br />
-
-            <label for="resultSummary" id="resultSummary_label">Summary of Results</label>
-            <input type="text" name="resultSummary" id="resultSummary" size="60" value="" class="text-input" />
-            <br />
 
             <p style="font-weight: bold;">NW CSC Science Agenda theme(s) Addressed</p>
             <label for="theme1" id="theme1_label">1 - Climate Science and Modeling</label>
@@ -204,10 +155,10 @@
             <br />
             <br />
 
-            <label for="file" id="file_label">Files</label>
+           <!--  <label for="file" id="file_label">Files</label>
             <input type="text" name="file" id="file">
             <input type="submit" name="upload_file" class="button" id="upload_file" value="Upload File" />
-            <br/>
+            <br/> -->
           </div><!--/hiddenFields -->
 
 
@@ -232,6 +183,11 @@
     <span style="padding: 0.2em">URL: <script type="text/javascript" language="javascript">document.write(location.href + "<br />")</script></span>
     <span style="padding: 0.2em">Page Contact Information: <a href="mailto:sciencebase@usgs.gov">sciencebase@usgs.gov</a></span><br/><!-- /usgs footer -->
 
+    <!-- Javascript (down here so the page loads faster) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular-resource.min.js"></script>
+    <script src="js/sbRest.js"></script>
+    <script src="js/depth.js"></script>
     <script src="js/jquery-1.8.3.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/bootstrap-lightbox.min.js"></script>
