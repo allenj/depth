@@ -1,0 +1,126 @@
+<div class="container-fluid">
+  <div class="row-fluid">
+
+    <!-- Sidebar -->
+    <div class="span4 proj-view-sidebar">
+
+      <legend>Filter</legend>
+
+      <ul class="proj-view-sidenav unstyled" id="sort-fields" data-spy="affix" data-offset-top="200">
+      <!-- <div id="sort-fields" class="nav" style="" data-spy="affix" data-offset-top="200"> -->
+        <li>
+          <!-- Organization Type -->
+          <label class="control-label" for="orgType">Organization Type</label>
+          <div class="controls">
+            <select id="orgType" ng-model="orgType" ng-options="orgType as orgType.title for orgType in orgTypes" class="span12" placeholder="organization type" multiple="multiple">
+            </select>
+          </div>
+          <!-- <a class="btn btn-info" ng-show="orgType.id"href="https://my-beta.usgs.gov/catalog/item/{{orgType.id}}" target="_blank">View in SB</a> -->
+        </li>
+        <li>
+          <!-- Organization -->
+          <label class="control-label" for="organization">Organization <!--({{(organizations | filter:filterOrganizations).length}})--></label>
+          <div class="controls">
+            <select id="organization" ng-model="organization" ng-options="organization as organization.title for organization in organizations | filter:filterOrganizations | orderBy: 'title'" class="span12" multiple="multiple">
+            </select>
+            <!-- <a class="btn btn-info" ng-show="organization.id" href="https://my-beta.usgs.gov/catalog/item/{{organization.id}}" target="_blank">View in SB</a> -->
+          </div>
+        </li>
+        <li>
+          <!-- Fiscal Year -->
+          <div class="control-group">
+            <label class="control-label" for="fiscalYear">Fiscal Year</label>
+            <div class="controls">
+              <select id="fiscalYear" ng-model="fiscalYear" ng-options="fiscalYear.fy as fiscalYear.fy for fiscalYear in fiscalYears" class="span12" multiple="multiple">
+              </select>
+            </div>
+          </div>
+        </li>
+        <li>
+          <!-- Project Type -->
+          <div class="control-group">
+            <label class="control-label" for="projectType">Project Type</label>
+            <div class="controls">
+              <select id="projectType" ng-model="projectType" ng-options="projType.type as projType.type for projType in projectTypes" class="span12" multiple="multiple">
+              </select>
+            </div>
+          </div>
+        </li>
+        <li>
+          <!-- PI -->
+          <div class="control-group">
+            <label class="control-label" for="pi">Principal Investigator</label>
+            <div class="controls">
+              <select id="pi" ng-model="pi" ng-options="pi as pi.name for pi in allPIs() | orderBy:'name'" class="span12" multiple="multiple">
+              </select>
+            </div>
+          </div>
+        </li>
+        <li>
+          <!-- keywords -->
+          <div class="control-group">
+            <label class="control-label" for="pi">Keywords</label>
+            <div class="controls">
+              <select id="keywords" ng-model="keywords" ng-options="kw as kw.name for kw in allKeywords() | orderBy:'name'" class="span12" multiple="multiple">
+              </select>
+            </div>
+          </div>
+        </li>
+        <li>
+          <!-- project status -->
+          <div class="control-group">
+            <label class="control-label" for="projStatuses">Project Status</label>
+            <div class="controls">
+              <select id="projStatuses" ng-model="projStatuses" ng-options="status for status in projectStatuses" class="span12" multiple="multiple">
+              </select>
+            </div>
+          </div>
+        </li>
+        <li>
+          <!-- Project -->
+          <div class="control-group">
+            <label class="control-label" for="project">Project ({{(allProjects | filter:filterProjectsView).length}})</label>
+            <div class="controls">
+              <select id="project" ng-model="project" ng-options="proj as proj.title for proj in allProjects | filter:filterProjectsView | orderBy:'title'" class="span12" multiple="multiple">
+              </select>
+            </div>
+          </div>
+        </li>
+
+      </ul> <!-- /sort-fields -->
+
+    </div> <!-- /sidebar -->
+    <div class="span8"> <!-- body -->
+
+      <!-- total funding -->
+      <!-- <div id="total" style="position: fixed; right: 0; top: 50%; background: darkgrey; width: 200px;">
+        Total Funding: ${{totalFunding()}}
+      </div> -->
+
+      <span>{{addRequiredFields()}}</span>
+      <br />
+
+      <legend>
+        Projects ({{(allProjects | filter:filterAllProjectsView).length}}) 
+      </legend>
+      <!-- total funding -->
+      <h4>Total Funding: ${{totalFunding()}}</h4>
+      <br />
+
+      <!-- All Projects -->
+      <ul class="unstyled">
+        <li ng-repeat="proj in allProjects | filter:filterAllProjectsView | orderBy:'title'">
+          <div style="background-color: #eee;">
+            <a href="https://my-beta.usgs.gov/catalog/item/{{proj.id}}" target="_blank">{{proj.title}}</a>
+          </div>
+          <ul class="unstyled" ng-controller="ContactsCtrl">
+            <li ng-repeat="pi in proj.contacts | filter:isPrincipalInvestigator">
+              PI: {{pi.name}}
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+    </div> <!-- /body -->
+  </div>
+</div>

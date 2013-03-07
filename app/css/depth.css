@@ -1,0 +1,59 @@
+.input-largeBox {
+	width: 530px;
+	height: 200px;
+}
+
+.copy-fields, .create-org {
+	padding-top: 8px;
+	padding-bottom: 8px;
+	background-color: #ddd;
+	-webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+}
+
+.form-horizontal .control-group {
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+.proj-view-sidenav.affix {
+	top: 40px;
+}
+
+.centered-edit {
+	margin: 0 auto;
+}
+
+/*
+.edit-fields .input-set {
+  background-color: #eee;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding-top: 8px;
+  text-align: center;
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+  min-height: 40px;
+  line-height: 40px;
+}
+
+.edit-fields .input-set:hover {
+  background-color: #ddd;
+}
+
+.edit-fields .first {
+	background-color: #ddd;
+}
+
+.edit-fields ul,ol {
+	margin-bottom: 0;
+}
+
+.controls .input-prepend {
+	padding: 4px 6px 4px 6px;
+}
+.controls .input-prepend .add-on {
+	margin-top: 2px;
+}*/
