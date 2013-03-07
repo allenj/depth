@@ -2,14 +2,32 @@ var Depth = angular.module('depth', ['ngResource']);
 
 Depth.config(function($routeProvider) {
     $routeProvider.
-      when('/', {controller:depthCtrl, templateUrl:'editProject.html'}).
-      when('/sbFields', {controller:depthCtrl, templateUrl:'editSB.html'}).
-      when('/view', {controller:depthCtrl, templateUrl:'viewProjects.html'}).
+      when('/', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+      when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
+      when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}).
       otherwise({redirectTo:'/'});
   });
 
-function depthCtrl($scope, filterFilter, $http) {
+function DepthCtrl($scope, filterFilter, $http) {
+  $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog/"
   $scope.josso = checkCookie();
+  $scope.josso_check = {};
+  $http.get("/depth/josso-auth/json-josso.php").
+    success(function(data, status) {
+      // $scope.user = data.user;
+      // $scope.josso = data.josso;
+      $scope.josso_check = data;
+    }).error(function (data, status, headers, config) {
+      alert("failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
+    });
+
+  $scope.schema = {};
+  $http.get($scope.sciencebaseUrl + "item/5136be49e4b0a47351e401db?format=json&fields=facets").
+    success(function(data, status) {
+      $scope.schema = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.schema;
+    }).error(function (data, status, headers, config) {
+      alert("failed to get schema\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config)
+    });
 
   $scope.json = {};
   $scope.json.id = "";
@@ -35,20 +53,26 @@ function depthCtrl($scope, filterFilter, $http) {
   $scope.project = "";
   $scope.organization = "";
 
+  $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
+
   $scope.allProjects = [];
-  $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
+  $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets,contacts&max=1000&josso=" + $scope.josso).
     success(function(data, status) {
       $scope.allProjects = data.items;
+    }).error(function (data, status, headers, config) {
+      alert("failed to get projects\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
     });
 
   $scope.organizations = [];
-  $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+  $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
     success(function(data, status) {
       $scope.organizations = data.items;
+    }).error(function (data, status, headers, config) {
+      alert("failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
     });
 
   $scope.refresh = function() {
-    $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
+    $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
       success(function(data, status) {
         $scope.allProjects = data.items;
         // set project
@@ -56,7 +80,7 @@ function depthCtrl($scope, filterFilter, $http) {
       });
 
     var hasTags = $scope.json && $scope.json.tags;
-    $http.get("https://my-beta.usgs.gov/catalog/items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+    $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
       success(function(data, status) {
         $scope.organizations = data.items;
         // set organization
@@ -131,6 +155,11 @@ function depthCtrl($scope, filterFilter, $http) {
       $scope.json.facets.push({className: "gov.sciencebase.catalog.item.facet.ProjectFacet"});
     }
 
+    var expandos = filterFilter($scope.json.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"});
+    if(expandos.length === 0) {
+      $scope.json.facets.push({className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"});
+    }
+
     // var projIdx = $scope.indexOfProject;
     var projIdx = $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
     if(projIdx >= 0){
@@ -161,6 +190,26 @@ function depthCtrl($scope, filterFilter, $http) {
       }
     }
 
+    var expandoIdx = $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    if (expandoIdx >= 0) {
+      if (!$scope.json.facets[expandoIdx].object) {
+        $scope.json.facets[expandoIdx].object = {};
+      }
+      if (!$scope.json.facets[expandoIdx].object.themes) {
+        $scope.json.facets[expandoIdx].object.themes = {};
+      }
+      for (var concept in $scope.schema) {
+        if (!$scope.json.facets[expandoIdx].object.themes[concept]) {
+          $scope.json.facets[expandoIdx].object.themes[concept] = {};
+        }
+        for (var theme in $scope.schema[concept]) {
+          if (!$scope.json.facets[expandoIdx].object.themes[concept][theme]) {
+            $scope.json.facets[expandoIdx].object.themes[concept][theme] = false;
+          }
+        }
+      }
+    }
+
     // TODO: should change this to a $watch instead
     return "";
   };
@@ -188,9 +237,11 @@ function depthCtrl($scope, filterFilter, $http) {
   };
 
   $scope.findIndexByKeyValue = function (list, key, value) {
-    for (var i = 0; i < list.length; i++) {
-      if (list[i][key] === value) {
-        return i;
+    if (list) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i][key].toLowerCase() === value.toLowerCase()) {
+          return i;
+        }
       }
     }
     return -1;
@@ -301,6 +352,12 @@ function depthCtrl($scope, filterFilter, $http) {
   };
 
   $scope.get = function() {
+
+    if (!$scope.id) {
+      alert("Please choose a project.");
+      return false;
+    }
+
     var json = getItem($scope.id);
     show("edit-fields", false);
 
@@ -316,6 +373,7 @@ function depthCtrl($scope, filterFilter, $http) {
     {
       alert(exception);
     }
+    show("sort-fields", true); 
   };
 
   $scope.copy = function() {
@@ -355,6 +413,9 @@ function depthCtrl($scope, filterFilter, $http) {
     // Change the appropriate fields
     json.title = title;
 
+    // convert to JSON with angular to remove some crap
+    // json = angular.toJson(json);
+
     var returnedJson = upsert('POST', parentId, json);
 
     try
@@ -369,6 +430,8 @@ function depthCtrl($scope, filterFilter, $http) {
     } 
     show("copy-fields", true);
     show("sort-fields", true);
+
+    alert("Successfully copied item " + String($scope.id) + "to item " + returnedJson.id + ".");
   };
 
   $scope.createOrganization = function() {
@@ -402,10 +465,16 @@ function depthCtrl($scope, filterFilter, $http) {
     } 
     show("create-org", true);
     show("sort-fields", true); 
+    alert("Successfully created Organization " + returnedJson.id + ".");
   };
 
   $scope.create = function() {
+    $scope.json = {};
     show("edit-fields", false);
+    show("sort-fields", true); 
+
+    // $scope.json.id = "";
+    // $scope.json.title = "";
   };
 
   $scope.post = function() {
@@ -436,6 +505,7 @@ function depthCtrl($scope, filterFilter, $http) {
       alert(exception);
     }
 
+    alert("Successfully saved item " + returnedJson.id + ".");
   };
 
   $scope.put = function() {
@@ -458,6 +528,7 @@ function depthCtrl($scope, filterFilter, $http) {
     {
       alert(exception);
     }
+    alert("Successfully saved item " + returnedJson.id + ".");
 
   };
 
@@ -476,6 +547,11 @@ function depthCtrl($scope, filterFilter, $http) {
     json.facets[projIdx].projectProducts = filterFilter(json.facets[projIdx].projectProducts, $scope.filterBlankProjects);
     json.facets[projIdx].funding = filterFilter(json.facets[projIdx].funding, $scope.filterBlankFunds);
 
+    var expandoIdx = $scope.findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    for (var concept in json.facets[expandoIdx].object.themes) {
+      delete json.facets[expandoIdx].object.themes[concept]["$$hashKey"];
+    }
+
     // json.dates.pop();
     return json;
   };
@@ -488,7 +564,7 @@ function depthCtrl($scope, filterFilter, $http) {
     return (contact.name != null && contact.name != ""); 
   };
 
-  $scope.fitlerBlankWeblinks = function(weblink) {
+  $scope.filterBlankWeblinks = function(weblink) {
     return (weblink.uri != null && weblink.uri != "");
   };
 
@@ -528,32 +604,176 @@ function depthCtrl($scope, filterFilter, $http) {
     return true;
   };
 
+  $scope.filterAllProjectsView = function(project) {
+
+    if ($scope.orgType) {
+      var orgMatch = false;
+      for (var i = 0; i < $scope.orgType.length; i++) {
+        if ($scope.orgType[i].org &&
+            $scope.orgType[i].org !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType[i].org}).length > 0) {
+          orgMatch = true;
+        }
+      }
+      if (!orgMatch) {
+        return false;
+      }
+    } 
+ 
+    if ($scope.fiscalYear) {
+      var fyMatch = false;
+      for (var i = 0; i < $scope.fiscalYear.length; i++) {
+        if ($scope.fiscalYear[i] &&
+            $scope.fiscalYear[i] !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear[i]}).length > 0) {
+          fyMatch = true;
+        }
+      }
+      if (!fyMatch) {
+        return false;
+      }
+    }
+
+    if ($scope.projectType) {
+      var typeMatch = false;
+      for (var i = 0; i < $scope.projectType.length; i++) {
+        if ($scope.projectType[i] &&
+            $scope.projectType[i] !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Project Type", name: $scope.projectType[i]}).length > 0) {
+          typeMatch = true;
+        }
+      }
+      if (!typeMatch) {
+        return false;
+      }
+    }
+
+    if ($scope.organization) {
+      var orgMatch = false;
+      for (var i = 0; i < $scope.organization.length; i++) {
+        if ($scope.organization[i].title &&
+            $scope.organization[i].title !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Organization Name", name: $scope.organization[i].title}).length > 0) {
+          orgMatch = true;
+        }
+      }
+      if (!orgMatch) {
+        return false;
+      }
+    }
+
+    if ($scope.project) {
+      var projMatch = false;
+      for (var i = 0; i < $scope.project.length; i++) {
+        if ($scope.project[i] && $scope.project[i] === project) {
+          projMatch = true;
+        }
+      }
+      if (!projMatch) {
+        return false;
+      }
+    }
+
+    if ($scope.pi) {
+      var piMatch = false;
+      for (var i = 0; i < $scope.pi.length; i++) {
+        var pis = filterFilter(project.contacts, {type: "Principal Investigator"});
+        if ($scope.findIndexByKeyValue(pis, "name", $scope.pi[i].name) !== -1) {
+          piMatch = true;
+        }
+      }
+      if (!piMatch) {
+        return false;
+      }
+    }
+
+    if ($scope.keywords) {
+      var kwMatch = false;
+      for (var i = 0; i < $scope.keywords.length; i++) {
+        var kws = filterFilter(project.tags, {scheme: "Project", type: "Keyword"});
+        if ($scope.findIndexByKeyValue(kws, "name", $scope.keywords[i].name) !== -1) {
+          kwMatch = true;
+        }
+      }
+      if (!kwMatch) {
+        return false;
+      }
+    }
+
+    if ($scope.projStatuses) {
+      var statusMatch = false;
+      var projIdx = $scope.findIndexByKeyValue(project.facets, "className", "ProjectFacet");
+      if (projIdx >= 0) {
+        for (var i = 0; i < $scope.projStatuses.length; i++) {
+          if (project.facets[projIdx].projectStatus === $scope.projStatuses[i]) {
+            statusMatch = true;
+          }
+        }
+      }
+      if (!statusMatch) return false;
+    }
+
+    return true;
+  };
+
   $scope.filterProjectsView = function(project) {
-    if ($scope.orgType && 
-        $scope.orgType.org && 
-        $scope.orgType.org !== "" && 
-        filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType.org}).length === 0) {
-      return false;
+
+    if ($scope.orgType) {
+      var orgMatch = false;
+      for (var i = 0; i < $scope.orgType.length; i++) {
+        if ($scope.orgType[i].org &&
+            $scope.orgType[i].org !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType[i].org}).length > 0) {
+          orgMatch = true;
+        }
+      }
+      if (!orgMatch) {
+        return false;
+      }
+    } 
+ 
+    if ($scope.fiscalYear) {
+      var fyMatch = false;
+      for (var i = 0; i < $scope.fiscalYear.length; i++) {
+        if ($scope.fiscalYear[i] &&
+            $scope.fiscalYear[i] !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear[i]}).length > 0) {
+          fyMatch = true;
+        }
+      }
+      if (!fyMatch) {
+        return false;
+      }
     }
 
-    var fyTag = {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear};
-    if ($scope.fiscalYear && $scope.fiscalYear !== "" && filterFilter(project.tags, fyTag).length === 0) {
-      return false;
+    if ($scope.projectType) {
+      var typeMatch = false;
+      for (var i = 0; i < $scope.projectType.length; i++) {
+        if ($scope.projectType[i] &&
+            $scope.projectType[i] !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Project Type", name: $scope.projectType[i]}).length > 0) {
+          typeMatch = true;
+        }
+      }
+      if (!typeMatch) {
+        return false;
+      }
     }
 
-    var projTypeTag = {scheme: "Project", type: "Project Type", name: $scope.projectType};
-    if ($scope.projectType && $scope.projectType !== "" && filterFilter(project.tags, projTypeTag).length === 0) {
-      return false;
+    if ($scope.organization) {
+      var orgMatch = false;
+      for (var i = 0; i < $scope.organization.length; i++) {
+        if ($scope.organization[i].title &&
+            $scope.organization[i].title !== "" &&
+            filterFilter(project.tags, {scheme: "Project", type: "Organization Name", name: $scope.organization[i].title}).length > 0) {
+          orgMatch = true;
+        }
+      }
+      if (!orgMatch) {
+        return false;
+      }
     }
 
-    var organizationTag = {scheme: "Project", type: "Organization Name", name: $scope.organization.title};
-    if ($scope.organization.title && $scope.organization.title !== "" && filterFilter(project.tags, organizationTag).length === 0) {
-      return false;
-    }
-
-    if ($scope.project && $scope.project !== "" && project !== $scope.project) {
-      return false;
-    }
 
     return true;
   };
@@ -570,7 +790,7 @@ function depthCtrl($scope, filterFilter, $http) {
 
   $scope.totalFunding = function() {
     var funding = 0;
-    var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
+    var filteredProjects = filterFilter($scope.allProjects, $scope.filterAllProjectsView);
     for (var i = 0; i < filteredProjects.length; i++) {
       var projs = filterFilter(filteredProjects[i].facets, {className: "ProjectFacet"});
       // alert($scope.prettyPrint(filteredProjects[i].facets));
@@ -580,11 +800,51 @@ function depthCtrl($scope, filterFilter, $http) {
           if (value) {
             funding += parseInt(projs[0].parts[j].value);
           }
-          // alert(projs[0].parts[j].value);
+        }
+      }
+      if (projs && projs.length > 0 && projs[0].funding) {
+        for (var j = 0; j < projs[0].funding.length; j++) {
+          if (parseInt(projs[0].funding[j].fundingAmount)) {
+            funding += parseInt(projs[0].funding[j].fundingAmount);
+          }
         }
       }
     }
     return funding;
+  };
+
+  $scope.allPIs = function() {
+    var contacts = [];
+    var fullContacts = [];
+    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
+    var filteredProjects = $scope.allProjects;
+    for (var i = 0; i < filteredProjects.length; i++) {
+      var pis = filterFilter(filteredProjects[i].contacts, {type: "Principal Investigator"});
+      fullContacts = fullContacts.concat(pis);
+    }
+    for (var i = 0; i < fullContacts.length; i++) {
+      if (fullContacts[i]) {
+        var idx = $scope.findIndexByKeyValue(contacts, "name", fullContacts[i].name);
+        // console.log(fullContacts[i]);
+        if (idx === -1) contacts.push(fullContacts[i]);
+      }
+    }
+    // contacts = jQuery.unique(contacts);
+    return contacts;
+  };
+
+  $scope.allKeywords = function() {
+    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
+    var filteredProjects = $scope.allProjects;
+    var keywords = [];
+    for (var i = 0; i < filteredProjects.length; i++) {
+      var kws = filterFilter(filteredProjects[i].tags, {scheme: "Project", type: "Keyword"});
+      for (var j = 0; j < kws.length; j++) {
+        var idx = $scope.findIndexByKeyValue(keywords, "name", kws[j].name);
+        if (idx === -1) keywords.push(kws[j]);
+      }
+    }
+    return keywords;
   };
 
   $scope.prettyPrint = function(json) {
@@ -716,6 +976,10 @@ function FacetsCtrl($scope) {
 
   $scope.isProject = function(facet) {
     return (facet.className === "gov.sciencebase.catalog.item.facet.ProjectFacet");
+  }
+
+  $scope.isExpando = function(facet) {
+    return (facet.className === "gov.sciencebase.catalog.item.facet.ExpandoFacet");
   }
 
   $scope.isExpectedProduct = function(product) {

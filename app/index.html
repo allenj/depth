@@ -7,194 +7,82 @@
     <link href="css/bootstrap-lightbox.min.css" rel="stylesheet">
     <link href="css/depth.css" rel="stylesheet">
     <link href="img/favicon.jpg" rel="shortcut icon">
-    
-    <style>
-      .fornav {
-          position:relative;
-          margin-left:-22px;
-          top:-3px;
-          z-index:2;
-      }
 
-      .search-center {
-          font-size: 72px;
-          text-align: center;
-      }
-
-      .forcenter {
-          position:relative;
-          margin-left:-40px;
-          top:6px;
-          z-index:2;
-      }
-    </style>
 </head>
-<body>
-    <div id="usgscolorband">
-      <div id="usgsbanner">
-        <div id="usgsidentifier"><a href="http://www.usgs.gov/">
-          <img src="img/usgs/header_graphic_usgsIdentifier_white.jpg"
-               alt="USGS - science for a changing world" title="U.S. Geological Survey Home Page"
-               width="178" height="72"/></a>
+<body data-spy="scroll" data-target=".proj-view-sidebar">
+<!-- USGS Header -->
+  <div id="usgscolorband">
+    <div id="usgsbanner">
+      <div id="usgsidentifier"><a href="http://www.usgs.gov/">
+        <img src="img/usgs/header_graphic_usgsIdentifier_white.jpg"
+             alt="USGS - science for a changing world" title="U.S. Geological Survey Home Page"
+             width="178" height="72"/></a>
+      </div>
+      <div id="usgsccsabox">
+        <div id="usgsccsa">
+          <br><a href="http://www.usgs.gov/">USGS Home</a>
+          <br><a href="http://www.usgs.gov/ask/">Contact USGS</a>
+          <br><a href="http://www.usgs.gov/search/">Search USGS</a>
         </div>
-        <div id="usgsccsabox">
-          <div id="usgsccsa">
-            <br><a href="http://www.usgs.gov/">USGS Home</a>
-            <br><a href="http://www.usgs.gov/ask/">Contact USGS</a>
-            <br><a href="http://www.usgs.gov/search/">Search USGS</a>
+      </div>
+    </div>
+  </div>
+  <img src="img/usgs/sciencebase_earth.png" class="image-float"/><!-- / usgscolorband -->
+  <!-- End USGS Header -->
+
+  <div class="navbar navbar-static-top navbar-inverse">
+    <div class="navbar-inner">
+      <a class="brand" href="#">DEPTH Project Editor</a>
+      <ul class="nav" style="float: right;" ng-controller="DepthCtrl">
+        <li ng-show="josso_check.user" ><a href="#">{{josso_check.user}}</a></li>
+        <li ng-show="!josso_check.user"><a href="/depth/josso-auth/josso-login.php">Login</a></li>
+        <li ng-show="josso_check.user"><a href="https://my-beta.usgs.gov/josso/signon/logout.do?josso_back_to=http://localhost/depth/index.html">Log Out</a></li>
+      </ul>
+    </div>
+  </div><!-- /navbar -->
+  <div style="margin-top: 5px;">
+    <div id="welcome" class="container">
+      <div class="hero-unit">
+        <h1>
+          DEPTH
+          <div class="btn-group">
+            <a class="btn" href="#/">Edit Project</a>
+            <a class="btn" href="#/view">View Projects</a>
           </div>
-        </div>
+        </h1>
+        <p>Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
       </div>
     </div>
-    <img src="img/usgs/sciencebase_earth.png" class="image-float"/><!-- / usgscolorband -->
-    <div class="navbar navbar-static-top navbar-inverse">
-      <div class="navbar-inner">
-        <a class="brand" href="#">DEPTH Project Editor</a>
-        <ul class="nav" style="float: right;">
-            <!-- <li class="active"><a href="#">Home</a></li> -->
-            <!-- <li><a href="https://www.sciencebase.gov/confluence/display/sciencebase/ScienceBase/">About</a></li> -->
-        <a href="/depth/login.html">Login</a>
-        <!-- <a href="/depth/loginProd.html">LoginProd</a> -->
-        <a href="https://my-beta.usgs.gov/josso/signon/logout.do?josso_back_to=http://localhost/depth/index.html">Log Out</a>
-          </ul>
-      </div>
-    </div><!-- /navbar -->
-    <div style="margin-top: 5px;">
-      <div id="welcome" class="container">
-        <div class="hero-unit">
-          <h1>
-            DEPTH
-            <div class="btn-group" ng-class='{open: open}'>
-              <button class="btn">Edit Mode</button>
-              <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click='open=!open'><span class="caret"></span></button>
-              <ul class="dropdown-menu">
-                <li><a href="#/">Edit in Project Mode</a></li>
-                <li><a href="#/sbFields">Edit in ScienceBase Mode</a></li>
-                <li><a href="#/view">View Projects</a></li>
-              </ul>
-            </div>
-          </h1>
-          <p>Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
-        </div>
-      </div><!-- /welcome -->
-      <div style="margin-left: auto; margin-right: auto; width: 940px;">
+  </div>
+  <div ng-view></div>
+  <br />
 
-            <div ng-view></div>
-            <br />
+  <!-- USGS Footer -->
+  <div style="margin-top: 50px; font-size: 93%; background:#ccc; border-bottom:1px solid #333; border-top:1px solid #333; padding: 0.2em;">
+      <a href="http://www.usgs.gov/accessibility.html" target="_blank" title="Accessibility Policy (Section 508)">Accessibility</a>
+      <span style="margin:0 1em">|</span>
+      <a href="http://www.usgs.gov/foia/" target="_blank" title="Freedom of Information Act">FOIA</a>
+      <span style="margin:0 1em">|</span>
+      <a href="http://www.usgs.gov/privacy.html" target="_blank" title="Privacy policies of the U.S. Geological Survey.">Privacy</a>
+      <span style="margin:0 1em">|</span>
+      <a href="http://www.usgs.gov/policies_notices.html" target="_blank" title="Policies and notices that govern information posted on USGS Web sites.">Policies and Notices</a>
+  </div>
+  <a href="http://www.takepride.gov/"><img src="img/usgs/footer_graphic_takePride.jpg" alt="Take Pride in America logo" title="Take Pride in America Home Page" style="width:60; height:58; float: right; border: none; margin-right: 5px; padding-top: 0.2em" /></a>
+  <a href="http://usa.gov/"><img src="img/usgs/footer_graphic_usagov.jpg" alt="USA.gov logo" title="USAGov: Government Made Easy" style="width:90; height:26; float: right; border: none; margin-right: 5px; padding-top: 0.2em" /></a>
+  <a href="http://www.doi.gov/" target="_blank" style="padding: 0.2em">U.S. Department of the Interior</a>
+  <span style="margin:0 1em">|</span>
+  <a href="http://www.usgs.gov/" target="_blank" style="padding: 0.2em">U.S. Geological Survey</a><br/>
+  <span style="padding: 0.2em">URL: <script type="text/javascript" language="javascript">document.write(location.href + "<br />")</script></span>
+  <span style="padding: 0.2em">Page Contact Information: <a href="mailto:sciencebase@usgs.gov">sciencebase@usgs.gov</a></span><br/><!-- /usgs footer -->
+  <!-- End USGS Footer -->
 
-            <!-- <input type="button" id="show-hiddenFields" value="Show Unimplemented Fields" onclick="show('hiddenFields', true); return false;"/> -->
-            <div id="hiddenFields" style="display: none;">
-
-            <p style="font-weight: bold;">NW CSC Science Agenda theme(s) Addressed</p>
-            <label for="theme1" id="theme1_label">1 - Climate Science and Modeling</label>
-            a <input type="checkbox" name="theme1a" id="theme1a">
-            b <input type="checkbox" name="theme1b" id="theme1b">
-            c <input type="checkbox" name="theme1c" id="theme1c">
-            d <input type="checkbox" name="theme1d" id="theme1d">
-            <br />
-            <br />
-            <br />
-
-            <label for="theme2" id="theme2_label">2 - Response of Physical Systems to Climate Change</label>
-            a <input type="checkbox" name="theme2a" id="theme2a">
-            b <input type="checkbox" name="theme2b" id="theme2b">
-            c <input type="checkbox" name="theme2c" id="theme2c">
-            d <input type="checkbox" name="theme2d" id="theme2d">
-            e <input type="checkbox" name="theme2e" id="theme2e">
-            f <input type="checkbox" name="theme2f" id="theme2f">
-            <br />
-            <br />
-            <br />
-            <br />
-
-            <label for="theme3" id="theme3_label">3 - Response of Biological Systems to Climate Change</label>
-            a <input type="checkbox" name="theme3a" id="theme3a">
-            b <input type="checkbox" name="theme3b" id="theme3b">
-            c <input type="checkbox" name="theme3c" id="theme3c">
-            d <input type="checkbox" name="theme3d" id="theme3d">
-            e <input type="checkbox" name="theme3e" id="theme3e">
-            f <input type="checkbox" name="theme3f" id="theme3f">
-            g <input type="checkbox" name="theme3g" id="theme3g">
-            <br />
-            <br />
-            <br />
-            <br />
-
-            <label for="theme4" id="theme4_label">4 - Vulnerability and Adaptation</label>
-            a <input type="checkbox" name="theme4a" id="theme4a">
-            b <input type="checkbox" name="theme4b" id="theme4b">
-            c <input type="checkbox" name="theme4c" id="theme4c">
-            d <input type="checkbox" name="theme4d" id="theme4d">
-            e <input type="checkbox" name="theme4e" id="theme4e">
-            <br />
-            <br />
-            <br />
-
-            <label for="theme5" id="theme5_label">5 - Monitoring and Observation Systems</label>
-            a <input type="checkbox" name="theme5a" id="theme5a">
-            b <input type="checkbox" name="theme5b" id="theme5b">
-            c <input type="checkbox" name="theme5c" id="theme5c">
-            <br />
-            <br />
-            <br />
-
-            <label for="theme6" id="theme6_label">6 - Data, Infrastructure, Analysis, and Modeling</label>
-            a <input type="checkbox" name="theme6a" id="theme6a">
-            b <input type="checkbox" name="theme6b" id="theme6b">
-            c <input type="checkbox" name="theme6c" id="theme6c">
-            d <input type="checkbox" name="theme6d" id="theme6d">
-            e <input type="checkbox" name="theme6e" id="theme6f">
-            <br />
-            <br />
-            <br />
-
-            <label for="theme7" id="theme7_label">7 - Communication of Science Findings</label>
-            a <input type="checkbox" name="theme7a" id="theme7a">
-            b <input type="checkbox" name="theme7b" id="theme7b">
-            <br />
-            <br />
-            <br />
-
-           <!--  <label for="file" id="file_label">Files</label>
-            <input type="text" name="file" id="file">
-            <input type="submit" name="upload_file" class="button" id="upload_file" value="Upload File" />
-            <br/> -->
-          </div><!--/hiddenFields -->
-
-
-
-      </div>
-    </div><!-- /margin div -->
-
-    <div style="margin-top: 50px; font-size: 93%; background:#ccc; border-bottom:1px solid #333; border-top:1px solid #333; padding: 0.2em;">
-        <a href="http://www.usgs.gov/accessibility.html" target="_blank" title="Accessibility Policy (Section 508)">Accessibility</a>
-        <span style="margin:0 1em">|</span>
-        <a href="http://www.usgs.gov/foia/" target="_blank" title="Freedom of Information Act">FOIA</a>
-        <span style="margin:0 1em">|</span>
-        <a href="http://www.usgs.gov/privacy.html" target="_blank" title="Privacy policies of the U.S. Geological Survey.">Privacy</a>
-        <span style="margin:0 1em">|</span>
-        <a href="http://www.usgs.gov/policies_notices.html" target="_blank" title="Policies and notices that govern information posted on USGS Web sites.">Policies and Notices</a>
-    </div>
-    <a href="http://www.takepride.gov/"><img src="img/usgs/footer_graphic_takePride.jpg" alt="Take Pride in America logo" title="Take Pride in America Home Page" style="width:60; height:58; float: right; border: none; margin-right: 5px; padding-top: 0.2em" /></a>
-    <a href="http://usa.gov/"><img src="img/usgs/footer_graphic_usagov.jpg" alt="USA.gov logo" title="USAGov: Government Made Easy" style="width:90; height:26; float: right; border: none; margin-right: 5px; padding-top: 0.2em" /></a>
-    <a href="http://www.doi.gov/" target="_blank" style="padding: 0.2em">U.S. Department of the Interior</a>
-    <span style="margin:0 1em">|</span>
-    <a href="http://www.usgs.gov/" target="_blank" style="padding: 0.2em">U.S. Geological Survey</a><br/>
-    <span style="padding: 0.2em">URL: <script type="text/javascript" language="javascript">document.write(location.href + "<br />")</script></span>
-    <span style="padding: 0.2em">Page Contact Information: <a href="mailto:sciencebase@usgs.gov">sciencebase@usgs.gov</a></span><br/><!-- /usgs footer -->
-
-    <!-- Javascript (down here so the page loads faster) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular-resource.min.js"></script>
-    <script src="js/sbRest.js"></script>
-    <script src="js/depth.js"></script>
-    <script src="js/jquery-1.8.3.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/bootstrap-lightbox.min.js"></script>
-    <script type="text/javascript">
-      $("#close-no-results").click(function() {
-        $("#no-results").hide();
-      });
-    </script>
+  <!-- Javascript (down here so the page loads faster) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular-resource.min.js"></script>
+  <script src="js/sbRest.js"></script>
+  <script src="js/depth.js"></script>
+  <script src="js/jquery-1.8.3.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/bootstrap-lightbox.min.js"></script>
 </body>
 </html>
