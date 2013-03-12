@@ -437,9 +437,11 @@ function DepthCtrl($scope, filterFilter, $http) {
   $scope.createOrganization = function() {
 
     var json = {};
-    json.parentId = $scope.newOrgParent.id;
-    json.title = $scope.newOrgTitle;
-    json.tags = [{scheme: "Project", type:"Label", name: $scope.newOrgParent.org}];
+    json.parentId = $scope.newOrg.parent.id;
+    json.title = $scope.newOrg.title;
+    json.tags = [{scheme: "Project", type:"Label", name: $scope.newOrg.parent.org}];
+    json.body = $scope.newOrg.body;
+    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.emaiagnes.jsl}];
 
     if (!json.parentId) {
       alert("You need to choose an organization type to put the organization in.");
@@ -849,6 +851,169 @@ function DepthCtrl($scope, filterFilter, $http) {
 
   $scope.prettyPrint = function(json) {
     return JSON.stringify(json, undefined, 2);
+  };
+
+  $scope.getCsv = function() {
+    var projects = filterFilter($scope.allProjects, $scope.filterAllProjectsView);
+    if (!projects) {
+      return;
+    }
+
+    var url = "items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&max=1000&josso=" + $scope.josso;
+    url += "&fields=id,title,contacts,tags,facets,webLinks,body"
+   
+    $http.get($scope.sciencebaseUrl + url).
+      success(function(data, status) {
+        var fullJsonItems = filterFilter(data.items, $scope.filterAllProjectsView);
+
+        var flatProjects = [];
+        for (i in fullJsonItems) {
+          var flatProject = {};
+
+          // Set up columns, this will keep the order correct
+          flatProject["Funding Agency"] = "";
+          flatProject["Fiscal Year"] = "";
+          flatProject["Project Title"] = "";
+          flatProject["Lead Pi"] = "";
+          flatProject["Email"] = "";
+          flatProject["Affiliation"] = "";
+          flatProject["Organization"] = "";
+          flatProject["Cooperators"] = "";
+          flatProject["Project Type"] = "";
+          flatProject["Project Status"] = "";
+          flatProject["FY2008 Funding"] = "";
+          flatProject["FY2009 Funding"] = "";
+          flatProject["FY2010 Funding"] = "";
+          flatProject["FY2011 Funding"] = "";
+          flatProject["FY2012 Funding"] = "";
+          flatProject["FY2013 Funding"] = "";
+          flatProject["FY2014 Funding"] = "";
+          flatProject["Webpage"] = "";
+          flatProject["Project Objectives"] = "";
+          flatProject["Keywords"] = "";
+          flatProject["Locations"] = "";
+          flatProject["Expected Products"] = "";
+          flatProject["Delivered Products"] = "";
+          flatProject["Summary of Results"] = "";
+          flatProject.id = "";
+
+          flatProject.id = fullJsonItems[i].id;
+          flatProject["Project Title"] = fullJsonItems[i].title;
+
+          var fundingAgencies = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Organization Type"});
+          for (fa in fundingAgencies) {
+            if (flatProject["Funding Agency"] === "") flatProject["Funding Agency"] = fundingAgencies[fa].name;
+            else flatProject["Funding Agency"] += ", " + fundingAgencies[fa].name;
+          }
+
+          var affiliations = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Organization Name"});
+          for (affil in affiliations) {
+            if (flatProject["Affiliation"] === "") flatProject["Affiliation"] = affiliations[affil].name;
+            else flatProject["Affiliation"] += ", " + affiliations[affil].name;
+          }
+
+          var fys = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Fiscal Year"});
+          for (fy in fys) {
+            if (flatProject["Fiscal Year"] === "") flatProject["Fiscal Year"] = fys[fy].name;
+            else flatProject["Fiscal Year"] += ", " + fys[fy].name;
+          }
+
+          var kws = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Keyword"});
+          for (kw in kws) {
+            if (flatProject["Keywords"] === "") flatProject["Keywords"] = kws[kw].name;
+            else flatProject["Keywords"] += ", " + kws[kw].name;
+          }
+
+          var locs = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Location"});
+          for (loc in locs) {
+            if (flatProject["Locations"] === "") flatProject["Locations"] = locs[loc].name;
+            else flatProject["Locations"] += ", " + locs[loc].name;
+          }
+
+          var types = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Project Type"});
+          for (type in types) {
+            if (flatProject["Project Type"] === "") flatProject["Project Type"] = types[type].name;
+            else flatProject["Project Type"] += ", " + types[type].name;
+          }
+
+          for (weblink in fullJsonItems[i].webLinks) {
+            if (flatProject["Webpage"] === "") flatProject["Webpage"] = fullJsonItems[i].webLinks[weblink].uri;
+            else flatProject["Webpage"] += ", " + fullJsonItems[i].webLinks[weblink].uri;
+          }
+
+          var pis = filterFilter(fullJsonItems[i].contacts, {type: "Principal Investigator"});
+          for (pi in pis) {
+            if (flatProject["Lead Pi"] === "") {
+              flatProject["Lead Pi"] = pis[pi].name;
+              flatProject["Email"] = pis[pi].email;
+              flatProject["Organization"] = pis[pi].personsOrganization;
+            } else {
+              if (flatProject["Cooperators"] === "") flatProject["Cooperators"] = pis[pi].name;
+              else flatProject["Cooperators"] += ", " + pis[pi].name;
+            }
+          }
+
+          var cos = filterFilter(fullJsonItems[i].contacts, {type: "Cooperator/Partner"});
+          for (co in cos) {
+            if (flatProject["Cooperators"] === "") flatProject["Cooperators"] = cos[co].name;
+            else flatProject["Cooperators"] += ", " + cos[co].name;
+          }
+
+          var projIdx = $scope.findIndexByKeyValue(fullJsonItems[i].facets, "className", "ProjectFacet");
+          if (projIdx >= 0) {
+            var projFacet = fullJsonItems[i].facets[projIdx];
+            flatProject["Summary of Results"] = projFacet.summaryOfResults;
+            flatProject["Project Objectives"] = projFacet.objectives;
+            flatProject["Project Status"] = projFacet.projectStatus;
+
+            for (i in projFacet.projectProducts) {
+              var product = projFacet.projectProducts[i];
+              if (product.status === "Expected") {
+                if (flatProject["Expected Products"] === "") flatProject["Expected Products"] = product.productDescription;
+                else flatProject["Expected Products"] += ", " + product.productDescription;
+              }
+              else if (product.status === "Delivered") {
+                if (flatProject["Delivered Products"] === "") flatProject["Delivered Products"] = product.productDescription;
+                else flatProject["Delivered Products"] += ", " + product.productDescription;
+              }
+            }
+
+            for (i in projFacet.funding) {
+              flatProject["FY" + projFacet.funding[i].fiscalYear + " Funding"] = projFacet.funding[i].fundingAmount;
+            }
+
+          }
+
+
+          
+
+          flatProjects.push(flatProject);
+        }
+        if (flatProjects) {
+          $scope.csv = agnes.jsonToCsv(flatProjects);
+        }
+
+        var csvContent;
+
+        var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+        if (is_chrome) {
+          csvContent = 'data:text/csv;charset=utf-8,' + $scope.csv;
+          
+        } else {
+          csvContent = 'data:text/csv;charset=utf-8;base64,' + window.btoa(encodeURI($scope.csv));
+        }
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.getElementById("download");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "projectsOutput.csv");
+
+        link.click();
+        // link.setAttribute("style", "display: inline-block;");
+
+      });
+
+    
   };
 
 }

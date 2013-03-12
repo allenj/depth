@@ -102,6 +102,8 @@
 
       <legend>
         Projects ({{(allProjects | filter:filterAllProjectsView).length}}) 
+        <button class="btn btn-info" id="show-csv" ng-click="getCsv()">Get CSV</button>
+        <a class="btn btn-info" id="download" href="#" style="display: none;">Download</a>
       </legend>
       <!-- total funding -->
       <h4>Total Funding: ${{totalFunding()}}</h4>
@@ -120,6 +122,13 @@
           </ul>
         </li>
       </ul>
+
+
+      <button class="btn" onclick="show('csv', true); return false;">Show CSV</button>
+      <span class="help-inline">You must click Get CSV above first.</span>
+      <pre id="csv" style="display: none;">
+        {{csv}}
+      </pre>
 
     </div> <!-- /body -->
   </div>

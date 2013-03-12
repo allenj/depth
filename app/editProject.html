@@ -95,7 +95,7 @@
     <!-- Create Org -->
     <div id="create-org" class="create-org offset2" style="display: none;">
       <div class="control-group">
-        <label class="control-label" for="newOrgTitle">New Organization Title</label>
+        <label class="control-label" for="newOrg.title">New Organization Title</label>
         <div class="controls">
           <input ng-model="newOrgTitle" type="text" class="span6" placeholder="new organization title" />
         </div>
@@ -103,10 +103,16 @@
       <div class="control-group">
         <label class="control-label" for="newOrgParent">New Organization's Type</label>
         <div class="controls">
-          <select id="newOrgParent" ng-model="newOrgParent" ng-options="orgType as orgType.title for orgType in orgTypes | orderBy: 'title'" class="span6">
+          <select id="newOrgParent" ng-model="newOrg.parent" ng-options="orgType as orgType.title for orgType in orgTypes | orderBy: 'title'" class="span6">
             <option value=""></option>
           </select>
           <span class="help-inline">This will be the parent item in ScienceBase.</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="newOrgBody">About</label>
+        <div class="controls">
+          <textarea type="text" ng-model="newOrg.body" id="body" class="input-largeBox" placeholder="abstract"></textarea>
         </div>
       </div>
       <button class="btn btn-primary offset2" ng-click="createOrganization()">Create Organization</button>
