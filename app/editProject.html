@@ -9,18 +9,18 @@
         <select id="orgType" ng-model="orgType" ng-options="orgType as orgType.title for orgType in orgTypes" class="input-xxlarge" placeholder="organization type">
           <option value="" >all organization types</option>
         </select>
-        <a class="btn btn-info" ng-show="orgType.id"href="https://my-beta.usgs.gov/catalog/item/{{orgType.id}}" target="_blank">View in SB</a>
+        <a class="btn btn-info" ng-show="orgType.id"href="{{sciencebaseUrl}}/item/{{orgType.id}}" target="_blank">View in SB</a>
       </div>
     </div>
 
     <!-- Organization -->
     <div class="control-group">
-      <label class="control-label" for="organization">Organization <!--({{(organizations | filter:filterOrganizations).length}})--></label>
+      <label class="control-label" for="organization">Organization</label>
       <div class="controls">
-        <select id="organization" ng-model="organization" ng-options="organization as organization.title for organization in organizations | filter:filterOrganizations | orderBy: 'title'" class="input-xxlarge">
+        <select id="organization" ng-model="organization" ng-options="organization as organization.title for organization in organizations | filterOrgs:{orgTypes: [orgType]} | orderBy: 'title'" class="input-xxlarge">
           <option value="">all organizations</option>
         </select>
-        <a class="btn btn-info" ng-show="organization.id" href="https://my-beta.usgs.gov/catalog/item/{{organization.id}}" target="_blank">View in SB</a>
+        <a class="btn btn-info" ng-show="organization.id" href="{{sciencebaseUrl}}/item/{{organization.id}}" target="_blank">View in SB</a>
       </div>
     </div>
 
@@ -59,7 +59,7 @@
       <label class="control-label" for="id">Manually Enter</label>
       <div class="controls">
         <input type="text" ng-model="id"  id="id" placeholder="item id" class="text-input" />
-        <a class="btn btn-info" ng-show="id" href="https://my-beta.usgs.gov/catalog/item/{{id}}" target="_blank">View Project in SB</a>
+        <a class="btn btn-info" ng-show="id" href="{{sciencebaseUrl}}/item/{{id}}" target="_blank">View Project in SB</a>
       </div>
     </div>
 
@@ -95,18 +95,25 @@
     <!-- Create Org -->
     <div id="create-org" class="create-org offset2" style="display: none;">
       <div class="control-group">
-        <label class="control-label" for="newOrg.title">New Organization Title</label>
+        <label class="control-label" for="newOrgTitle">Title</label>
         <div class="controls">
-          <input ng-model="newOrgTitle" type="text" class="span6" placeholder="new organization title" />
+          <input id="newOrgTitle" ng-model="newOrg.title" type="text" class="span7" placeholder="new organization title" />
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label" for="newOrgParent">New Organization's Type</label>
+        <label class="control-label" for="newOrgParent">Type</label>
         <div class="controls">
-          <select id="newOrgParent" ng-model="newOrg.parent" ng-options="orgType as orgType.title for orgType in orgTypes | orderBy: 'title'" class="span6">
+          <select id="newOrgParent" ng-model="newOrg.parent" ng-options="orgType as orgType.title for orgType in orgTypes | orderBy: 'title'" class="span7">
             <option value=""></option>
           </select>
           <span class="help-inline">This will be the parent item in ScienceBase.</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="newOrgContact">Contact</label>
+        <div class="controls">
+          <input id="newOrgContact" class="span3" type="text" ng-model="newOrg.contact.name" placeholder="name" /> &nbsp;&nbsp;&nbsp;&nbsp;
+          <input class="span4" type="text" ng-model="newOrg.contact.email" placeholder="email" />
         </div>
       </div>
       <div class="control-group">
@@ -145,14 +152,14 @@
       </label>
       <div class="controls">
         <span class="span4 uneditable-input" id="id">{{json.id}}</span>
-        <a class="btn btn-info" ng-show="json.id"href="https://my-beta.usgs.gov/catalog/item/{{json.id}}" target="_blank">View in SB</a>
+        <a class="btn btn-info" ng-show="json.id"href="{{sciencebaseUrl}}/item/{{json.id}}" target="_blank">View in SB</a>
       </div>
     </div>
 
     <!-- Organization Type -->
     <ul class="unstyled" ng-controller="TagsCtrl">
       <li ng-repeat="tag in json.tags | filter:isOrganizationType" class="control-group">
-        <label class="control-label" for="orgType_{{$index}}">{{tag.type}}</label>
+        <label class="control-label" for="orgType_{{$index}}">Organization Type</label>
         <div class="controls">
           <select id="orgType_{{$index}}" ng-model="tag.name" ng-options="orgType.org as orgType.title for orgType in orgTypes" class="span6">
             <option value="" ></option>
@@ -166,11 +173,12 @@
     <!-- Organization Name -->
     <ul class="unstyled" ng-controller="TagsCtrl">
       <li ng-repeat="tag in json.tags | filter:isOrganizationName" class="control-group">
-        <label class="control-label" for="organization_{{$index}}">{{tag.type}}</label>
+        <label class="control-label" for="organization_{{$index}}">Organization Name</label>
         <div class="controls">
           <select id="organization_{{$index}}" ng-model="tag.name" ng-options="organization.title as organization.title for organization in organizations | orderBy: 'title'" class="span6">
             <option value=""></option>
           </select>
+          <a class="btn btn-info" ng-show="!isParent({{json.id}}, {{tag.name}}, {{organizations}})" ng-click="useAsParent({{tag.name}}, {{organizations}})">Set as parent</a>
           <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Name')">Add Organization</a>
           <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
           <span class="help-inline">This is the parent item in ScienceBase.</span>
@@ -181,7 +189,7 @@
     <!-- Fiscal Year -->
     <ul class="unstyled" ng-controller="TagsCtrl">
       <li ng-repeat="tag in json.tags | filter:isFiscalYear" class="control-group">
-        <label class="control-label" for="fiscalYear_{{$index}}">{{tag.type}}</label>
+        <label class="control-label" for="fiscalYear_{{$index}}">Fiscal Year</label>
         <div class="controls">
           <select id="fiscalYear_{{$index}}" ng-model="tag.name" ng-options="fiscalYear.fy as fiscalYear.fy for fiscalYear in fiscalYears" >
             <option value="" ></option>
@@ -195,7 +203,7 @@
     <!-- Project Type -->
     <ul class="unstyled" ng-controller="TagsCtrl">
       <li ng-repeat="tag in json.tags | filter:isProjectType" class="control-group">
-        <label class="control-label" for="projectType_{{$index}}">{{tag.type}}</label>
+        <label class="control-label" for="projectType_{{$index}}">Project Type</label>
         <div class="controls">
           <select id="projectType_{{$index}}" ng-model="tag.name" ng-options="projType.type as projType.type for projType in projectTypes" >
             <option value="" ></option>
@@ -247,7 +255,7 @@
           <div class="control-group">
             <label class="control-label" for="piOrg_{{$index}}">PI Organization</label>
             <div class="controls">
-              <input class="span5" id="piOrg_{{$index}}" type="text" placeholder="affiliation" ng-model="contact.personsOrganization" />
+              <input class="span5" id="piOrg_{{$index}}" type="text" placeholder="affiliation" ng-model="contact.organization.displayText" />
               <!-- <input ng-controller="TagsCtrl" type="text" placeholder="organization type" ng-model="(json.tags | filter:isOrganizationType)[$index].name" /> -->
             </div>
           </div>
@@ -262,6 +270,7 @@
         <label class="control-label" for="contact_{{$index}}">{{contact.type}}</label>
         <div class="controls">
           <input id="contact_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
+          <input type="text" placeholder="email" ng-model="contact.email" />
           <input type="text" placeholder="organization" ng-model="contact.personsOrganization" />
           <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
         </div>
@@ -360,7 +369,8 @@
     <div class="control-group" ng-controller="FacetsCtrl">
       <label class="control-label" for="projectStatus">Project Status</label>
       <div class="controls">
-        <input id="projectStatus" type="text" ng-model="(json.facets | filter:isProject)[0].projectStatus" placeholder="project status" />
+        <select ui-select2 id="projectStatus" ng-model="(json.facets | filter:isProject)[0].projectStatus" ng-options="status for status in projectStatuses" placeholder="project status" style="width: 60%;">
+        </select>
       </div>
     </div>
 
@@ -374,7 +384,7 @@
 
     <legend>
       NW CSC Science Agenda theme(s) Addressed
-        <a class="btn btn-info" href="https://my-beta.usgs.gov/catalog/item/5136be49e4b0a47351e401db?format=json&fields=facets" target="_blank">Source</a>
+        <a class="btn btn-info" href="{{sciencebaseUrl}}/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets" target="_blank">Source</a>
     </legend>
     <!-- Agenda from schema -->
     <ul class="unstyled" ng-controller="FacetsCtrl">
@@ -394,9 +404,5 @@
 
   </div> <!-- /edit-fields -->
 
-  <button class="btn text-right" id="show-json" onclick="show('json', true); return false;">Show JSON</button>
-  <div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
-    <pre>{{prettyPrint(json)}}</pre>
-  </div>
 
 </div> <!-- /centered-edit -->

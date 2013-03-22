@@ -1,32 +1,70 @@
-var Depth = angular.module('depth', ['ngResource']);
+var Depth = angular.module('depth', ['ngResource', 'ui']);
 
 Depth.config(function($routeProvider) {
     $routeProvider.
-      when('/', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+      when('/migrate', {controller:DepthCtrl, templateUrl:'migrate.html'}).
+      when('/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
       when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
-      when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}).
-      otherwise({redirectTo:'/'});
+      when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
+      // otherwise({redirectTo:'/'});
   });
 
-function DepthCtrl($scope, filterFilter, $http) {
-  $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog/"
+Depth.value('ui.config', {
+});
+
+function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
+  // $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
+  $scope.alerts = [];
+  $scope.devAlerts = [];
+
+  $scope.closeAlert = function(index) {
+    $scope.alerts.splice(index, 1);
+  };
+
+  $scope.testLoc = function() {
+    $location.search({id: "test"});
+    $location.path("/edit");
+  };
+
+  $scope.urlSearch = $location.search();
+
+  $scope.isActiveRoute = function(route) {
+   return '/' + route === $location.path();
+  };
+
+  $scope.setRoute = function(route) {
+    $location.path(route);
+  };
+
+  $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   $scope.josso = checkCookie();
   $scope.josso_check = {};
   $http.get("/depth/josso-auth/json-josso.php").
     success(function(data, status) {
-      // $scope.user = data.user;
-      // $scope.josso = data.josso;
       $scope.josso_check = data;
     }).error(function (data, status, headers, config) {
-      alert("failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
+      $scope.alerts.push({msg: "DEPTH error: Security Check Failed.", type: "error"})
+      $scope.devAlerts.push({msg: "failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
     });
 
+  $scope.recheckJosso = function() {
+    $scope.josso_check = {};
+    $http.get("/depth/josso-auth/json-josso.php").
+      success(function(data, status) {
+        $scope.josso_check = data;
+      }).error(function (data, status, headers, config) {
+        // alert("failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
+        $scope.josso_check = {};
+      });
+  };
+
   $scope.schema = {};
-  $http.get($scope.sciencebaseUrl + "item/5136be49e4b0a47351e401db?format=json&fields=facets").
+  $http.get($scope.sciencebaseUrl + "/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets").
     success(function(data, status) {
       $scope.schema = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.schema;
     }).error(function (data, status, headers, config) {
-      alert("failed to get schema\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config)
+      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+      $scope.devAlerts.push({msg: "failed to get schema\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
     });
 
   $scope.json = {};
@@ -43,65 +81,89 @@ function DepthCtrl($scope, filterFilter, $http) {
   $scope.orgTypes = [
     {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
     {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
-    {title: "Other Project Community", org: "Other", id: "51240771e4b00784769a6432"}];
+    {title: "Other Project Community", org: "Other", id: "511ac38ee4b084e2824d6a26"}];
   $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
   $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other"}];
 
-  $scope.orgType = "";
-  $scope.fiscalYear = "";
-  $scope.projectType = "";
-  $scope.project = "";
-  $scope.organization = "";
+  $scope.filter = {orgTypes: null, organizations: null, fiscalYears: null, projectTypes: null, pis: null, keywords: null, projStatuses: null, projects: null};
 
   $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
 
   $scope.allProjects = [];
-  $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets,contacts&max=1000&josso=" + $scope.josso).
+  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,contacts&max=1000&josso=" + $scope.josso).
     success(function(data, status) {
       $scope.allProjects = data.items;
     }).error(function (data, status, headers, config) {
-      alert("failed to get projects\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
+      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+      $scope.devAlerts.push({msg: "failed to get projects\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
     });
 
   $scope.organizations = [];
-  $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'LCC'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
     success(function(data, status) {
       $scope.organizations = data.items;
     }).error(function (data, status, headers, config) {
-      alert("failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
+      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+      $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
     });
 
   $scope.refresh = function() {
-    $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
+    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
       success(function(data, status) {
         $scope.allProjects = data.items;
         // set project
         $scope.project = filterFilter($scope.allProjects, {id: $scope.json.id})[0];
+      }).error(function (data, status, headers, config) {
+        $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+        $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
       });
 
     var hasTags = $scope.json && $scope.json.tags;
-    $http.get($scope.sciencebaseUrl + "items?q=&filter=tags={scheme:'Project',type:'Label',name:'CSC'}&filter=tags={scheme:'Project',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
       success(function(data, status) {
         $scope.organizations = data.items;
         // set organization
-        if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Name"})[0]) {
+        if (hasTags && filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"})[0]) {
           $scope.organization = organization.name;
         }
+      }).error(function (data, status, headers, config) {
+        $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+        $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
       });
 
-    // set org type
-    if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Type"})[0]) {
-      $scope.orgType.org = orgType.name;
+  };
+
+  $scope.persistMigrate = function() {
+    if (!$scope.migrateProj) {
+      $scope.migrateProj = {};
     }
-    
-    // set fiscal year
-    if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Fiscal Year"})[0]) {
-      $scope.fiscalYear = fiscalYear.name;
-    }
-    // set project type
-    if (hasTags && filterFilter($scope.json.tags, {scheme: "Project", type: "Project Type"})[0]) {
-      $scope.projectType = projectType.name;
+    // Facets
+    var projs = filterFilter($scope.migrateProj.facets, {className: "ProjectFacet"});
+    var projsLongName = filterFilter($scope.migrateProj.facets, {className: "gov.sciencebase.catalog.item.facet.ProjectFacet"});
+    var projsIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "ProjectFacet");
+    if (projs && (!projsLongName || projsLongName.length === 0)) {
+      $scope.migrateProj.facets[projsIdx].className = "gov.sciencebase.catalog.item.facet.ProjectFacet";
     } 
+
+    var expandoIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "ExpandoFacet");
+    var expandoLongIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    if (expandoIdx > -1 && !expandoLongIdx > -1) {
+      $scope.migrateProj.facets[expandoIdx].className = "gov.sciencebase.catalog.item.facet.ExpandoFacet";
+    }
+
+    var projIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+    if(projIdx >= 0){
+      if(!$scope.migrateProj.facets[projIdx].funding){
+        $scope.migrateProj.facets[projIdx].funding = [];
+      }
+
+      var funds = $scope.migrateProj.facets[projIdx].funding;
+      if(funds.length === 0 || funds[funds.length-1].fiscalYear || funds[funds.length-1].fundingAmount) {
+        $scope.migrateProj.facets[projIdx].funding.push({fiscalYear: null, fundingAmount: null});
+      }
+
+    }
+
   };
 
   $scope.persistNecessaryData = function() {
@@ -125,21 +187,22 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
 
     // Tags
-    $scope.persistTags(["Fiscal Year", "Organization Type", "Organization Name", "Project Type", "Keyword", "Location"]);
+    $scope.persistTags([
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Location", type: "Location"}]);
 
-    // if(filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Type"}).length < 
-    //    filterFilter($scope.json.contacts, {type: "Principal Investigator"}).length) {
-    //   $scope.json.tags.push({scheme: "Project", type: "Organization Type"});
-    // }
-
-    var kws = filterFilter($scope.json.tags, {scheme: "Project", type: "Keyword"});
-    if(kws[kws.length-1].name) {
-      $scope.json.tags.push({scheme: "Project", type: "Keyword"});
+    var kws = filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"});
+    if(kws.length > 0 && kws[kws.length-1].name) {
+      $scope.json.tags.push({scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"});
     }
 
-    var locs = filterFilter($scope.json.tags, {scheme: "Project", type: "Location"});
-    if(locs[locs.length-1].name) {
-      $scope.json.tags.push({scheme: "Project", type: "Location"});
+    var locs = filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Location", type: "Location"});
+    if(locs.length > 0 && locs[locs.length-1].name) {
+      $scope.json.tags.push({scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Location", type: "Location"});
     }
 
     // Weblinks
@@ -160,8 +223,7 @@ function DepthCtrl($scope, filterFilter, $http) {
       $scope.json.facets.push({className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"});
     }
 
-    // var projIdx = $scope.indexOfProject;
-    var projIdx = $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+    var projIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
     if(projIdx >= 0){
       if(!$scope.json.facets[projIdx].funding){
         $scope.json.facets[projIdx].funding = [];
@@ -190,7 +252,7 @@ function DepthCtrl($scope, filterFilter, $http) {
       }
     }
 
-    var expandoIdx = $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    var expandoIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
     if (expandoIdx >= 0) {
       if (!$scope.json.facets[expandoIdx].object) {
         $scope.json.facets[expandoIdx].object = {};
@@ -225,42 +287,29 @@ function DepthCtrl($scope, filterFilter, $http) {
 
   $scope.persistTags = function(tagTypes) {
     for (var i = 0; i < tagTypes.length; i++) {
-      if (filterFilter($scope.json.tags, {scheme: "Project", type: tagTypes[i]}).length === 0) {
-        $scope.json.tags.push({scheme: "Project", type: tagTypes[i]});
+      if (filterFilter($scope.json.tags, {scheme: tagTypes[i].scheme, type: tagTypes[i].type}).length === 0) {
+        $scope.json.tags.push({scheme: tagTypes[i].scheme, type: tagTypes[i].type});
       }
     }
   };
 
   //Need to figure out how to make this persistant
   $scope.indexOfProject = function() {
-    return $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
-  };
-
-  $scope.findIndexByKeyValue = function (list, key, value) {
-    if (list) {
-      for (var i = 0; i < list.length; i++) {
-        if (list[i][key].toLowerCase() === value.toLowerCase()) {
-          return i;
-        }
-      }
-    }
-    return -1;
+    return findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
   };
 
   //Adds on arrays - these are unnecessary now
   $scope.addContact = function() {
-    $scope.json.contacts.push({type:$scope.contact.type, name:$scope.contact.name, personsOrganization:$scope.contact.personsOrganization});
+    $scope.json.contacts.push({type:$scope.contact.type, name:$scope.contact.name, organization:{displayText:$scope.contact.organization.displayText}});
     $scope.contact.type = '';
     $scope.contact.name = '';
-    $scope.contact.personsOrganization = '';
+    $scope.contact.organization = {};
+    $scope.contact.organization.displayText = '';
     $scope.contact.type.focus();
   };
 
   $scope.addBlankContact = function(type) {
     $scope.json.contacts.push({type: type});
-    // if(type === "Principal Investigator") {
-      // $scope.json.tags.push({scheme: "Project", type: "Organization Type"});
-    // }
   };
 
   $scope.addAltTitle = function() {
@@ -283,7 +332,7 @@ function DepthCtrl($scope, filterFilter, $http) {
   };
 
   $scope.addBlankTag = function(type) {
-    $scope.json.tags.push({scheme:"Project", type: type});
+    $scope.json.tags.push({scheme:"http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel", type: type});
   };
 
   $scope.addDate = function() {
@@ -323,42 +372,43 @@ function DepthCtrl($scope, filterFilter, $http) {
   };
 
   $scope.deleteProduct = function() {
-    var projIdx = $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+    var projIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
     $scope.json.facets[projIdx].projectProducts.splice($scope.json.facets[projIdx].projectProducts.indexOf(this.product), 1);
   };
 
   $scope.deleteFund = function() {
-    var projIdx = $scope.findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+    var projIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
     $scope.json.facets[projIdx].funding.splice($scope.json.facets[projIdx].funding.indexOf(this.fund), 1);
-  }
-
-  $scope.prodToBeta = function() {
-    for (var i = 0; i < $scope.allProjects.length; i++) {
-
-      var prodItem = getItemProd($scope.allProjects[i].id);
-
-      try
-      {
-        $scope.json = prodItem;
-        $scope.persistNecessaryData();
-      }
-      catch(exception)
-      {
-        alert(exception);
-      }
-      $scope.put();
-    }
-
   };
 
-  $scope.get = function() {
+  // $scope.prodToBeta = function() {
+  //   for (var i = 0; i < $scope.allProjects.length; i++) {
+
+  //     var prodItem = getItemProd($scope.allProjects[i].id, );
+
+  //     try
+  //     {
+  //       $scope.json = prodItem;
+  //       $scope.persistNecessaryData();
+  //     }
+  //     catch(exception)
+  //     {
+  //       $scope.alerts.push({msg: exception, type: "error"});
+  //     }
+  //     $scope.put();
+  //   }
+
+  // };
+
+  $scope.get = function () {
+    console.log('anything');
 
     if (!$scope.id) {
-      alert("Please choose a project.");
+      $scope.alerts.push({msg: "Please choose a project.", type: "error"});
       return false;
     }
 
-    var json = getItem($scope.id);
+    var json = getItem($scope.id, $scope.sciencebaseUrl);
     show("edit-fields", false);
 
     try
@@ -371,7 +421,7 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
     catch(exception)
     {
-      alert(exception);
+      $scope.alerts.push({msg: exception, type: "error"});
     }
     show("sort-fields", true); 
   };
@@ -382,7 +432,7 @@ function DepthCtrl($scope, filterFilter, $http) {
 
   $scope.createOrg = function() {
     show("create-org", true);
-  }
+  };
 
   $scope.createCopy = function() {
 
@@ -390,21 +440,21 @@ function DepthCtrl($scope, filterFilter, $http) {
     var title = $scope.newProjectTitle;
 
     if (!parentId) {
-      alert("You need to choose an organization to copy the item into.");
+      $scope.alerts.push({msg: "You need to choose an organization to copy the item into.", type: "error"});
       return false;
     }
     if (!$scope.id) {
-      alert("You need to choose a project to copy.");
+      $scope.alerts.push({msg: "You need to choose a project to copy.", type: "error"});
       return false;
     }
     if (!title) {
-      alert("You need a new title for the project.");
+      $scope.alerts.push({msg: "You need a new title for the project.", type: "error"});
       return false;
     }
 
     show("edit-fields", false);
 
-    var json = getItem(String($scope.id));
+    var json = getItem(String($scope.id), $scope.sciencebaseUrl);
 
     //remove things that we don't want to clone, parentId and id
     delete json.parentId;
@@ -416,7 +466,7 @@ function DepthCtrl($scope, filterFilter, $http) {
     // convert to JSON with angular to remove some crap
     // json = angular.toJson(json);
 
-    var returnedJson = upsert('POST', parentId, json);
+    var returnedJson = upsert('POST', parentId, json, $scope.sciencebaseUrl);
 
     try
     {
@@ -426,35 +476,41 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
     catch(exception)
     {
-      alert(exception);
+      $scope.alerts.push({msg: exception, type: "error"});
     } 
     show("copy-fields", true);
     show("sort-fields", true);
 
-    alert("Successfully copied item " + String($scope.id) + "to item " + returnedJson.id + ".");
+    $scope.alerts.push({msg: "Successfully copied item " + String($scope.id) + "to item " + returnedJson.id + ".", type: "success"});
   };
 
   $scope.createOrganization = function() {
 
+    if (!$scope.josso_check.user) {
+      $scope.alerts.push({msg: "You are not logged in.", type: "error"});
+      return false;
+    } 
+
+    if (!$scope.newOrg || !$scope.newOrg.parent || !$scope.newOrg.parent.id) {
+      $scope.alerts.push({msg: "You need to choose an organization type to put the organization in.", type: "error"});
+      return false;
+    }
+    if (!$scope.newOrg.title) {
+      $scope.alerts.push({msg: "You need a new title for the organization.", type: "error"});
+      return false;
+    }
+
     var json = {};
     json.parentId = $scope.newOrg.parent.id;
     json.title = $scope.newOrg.title;
-    json.tags = [{scheme: "Project", type:"Label", name: $scope.newOrg.parent.org}];
+    json.tags = [{scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel", type:"Label", name: $scope.newOrg.parent.org}];
     json.body = $scope.newOrg.body;
-    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.emaiagnes.jsl}];
+    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email}];
 
-    if (!json.parentId) {
-      alert("You need to choose an organization type to put the organization in.");
-      return false;
-    }
-    if (!title) {
-      alert("You need a new title for the organization.");
-      return false;
-    }
 
-    show("edit-fields", false);
+    var returnedJson = upsert('POST', json.parentId, json, $scope.sciencebaseUrl);
 
-    var returnedJson = upsert('POST', json.parentId, json);
+    // show("edit-fields", false);
 
     try
     {
@@ -463,11 +519,15 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
     catch(exception)
     {
-      alert(exception);
+      $scope.alerts.push({msg: exception, type: "error"});
     } 
-    show("create-org", true);
-    show("sort-fields", true); 
-    alert("Successfully created Organization " + returnedJson.id + ".");
+    // show("create-org", true);
+    // show("sort-fields", true); 
+    if (!returnedJson.id) {
+      $scope.alerts.push({msg: "An error occurred, please make sure you are logged in and have appropriate permissions.", type: "error"});
+      return false;
+    }
+    $scope.alerts.push({msg: "Successfully created Organization " + returnedJson.id + ".", type: "success"});
   };
 
   $scope.create = function() {
@@ -479,22 +539,34 @@ function DepthCtrl($scope, filterFilter, $http) {
     // $scope.json.title = "";
   };
 
+  $scope.migrate = function() {
+    var projIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+    if (projIdx > -1) {
+      delete $scope.migrateProj.facets[projIdx].parts;
+    }
+
+    $scope.json = $scope.migrateProj;
+    $scope.put();
+
+    // $scope.alerts.push({msg: $scope.migrateProj.facets, type: "success"});
+  }
+
   $scope.post = function() {
     var json = $scope.json;
     json = $scope.prepareJson(json);
-    var org = filterFilter($scope.json.tags, {scheme: "Project", type: "Organization Name"})[0].name;
+    var org = filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"})[0].name;
     var orgId = filterFilter($scope.organizations, {title: org})[0].id;
     if (!org || !orgId) {
-      alert("Organization required create new items org = " + org + " orgId = " + orgId);
+      $scope.alerts.push({msg: "Organization required create new items org = " + org + " orgId = " + orgId, type: "error"});
       return false;
     }
     if(!json.title) {
-      alert("Title required to create new items");
+      $scope.alerts.push({msg: "Title required to create new items", type: "error"});
       return false;
     }
     delete json.id;
     json.parentId = orgId;
-    var returnedJson = upsert('POST', orgId, json);
+    var returnedJson = upsert('POST', orgId, json, $scope.sciencebaseUrl);
 
     try
     {
@@ -504,21 +576,21 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
     catch(exception)
     {
-      alert(exception);
+      $scope.alerts.push({msg: exception, type: "error"});
     }
 
-    alert("Successfully saved item " + returnedJson.id + ".");
+    $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
   };
 
   $scope.put = function() {
-    if (!$scope.json.id) 
-      return $scope.post();
+    if (!$scope.json.id) return $scope.post();
+
     var json = $scope.json;
     json = $scope.prepareJson(json);
     //delete the parent id so we don't move the item.
     //TODO: have a checkbox if they want to move to the parentId
     delete json.parentId;
-    var returnedJson = upsert('PUT', $scope.json.id, json);
+    var returnedJson = upsert('PUT', $scope.json.id, json, $scope.sciencebaseUrl);
 
     try
     {
@@ -528,9 +600,15 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
     catch(exception)
     {
-      alert(exception);
+      $scope.alerts.push({msg: exception, type: "error"});
     }
-    alert("Successfully saved item " + returnedJson.id + ".");
+
+    if (!returnedJson.id) {
+      $scope.alerts.push({msg: "There was an error saving your item.", type: "error"});
+    } 
+    else {
+      $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
+    }
 
   };
 
@@ -539,19 +617,21 @@ function DepthCtrl($scope, filterFilter, $http) {
   };
 
   $scope.prepareJson = function(json) {
-    var json = jQuery.extend(true, {}, json);
+    json = jQuery.extend(true, {}, json);
     // Remove any contacts without a name
     json.contacts = filterFilter(json.contacts, $scope.filterBlankContacts);
     json.webLinks = filterFilter(json.webLinks, $scope.filterBlankWeblinks);
     json.tags = filterFilter(json.tags, $scope.filterBlankTags);
 
-    var projIdx = $scope.findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+    var projIdx = findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
     json.facets[projIdx].projectProducts = filterFilter(json.facets[projIdx].projectProducts, $scope.filterBlankProjects);
     json.facets[projIdx].funding = filterFilter(json.facets[projIdx].funding, $scope.filterBlankFunds);
 
-    var expandoIdx = $scope.findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
-    for (var concept in json.facets[expandoIdx].object.themes) {
-      delete json.facets[expandoIdx].object.themes[concept]["$$hashKey"];
+    var expandoIdx = findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    if (expandoIdx >= 0) {
+      for (var concept in json.facets[expandoIdx].object.themes) {
+        delete json.facets[expandoIdx].object.themes[concept]["$$hashKey"];
+      }
     }
 
     // json.dates.pop();
@@ -576,22 +656,22 @@ function DepthCtrl($scope, filterFilter, $http) {
 
   $scope.filterBlankFunds = function(fund) {
     return (fund.fundingAmount != null && fund.fundingAmount != "");
-  }
+  };
 
   $scope.filterProjects = function(project) {
     if ($scope.orgType && 
         $scope.orgType.org && 
         $scope.orgType.org !== "" && 
-        filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType.org}).length === 0) {
+        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: $scope.orgType.org}).length === 0) {
       return false;
     }
 
-    var fyTag = {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear};
+    var fyTag = {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: $scope.fiscalYear};
     if ($scope.fiscalYear && $scope.fiscalYear !== "" && filterFilter(project.tags, fyTag).length === 0) {
       return false;
     }
 
-    var projTypeTag = {scheme: "Project", type: "Project Type", name: $scope.projectType};
+    var projTypeTag = {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: $scope.projectType};
     if ($scope.projectType && $scope.projectType !== "" && filterFilter(project.tags, projTypeTag).length === 0) {
       return false;
     }
@@ -599,7 +679,7 @@ function DepthCtrl($scope, filterFilter, $http) {
     if ($scope.organization &&
         $scope.organization.title && 
         $scope.organization.title !== "" && 
-        filterFilter(project.tags, {scheme: "Project", type: "Organization Name", name: $scope.organization.title}).length === 0) {
+        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: $scope.organization.title}).length === 0) {
       return false;
     }
 
@@ -608,124 +688,17 @@ function DepthCtrl($scope, filterFilter, $http) {
 
   $scope.filterAllProjectsView = function(project) {
 
-    if ($scope.orgType) {
-      var orgMatch = false;
-      for (var i = 0; i < $scope.orgType.length; i++) {
-        if ($scope.orgType[i].org &&
-            $scope.orgType[i].org !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType[i].org}).length > 0) {
-          orgMatch = true;
-        }
-      }
-      if (!orgMatch) {
-        return false;
-      }
-    } 
- 
-    if ($scope.fiscalYear) {
-      var fyMatch = false;
-      for (var i = 0; i < $scope.fiscalYear.length; i++) {
-        if ($scope.fiscalYear[i] &&
-            $scope.fiscalYear[i] !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear[i]}).length > 0) {
-          fyMatch = true;
-        }
-      }
-      if (!fyMatch) {
-        return false;
-      }
-    }
 
-    if ($scope.projectType) {
-      var typeMatch = false;
-      for (var i = 0; i < $scope.projectType.length; i++) {
-        if ($scope.projectType[i] &&
-            $scope.projectType[i] !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Project Type", name: $scope.projectType[i]}).length > 0) {
-          typeMatch = true;
-        }
-      }
-      if (!typeMatch) {
-        return false;
-      }
-    }
-
-    if ($scope.organization) {
-      var orgMatch = false;
-      for (var i = 0; i < $scope.organization.length; i++) {
-        if ($scope.organization[i].title &&
-            $scope.organization[i].title !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Organization Name", name: $scope.organization[i].title}).length > 0) {
-          orgMatch = true;
-        }
-      }
-      if (!orgMatch) {
-        return false;
-      }
-    }
-
-    if ($scope.project) {
-      var projMatch = false;
-      for (var i = 0; i < $scope.project.length; i++) {
-        if ($scope.project[i] && $scope.project[i] === project) {
-          projMatch = true;
-        }
-      }
-      if (!projMatch) {
-        return false;
-      }
-    }
-
-    if ($scope.pi) {
-      var piMatch = false;
-      for (var i = 0; i < $scope.pi.length; i++) {
-        var pis = filterFilter(project.contacts, {type: "Principal Investigator"});
-        if ($scope.findIndexByKeyValue(pis, "name", $scope.pi[i].name) !== -1) {
-          piMatch = true;
-        }
-      }
-      if (!piMatch) {
-        return false;
-      }
-    }
-
-    if ($scope.keywords) {
-      var kwMatch = false;
-      for (var i = 0; i < $scope.keywords.length; i++) {
-        var kws = filterFilter(project.tags, {scheme: "Project", type: "Keyword"});
-        if ($scope.findIndexByKeyValue(kws, "name", $scope.keywords[i].name) !== -1) {
-          kwMatch = true;
-        }
-      }
-      if (!kwMatch) {
-        return false;
-      }
-    }
-
-    if ($scope.projStatuses) {
-      var statusMatch = false;
-      var projIdx = $scope.findIndexByKeyValue(project.facets, "className", "ProjectFacet");
-      if (projIdx >= 0) {
-        for (var i = 0; i < $scope.projStatuses.length; i++) {
-          if (project.facets[projIdx].projectStatus === $scope.projStatuses[i]) {
-            statusMatch = true;
-          }
-        }
-      }
-      if (!statusMatch) return false;
-    }
-
-    return true;
   };
 
   $scope.filterProjectsView = function(project) {
 
-    if ($scope.orgType) {
+    if ($scope.orgType && $scope.orgType.length > 0) {
       var orgMatch = false;
       for (var i = 0; i < $scope.orgType.length; i++) {
         if ($scope.orgType[i].org &&
             $scope.orgType[i].org !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Organization Type", name: $scope.orgType[i].org}).length > 0) {
+            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: $scope.orgType[i].org}).length > 0) {
           orgMatch = true;
         }
       }
@@ -734,12 +707,12 @@ function DepthCtrl($scope, filterFilter, $http) {
       }
     } 
  
-    if ($scope.fiscalYear) {
+    if ($scope.fiscalYear && $scope.fiscalYear.length > 0) {
       var fyMatch = false;
       for (var i = 0; i < $scope.fiscalYear.length; i++) {
         if ($scope.fiscalYear[i] &&
             $scope.fiscalYear[i] !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Fiscal Year", name: $scope.fiscalYear[i]}).length > 0) {
+            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: $scope.fiscalYear[i]}).length > 0) {
           fyMatch = true;
         }
       }
@@ -748,12 +721,12 @@ function DepthCtrl($scope, filterFilter, $http) {
       }
     }
 
-    if ($scope.projectType) {
+    if ($scope.projectType && $scope.projectType.length > 0) {
       var typeMatch = false;
       for (var i = 0; i < $scope.projectType.length; i++) {
         if ($scope.projectType[i] &&
             $scope.projectType[i] !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Project Type", name: $scope.projectType[i]}).length > 0) {
+            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: $scope.projectType[i]}).length > 0) {
           typeMatch = true;
         }
       }
@@ -762,12 +735,12 @@ function DepthCtrl($scope, filterFilter, $http) {
       }
     }
 
-    if ($scope.organization) {
+    if ($scope.organization && $scope.organization.length > 0) {
       var orgMatch = false;
       for (var i = 0; i < $scope.organization.length; i++) {
         if ($scope.organization[i].title &&
             $scope.organization[i].title !== "" &&
-            filterFilter(project.tags, {scheme: "Project", type: "Organization Name", name: $scope.organization[i].title}).length > 0) {
+            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: $scope.organization[i].title}).length > 0) {
           orgMatch = true;
         }
       }
@@ -780,34 +753,35 @@ function DepthCtrl($scope, filterFilter, $http) {
     return true;
   };
 
-  $scope.filterOrganizations = function(org) {
-    if ($scope.orgType && 
-        $scope.orgType.org && 
-        $scope.orgType.org !== "" && 
-        filterFilter(org.tags, {scheme: "Project", type: "Label", name: $scope.orgType.org}).length === 0) {
-      return false;
-    }
-    return true;
-  };
-
   $scope.totalFunding = function() {
+    var filterParams = {
+      orgTypes: $scope.filter.orgTypes, 
+      orgs: $scope.filter.organizations, 
+      fys: $scope.filter.fiscalYears, 
+      projTypes: $scope.filter.projectTypes, 
+      pis: $scope.filter.pis, 
+      kws: $scope.filter.keywords, 
+      projStatuses: $scope.filter.projStatuses, 
+      projects: $scope.filter.projects
+    };
+    var filteredProjects = $filter('projectsFilter')($scope.allProjects, filterParams);
+    
     var funding = 0;
-    var filteredProjects = filterFilter($scope.allProjects, $scope.filterAllProjectsView);
     for (var i = 0; i < filteredProjects.length; i++) {
       var projs = filterFilter(filteredProjects[i].facets, {className: "ProjectFacet"});
       // alert($scope.prettyPrint(filteredProjects[i].facets));
       if (projs && projs.length > 0 && projs[0].parts) {
         for (var j = 0; j < projs[0].parts.length; j++) {
-          var value = parseInt(projs[0].parts[j].value);
+          var value = parseInt(projs[0].parts[j].value, 10);
           if (value) {
-            funding += parseInt(projs[0].parts[j].value);
+            funding += parseInt(projs[0].parts[j].value, 10);
           }
         }
       }
       if (projs && projs.length > 0 && projs[0].funding) {
         for (var j = 0; j < projs[0].funding.length; j++) {
-          if (parseInt(projs[0].funding[j].fundingAmount)) {
-            funding += parseInt(projs[0].funding[j].fundingAmount);
+          if (parseInt(projs[0].funding[j].fundingAmount, 10)) {
+            funding += parseInt(projs[0].funding[j].fundingAmount, 10);
           }
         }
       }
@@ -826,7 +800,7 @@ function DepthCtrl($scope, filterFilter, $http) {
     }
     for (var i = 0; i < fullContacts.length; i++) {
       if (fullContacts[i]) {
-        var idx = $scope.findIndexByKeyValue(contacts, "name", fullContacts[i].name);
+        var idx = findIndexByKeyValue(contacts, "name", fullContacts[i].name);
         // console.log(fullContacts[i]);
         if (idx === -1) contacts.push(fullContacts[i]);
       }
@@ -840,9 +814,9 @@ function DepthCtrl($scope, filterFilter, $http) {
     var filteredProjects = $scope.allProjects;
     var keywords = [];
     for (var i = 0; i < filteredProjects.length; i++) {
-      var kws = filterFilter(filteredProjects[i].tags, {scheme: "Project", type: "Keyword"});
+      var kws = filterFilter(filteredProjects[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"});
       for (var j = 0; j < kws.length; j++) {
-        var idx = $scope.findIndexByKeyValue(keywords, "name", kws[j].name);
+        var idx = findIndexByKeyValue(keywords, "name", kws[j].name);
         if (idx === -1) keywords.push(kws[j]);
       }
     }
@@ -854,20 +828,32 @@ function DepthCtrl($scope, filterFilter, $http) {
   };
 
   $scope.getCsv = function() {
-    var projects = filterFilter($scope.allProjects, $scope.filterAllProjectsView);
+    var filterParams = {
+      orgTypes: $scope.filter.orgTypes, 
+      orgs: $scope.filter.organizations, 
+      fys: $scope.filter.fiscalYears, 
+      projTypes: $scope.filter.projectTypes, 
+      pis: $scope.filter.pis, 
+      kws: $scope.filter.keywords, 
+      projStatuses: $scope.filter.projStatuses, 
+      projects: $scope.filter.projects
+    };
+
+    var projects = $filter('projectsFilter')($scope.allProjects, filterParams);
     if (!projects) {
       return;
     }
 
-    var url = "items?q=&filter=tags={scheme:'Project',type:'Project%20Type'}&format=json&max=1000&josso=" + $scope.josso;
-    url += "&fields=id,title,contacts,tags,facets,webLinks,body"
+    var url = "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}";
+    url += "&format=json&max=1000&josso=" + $scope.josso;
+    url += "&fields=id,title,contacts,tags,facets,webLinks,body";
    
     $http.get($scope.sciencebaseUrl + url).
       success(function(data, status) {
-        var fullJsonItems = filterFilter(data.items, $scope.filterAllProjectsView);
+        var fullJsonItems = $filter('projectsFilter')(data.items, filterParams);
 
         var flatProjects = [];
-        for (i in fullJsonItems) {
+        for (var i in fullJsonItems) {
           var flatProject = {};
 
           // Set up columns, this will keep the order correct
@@ -900,37 +886,37 @@ function DepthCtrl($scope, filterFilter, $http) {
           flatProject.id = fullJsonItems[i].id;
           flatProject["Project Title"] = fullJsonItems[i].title;
 
-          var fundingAgencies = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Organization Type"});
+          var fundingAgencies = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label"});
           for (fa in fundingAgencies) {
             if (flatProject["Funding Agency"] === "") flatProject["Funding Agency"] = fundingAgencies[fa].name;
             else flatProject["Funding Agency"] += ", " + fundingAgencies[fa].name;
           }
 
-          var affiliations = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Organization Name"});
+          var affiliations = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"});
           for (affil in affiliations) {
             if (flatProject["Affiliation"] === "") flatProject["Affiliation"] = affiliations[affil].name;
             else flatProject["Affiliation"] += ", " + affiliations[affil].name;
           }
 
-          var fys = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Fiscal Year"});
+          var fys = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label"});
           for (fy in fys) {
             if (flatProject["Fiscal Year"] === "") flatProject["Fiscal Year"] = fys[fy].name;
             else flatProject["Fiscal Year"] += ", " + fys[fy].name;
           }
 
-          var kws = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Keyword"});
+          var kws = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"});
           for (kw in kws) {
             if (flatProject["Keywords"] === "") flatProject["Keywords"] = kws[kw].name;
             else flatProject["Keywords"] += ", " + kws[kw].name;
           }
 
-          var locs = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Location"});
+          var locs = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Location", type: "Location"});
           for (loc in locs) {
             if (flatProject["Locations"] === "") flatProject["Locations"] = locs[loc].name;
             else flatProject["Locations"] += ", " + locs[loc].name;
           }
 
-          var types = filterFilter(fullJsonItems[i].tags, {scheme: "Project", type: "Project Type"});
+          var types = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label"});
           for (type in types) {
             if (flatProject["Project Type"] === "") flatProject["Project Type"] = types[type].name;
             else flatProject["Project Type"] += ", " + types[type].name;
@@ -946,6 +932,7 @@ function DepthCtrl($scope, filterFilter, $http) {
             if (flatProject["Lead Pi"] === "") {
               flatProject["Lead Pi"] = pis[pi].name;
               flatProject["Email"] = pis[pi].email;
+              // flatProject["Organization"] = pis[pi].organization.displayText;
               flatProject["Organization"] = pis[pi].personsOrganization;
             } else {
               if (flatProject["Cooperators"] === "") flatProject["Cooperators"] = pis[pi].name;
@@ -959,7 +946,7 @@ function DepthCtrl($scope, filterFilter, $http) {
             else flatProject["Cooperators"] += ", " + cos[co].name;
           }
 
-          var projIdx = $scope.findIndexByKeyValue(fullJsonItems[i].facets, "className", "ProjectFacet");
+          var projIdx = findIndexByKeyValue(fullJsonItems[i].facets, "className", "ProjectFacet");
           if (projIdx >= 0) {
             var projFacet = fullJsonItems[i].facets[projIdx];
             flatProject["Summary of Results"] = projFacet.summaryOfResults;
@@ -983,9 +970,6 @@ function DepthCtrl($scope, filterFilter, $http) {
             }
 
           }
-
-
-          
 
           flatProjects.push(flatProject);
         }
@@ -1071,27 +1055,27 @@ function TagsCtrl($scope) {
   };
 
   $scope.isFiscalYear = function(tag) {
-    return (tag.type === "Fiscal Year");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year");
   };
 
   $scope.isKeyword = function(tag) {
-    return (tag.type === "Keyword");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword");
   };
 
   $scope.isLocation = function(tag) {
-    return (tag.type === "Location");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Location");
   };
 
   $scope.isOrganizationType = function(tag) {
-    return (tag.type === "Organization Type");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type");
   };
 
   $scope.isOrganizationName = function(tag) {
-    return (tag.type === "Organization Name");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name");
   };
 
   $scope.isProjectType = function(tag) {
-    return (tag.type === "Project Type");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type");
   };
 
 }
@@ -1155,4 +1139,15 @@ function FacetsCtrl($scope) {
     return (product.status === "Delivered");
   }
 }
+
+var findIndexByKeyValue = function (list, key, value) {
+  if (list) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i][key] && value && list[i][key].toLowerCase() === value.toLowerCase()) {
+        return i;
+      }
+    }
+  }
+  return -1;
+};
 
