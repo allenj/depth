@@ -180,8 +180,8 @@
           <select id="orgType_{{$index}}" ng-model="tag.name" ng-options="orgType.org as orgType.title for orgType in orgTypes" class="span6">
             <option value="" ></option>
           </select>
-          <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Type')">Add Organization Type</a>
           <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
+          <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Type')">Add Organization Type</a>
         </div>
       </li>
     </ul>
@@ -194,9 +194,9 @@
           <select id="organization_{{$index}}" ng-model="tag.name" ng-options="organization.title as organization.title for organization in organizations | orderBy: 'title'" class="span6">
             <option value=""></option>
           </select>
+          <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
           <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Name')">Add Organization</a>
-          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
-          <span class="help-inline success" ng-show="orgIsParent(json.parentId, tag.name, organizations)">This organization is the <a href="{{sciencebaseUrl}}/item/{{json.parentId}}" target="_blank">parent item</a> in ScienceBase.</span>
+          <span class="help-inline success" ng-show="orgIsParent(json.parentId, tag.name, organizations)">This organization is the <a href="{{sciencebaseUrl}}/item/{{json.parentId}}" target="_blank">parent item</a> in ScienceBase.<a class="btn btn-link" ng-click="json.parentId = ''">Change Parent Id.</a></span>
           <span class="help-inline" ng-show="!orgIsParent(json.parentId, tag.name, organizations)" style="padding-top: 5px;">
             <a class="btn btn-info" ng-click="setOrgAsParent(tag.name, organizations)">Set Org as parent</a>
             or manually set Parent Id:
@@ -215,8 +215,8 @@
           <select id="fiscalYear_{{$index}}" ng-model="tag.name" ng-options="fiscalYear.fy as fiscalYear.fy for fiscalYear in fiscalYears" >
             <option value="" ></option>
           </select>
+          <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
           <a class="btn" ng-show="$last" ng-click="addBlankTag('Fiscal Year')">Add Fiscal Year</a>
-          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
         </div>
       </li>
     </ul>
@@ -229,8 +229,8 @@
           <select id="projectType_{{$index}}" ng-model="tag.name" ng-options="projType.type as projType.type for projType in projectTypes" >
             <option value="" ></option>
           </select>
+          <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
           <a class="btn" ng-show="$last" ng-click="addBlankTag('Project Type')">Add Project Type</a>
-          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
         </div>
       </li>
     </ul>
@@ -246,8 +246,8 @@
             <div class="controls">
               <input id="principalInvestigator_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
               <input type="text" placeholder="email" ng-model="contact.email" />
+              <a class="btn btn-danger" ng-show="!$first" ng-click="deleteContact()">X</a>
               <a class="btn" ng-show="$last" ng-click="addBlankContact('Principal Investigator')">Add Principal Investigator</a>
-              <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
             </div>
           </div>
           <div class="control-group">
@@ -281,8 +281,8 @@
         <label class="control-label" for="fundingAgency_{{$index}}">{{contact.type}}</label>
         <div class="controls">
           <input id="fundingAgency_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
+          <a class="btn btn-danger" ng-show="!$first" ng-click="deleteContact()">X</a>
           <a class="btn" ng-show="$last" ng-click="addBlankContact('Funding Agency')">Add Funding Agency</a>
-          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
         </div>
       </li>
     </ul>

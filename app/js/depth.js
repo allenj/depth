@@ -561,52 +561,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     $scope.json = {};
     show("edit-fields", false);
     show("sort-fields", true); 
-
-    // $scope.json.id = "";
-    // $scope.json.title = "";
   };
-
-  // $scope.migrate = function() {
-  //   var projIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
-  //   if (projIdx > -1) {
-  //     delete $scope.migrateProj.facets[projIdx].parts;
-  //   }
-
-  //   $scope.json = $scope.migrateProj;
-  //   $scope.put();
-
-  // }
-
-  // $scope.post = function() {
-  //   var json = $scope.json;
-  //   json = $scope.prepareJson(json);
-  //   var org = filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"})[0].name;
-  //   var orgId = filterFilter($scope.organizations, {title: org})[0].id;
-  //   if (!org || !orgId) {
-  //     $scope.alerts.push({msg: "Organization required create new items org = " + org + " orgId = " + orgId, type: "error"});
-  //     return false;
-  //   }
-  //   if(!json.title) {
-  //     $scope.alerts.push({msg: "Title required to create new items", type: "error"});
-  //     return false;
-  //   }
-  //   delete json.id;
-  //   json.parentId = orgId;
-  //   var returnedJson = upsert('POST', orgId, json, $scope.sciencebaseUrl);
-
-  //   try
-  //   {
-  //     $scope.json = returnedJson;
-
-  //     $scope.refresh();
-  //   }
-  //   catch(exception)
-  //   {
-  //     $scope.alerts.push({msg: exception, type: "error"});
-  //   }
-
-  //   $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
-  // };
 
   $scope.put = function() {
     if (!$scope.josso_check.user) {
@@ -653,10 +608,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     else {
       $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
     }
-
-  };
-
-  $scope.clone = function() {
 
   };
 
@@ -730,72 +681,67 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     return true;
   };
 
-  $scope.filterAllProjectsView = function(project) {
+  // $scope.filterProjectsView = function(project) {
 
-
-  };
-
-  $scope.filterProjectsView = function(project) {
-
-    if ($scope.orgType && $scope.orgType.length > 0) {
-      var orgMatch = false;
-      for (var i = 0; i < $scope.orgType.length; i++) {
-        if ($scope.orgType[i].org &&
-            $scope.orgType[i].org !== "" &&
-            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: $scope.orgType[i].org}).length > 0) {
-          orgMatch = true;
-        }
-      }
-      if (!orgMatch) {
-        return false;
-      }
-    } 
+  //   if ($scope.orgType && $scope.orgType.length > 0) {
+  //     var orgMatch = false;
+  //     for (var i = 0; i < $scope.orgType.length; i++) {
+  //       if ($scope.orgType[i].org &&
+  //           $scope.orgType[i].org !== "" &&
+  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: $scope.orgType[i].org}).length > 0) {
+  //         orgMatch = true;
+  //       }
+  //     }
+  //     if (!orgMatch) {
+  //       return false;
+  //     }
+  //   } 
  
-    if ($scope.fiscalYear && $scope.fiscalYear.length > 0) {
-      var fyMatch = false;
-      for (var i = 0; i < $scope.fiscalYear.length; i++) {
-        if ($scope.fiscalYear[i] &&
-            $scope.fiscalYear[i] !== "" &&
-            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: $scope.fiscalYear[i]}).length > 0) {
-          fyMatch = true;
-        }
-      }
-      if (!fyMatch) {
-        return false;
-      }
-    }
+  //   if ($scope.fiscalYear && $scope.fiscalYear.length > 0) {
+  //     var fyMatch = false;
+  //     for (var i = 0; i < $scope.fiscalYear.length; i++) {
+  //       if ($scope.fiscalYear[i] &&
+  //           $scope.fiscalYear[i] !== "" &&
+  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: $scope.fiscalYear[i]}).length > 0) {
+  //         fyMatch = true;
+  //       }
+  //     }
+  //     if (!fyMatch) {
+  //       return false;
+  //     }
+  //   }
 
-    if ($scope.projectType && $scope.projectType.length > 0) {
-      var typeMatch = false;
-      for (var i = 0; i < $scope.projectType.length; i++) {
-        if ($scope.projectType[i] &&
-            $scope.projectType[i] !== "" &&
-            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: $scope.projectType[i]}).length > 0) {
-          typeMatch = true;
-        }
-      }
-      if (!typeMatch) {
-        return false;
-      }
-    }
+  //   if ($scope.projectType && $scope.projectType.length > 0) {
+  //     var typeMatch = false;
+  //     for (var i = 0; i < $scope.projectType.length; i++) {
+  //       if ($scope.projectType[i] &&
+  //           $scope.projectType[i] !== "" &&
+  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: $scope.projectType[i]}).length > 0) {
+  //         typeMatch = true;
+  //       }
+  //     }
+  //     if (!typeMatch) {
+  //       return false;
+  //     }
+  //   }
 
-    if ($scope.organization && $scope.organization.length > 0) {
-      var orgMatch = false;
-      for (var i = 0; i < $scope.organization.length; i++) {
-        if ($scope.organization[i].title &&
-            $scope.organization[i].title !== "" &&
-            filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: $scope.organization[i].title}).length > 0) {
-          orgMatch = true;
-        }
-      }
-      if (!orgMatch) {
-        return false;
-      }
-    }
+  //   if ($scope.organization && $scope.organization.length > 0) {
+  //     var orgMatch = false;
+  //     for (var i = 0; i < $scope.organization.length; i++) {
+  //       if ($scope.organization[i].title &&
+  //           $scope.organization[i].title !== "" &&
+  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: $scope.organization[i].title}).length > 0) {
+  //         orgMatch = true;
+  //       }
+  //     }
+  //     if (!orgMatch) {
+  //       return false;
+  //     }
+  //   }
 
 
-    return true;
-  };
+  //   return true;
+  // };
 
   $scope.totalFunding = function() {
     var filterParams = {
