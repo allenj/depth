@@ -39,7 +39,7 @@
       <ul class="nav" style="float: right;" ng-controller="DepthCtrl">
         <li ng-show="josso_check.user" ><a href="#">{{josso_check.user}}</a></li>
         <li ng-show="!josso_check.user"><a href="/depth/josso-auth/josso-login.php">Login</a></li>
-        <li ng-show="josso_check.user"><a href="https://my.usgs.gov/josso/signon/logout.do?josso_back_to=https://my.usgs.gov/depth/index.html">Log Out</a></li>
+        <li ng-show="josso_check.user"><a id="logout" href="">Log Out</a></li>
       </ul>
     </div>
   </div><!-- /navbar -->
@@ -52,6 +52,7 @@
           <div class="btn-group" ng-controller="DepthCtrl">
             <button class="btn ng-class: {active:isActiveRoute('view')}" ng-click="setRoute('view')">View Report</button>
             <button class="btn ng-class: {active:isActiveRoute('edit')}" ng-click="setRoute('edit')">Edit Projects</button>
+            <!-- <button class="btn ng-class: {active:isActiveRoute('edit')}" ng-click="setRoute('edit'); create();">Create Project</button> -->
             <!-- <button class="btn" ng-click="testLoc()">{{urlSearch}}</button> -->
           </div>
         </h1>
@@ -64,27 +65,9 @@
     </div>
   </div>
 
-  <ul class="unstyled" ng-controller="DepthCtrl">
-    <li ng-repeat="alert in alerts | unique:msg" class="alert alert-{{alert.type}}">{{alert.msg}}
-      <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
-    </li>
-  </ul>
+
 
   <div ng-view></div>
-  <br />
-
-  <button class="btn btn-link offset12" id="show-json" onclick="show('json', true); return false;">Development Information</button>
-  <div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;" ng-controller="DepthCtrl">
-    <legend>Developer Errors</legend>
-    <ul class="unstyled">
-      <li ng-repeat="alert in devAlerts" class="alert alert-{{alert.type}}">{{alert.msg}}
-        <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
-      </li>
-    </ul>
-
-    <legend>json</legend>
-    <pre>{{prettyPrint(json)}}</pre>
-  </div>
 
   <!-- USGS Footer -->
   <div style="margin-top: 50px; font-size: 93%; background:#ccc; border-bottom:1px solid #333; border-top:1px solid #333; padding: 0.2em;">
@@ -101,8 +84,11 @@
   <a href="http://www.doi.gov/" target="_blank" style="padding: 0.2em">U.S. Department of the Interior</a>
   <span style="margin:0 1em">|</span>
   <a href="http://www.usgs.gov/" target="_blank" style="padding: 0.2em">U.S. Geological Survey</a><br/>
-  <span style="padding: 0.2em">URL: <script type="text/javascript" language="javascript">document.write(location.href + "<br />")</script></span>
-  <span style="padding: 0.2em">Page Contact Information: <a href="mailto:sciencebase@usgs.gov">sciencebase@usgs.gov</a></span><br/><!-- /usgs footer -->
+  <span style="padding: 0.2em">URL: <script type="text/javascript" language="javascript">document.write(location.href)</script></span><br/>
+  <span style="padding: 0.2em">Page Contact Information: <a href="mailto:sciencebase@usgs.gov">sciencebase@usgs.gov</a></span><br/>
+  <span style="padding: 0.2em">Depth Version: 1.0 <span style="color:#bbbbbb;">(2013/03/26)</span></span>
+  <br/>
+  <!-- /usgs footer -->
   <!-- End USGS Footer -->
 
   <!-- Javascript (down here so the page loads faster) -->
@@ -117,6 +103,11 @@
   <script src="js/depthFilters.js"></script>
   <script src="js/agnes.js"></script>
   <script src="https://my.usgs.gov/scripts/analytics/usgs-analytics.js"></script>
+  <script>
+    var logoutUrl = "https://my.usgs.gov/josso/signon/logout.do?josso_back_to=";
+    logoutUrl += location.href;
+    $('#logout').attr('href', logoutUrl);
+  </script>
 
   <!--[if lte IE 9 ]>
   <script>

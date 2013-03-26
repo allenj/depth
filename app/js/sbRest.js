@@ -28,9 +28,9 @@ function checkCookie()
   }
 }
 
-function getItem(id, sbUrl)
+function getItem(id, sbUrl, josso)
 {
-  var josso = checkCookie();
+  // var josso = checkCookie();
   var itemUrl = sbUrl + "/item/" + id + "?josso=" + josso + "&format=json";
 
   var json;
@@ -80,9 +80,9 @@ function getItem(id, sbUrl)
 //   return json;  
 // }
 
-function upsert(type, id, json, sbUrl)
+function upsert(type, id, json, sbUrl, josso)
 {
-  var josso = checkCookie();
+  // var josso = checkCookie();
 
   if (!josso) {
     alert("Please log in again.");
@@ -98,7 +98,7 @@ function upsert(type, id, json, sbUrl)
   itemUrl += "?josso=" + josso;
   itemUrl += "&format=json";
 
-  var json;
+  var returnedJson;
 
   // Make the request
   $.ajax({
@@ -108,15 +108,15 @@ function upsert(type, id, json, sbUrl)
     crossDomain: true,
     dataType: 'json',
     async: false,
-    success: function(data) { json = jQuery.extend(true, {}, data); },
-    failure: function(data) { json = {"error": data}; },
+    success: function(data) { returnedJson = jQuery.extend(true, {}, data); },
+    failure: function(data) { returnedJson = {"error": data}; },
     beforeSend: function(request)
     {
       request.setRequestHeader("Accept", "application/json");
       request.setRequestHeader("Content-Type", "application/json");
     }
   });  
-  return json;
+  return returnedJson;
 }
 
 function show(id, hide)

@@ -1,0 +1,70 @@
+<legend>
+  Projects
+</legend>
+
+<!-- Project -->
+<div class="control-group">
+  <label class="control-label" for="project">Project ({{(allProjects | filterParts).length}})</label>
+  <div class="controls">
+    <select id="project" ng-model="migrateProj" ng-options="proj as proj.title for proj in allProjects | filterParts | orderBy:'title'" class="input-xxlarge">
+      <option value="">all projects</option>
+    </select>
+  </div>
+</div>
+<a class="btn btn-info" ng-show="migrateProj.id" href="{{sciencebaseUrl}}/item/{{migrateProj.id}}" target="_blank">View in SB</a>
+
+<legend>
+  Old (Project Facet - Parts)
+</legend>
+
+<!-- Fiscal Year -->
+<ul class="unstyled" ng-controller="TagsCtrl">
+  <li ng-repeat="tag in migrateProj.tags | filter:isFiscalYear" class="control-group">
+    <label>Fiscal Year</label>
+    <div class="controls">
+      <p>{{tag.name}}</p>
+    </div>
+  </li>
+</ul>
+
+<!-- Parts -->
+<ul class="unstyled" ng-controller="FacetsCtrl">
+  <li ng-repeat="part in migrateProj.facets[0].parts" class="control-group">
+    <label class="control-label">Funding</label>
+    <div class="controls">
+      <p>{{part.type}} -- {{part.value}}</p>
+    </div>
+  </li>
+</ul>
+
+<legend>
+  New (Project Facet - Funding) 
+  <!-- <button class="btn btn-primary offset2" ng-click="get({id: migrateProj.id})">Edit</button> -->
+</legend>
+
+<span>{{persistMigrate()}}</span>
+
+<div id="edit-fields" class="form-horizontal" >
+
+  <!-- FY Funding -->
+  <ul class="unstyled" ng-controller="FacetsCtrl">
+    <li ng-repeat="fund in migrateProj.facets[0].funding" class="control-group">
+      <label class="control-label" for="fund_{{$index}}">Funding</label>
+      <div class="controls">
+        <input id="fund_{{$index}}" type="text" placeholder="fiscal year" ng-model="fund.fiscalYear" />
+        <div class="input-prepend">
+          <span class="add-on">$</span>
+          <input class="span3" type="text" placeholder="funding amount" ng-model="fund.fundingAmount" />
+        </div>
+        <a class="btn btn-danger" ng-show="!$last" ng-click="deleteFund()">X</a>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<button class="btn btn-primary" ng-click="migrate()">Migrate data</button>
+<br /><br />
+<button class="btn text-right" id="show-json" onclick="show('json', true); return false;">Show JSON</button>
+<div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+  <pre>{{prettyPrint(migrateProj)}}</pre>
+</div>

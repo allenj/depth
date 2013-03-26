@@ -2,7 +2,7 @@ var Depth = angular.module('depth', ['ngResource', 'ui']);
 
 Depth.config(function($routeProvider) {
     $routeProvider.
-      when('/migrate', {controller:DepthCtrl, templateUrl:'migrate.html'}).
+      // when('/migrate', {controller:DepthCtrl, templateUrl:'migrate.html'}).
       when('/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
       when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
       when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
@@ -37,7 +37,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
   };
 
   $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
-  $scope.josso = checkCookie();
   $scope.josso_check = {};
   $http.get("/depth/josso-auth/json-josso.php").
     success(function(data, status) {
@@ -83,14 +82,14 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
     {title: "Other Project Community", org: "Other", id: "511ac38ee4b084e2824d6a26"}];
   $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
-  $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other"}];
+  $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other Project"}];
 
   $scope.filter = {orgTypes: null, organizations: null, fiscalYears: null, projectTypes: null, pis: null, keywords: null, projStatuses: null, projects: null};
 
   $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
 
   $scope.allProjects = [];
-  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,contacts&max=1000&josso=" + $scope.josso).
+  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,contacts&max=1000&josso=" + $scope.josso_check.josso).
     success(function(data, status) {
       $scope.allProjects = data.items;
     }).error(function (data, status, headers, config) {
@@ -99,7 +98,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     });
 
   $scope.organizations = [];
-  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'LCC'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'LCC'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso_check.josso).
     success(function(data, status) {
       $scope.organizations = data.items;
     }).error(function (data, status, headers, config) {
@@ -108,7 +107,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     });
 
   $scope.refresh = function() {
-    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso).
+    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets&max=1000&josso=" + $scope.josso_check.josso).
       success(function(data, status) {
         $scope.allProjects = data.items;
         // set project
@@ -119,7 +118,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
       });
 
     var hasTags = $scope.json && $scope.json.tags;
-    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso).
+    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso_check.josso).
       success(function(data, status) {
         $scope.organizations = data.items;
         // set organization
@@ -293,6 +292,34 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     }
   };
 
+  $scope.orgIsParent = function (id, org, orgs) {
+    var orgId;
+    angular.forEach(orgs, function(orgJson) {
+      if (orgJson.title === org) {
+        orgId = orgJson.id;
+      }
+    });
+    if (id && orgId && orgId === id) {
+      return true;
+    }
+    return false;
+  };
+
+  $scope.setOrgAsParent = function (org, orgs) {
+    var orgId;
+    angular.forEach(orgs, function(orgJson) {
+      if (orgJson.title === org) {
+        orgId = orgJson.id;
+      }
+    });
+    if (orgId) {
+      $scope.json.parentId = orgId;
+    }
+    if (!orgId || $scope.json.parentId !== orgId) {
+      $scope.alerts.push({msg: "Error setting parent id. Please choose and organization.", type: "error"});
+    }
+  };
+
   //Need to figure out how to make this persistant
   $scope.indexOfProject = function() {
     return findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
@@ -332,7 +359,8 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
   };
 
   $scope.addBlankTag = function(type) {
-    $scope.json.tags.push({scheme:"http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel", type: type});
+    var httpType = type.replace(" ", "%20");
+    $scope.json.tags.push({scheme:"http://www.sciencebase.gov/vocab/category/NCCWSC/Project/" + httpType, type: type});
   };
 
   $scope.addDate = function() {
@@ -401,14 +429,13 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
   // };
 
   $scope.get = function () {
-    console.log('anything');
 
     if (!$scope.id) {
       $scope.alerts.push({msg: "Please choose a project.", type: "error"});
       return false;
     }
 
-    var json = getItem($scope.id, $scope.sciencebaseUrl);
+    var json = getItem($scope.id, $scope.sciencebaseUrl, $scope.josso_check.josso);
     show("edit-fields", false);
 
     try
@@ -454,7 +481,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
 
     show("edit-fields", false);
 
-    var json = getItem(String($scope.id), $scope.sciencebaseUrl);
+    var json = getItem(String($scope.id), $scope.sciencebaseUrl, $scope.josso_check.josso);
 
     //remove things that we don't want to clone, parentId and id
     delete json.parentId;
@@ -466,7 +493,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     // convert to JSON with angular to remove some crap
     // json = angular.toJson(json);
 
-    var returnedJson = upsert('POST', parentId, json, $scope.sciencebaseUrl);
+    var returnedJson = upsert('POST', parentId, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
 
     try
     {
@@ -508,7 +535,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email}];
 
 
-    var returnedJson = upsert('POST', json.parentId, json, $scope.sciencebaseUrl);
+    var returnedJson = upsert('POST', json.parentId, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
 
     // show("edit-fields", false);
 
@@ -523,7 +550,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     } 
     // show("create-org", true);
     // show("sort-fields", true); 
-    if (!returnedJson.id) {
+    if (!returnedJson || !returnedJson.id) {
       $scope.alerts.push({msg: "An error occurred, please make sure you are logged in and have appropriate permissions.", type: "error"});
       return false;
     }
@@ -539,58 +566,74 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     // $scope.json.title = "";
   };
 
-  $scope.migrate = function() {
-    var projIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
-    if (projIdx > -1) {
-      delete $scope.migrateProj.facets[projIdx].parts;
-    }
+  // $scope.migrate = function() {
+  //   var projIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
+  //   if (projIdx > -1) {
+  //     delete $scope.migrateProj.facets[projIdx].parts;
+  //   }
 
-    $scope.json = $scope.migrateProj;
-    $scope.put();
+  //   $scope.json = $scope.migrateProj;
+  //   $scope.put();
 
-    // $scope.alerts.push({msg: $scope.migrateProj.facets, type: "success"});
-  }
+  // }
 
-  $scope.post = function() {
-    var json = $scope.json;
-    json = $scope.prepareJson(json);
-    var org = filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"})[0].name;
-    var orgId = filterFilter($scope.organizations, {title: org})[0].id;
-    if (!org || !orgId) {
-      $scope.alerts.push({msg: "Organization required create new items org = " + org + " orgId = " + orgId, type: "error"});
-      return false;
-    }
-    if(!json.title) {
-      $scope.alerts.push({msg: "Title required to create new items", type: "error"});
-      return false;
-    }
-    delete json.id;
-    json.parentId = orgId;
-    var returnedJson = upsert('POST', orgId, json, $scope.sciencebaseUrl);
+  // $scope.post = function() {
+  //   var json = $scope.json;
+  //   json = $scope.prepareJson(json);
+  //   var org = filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"})[0].name;
+  //   var orgId = filterFilter($scope.organizations, {title: org})[0].id;
+  //   if (!org || !orgId) {
+  //     $scope.alerts.push({msg: "Organization required create new items org = " + org + " orgId = " + orgId, type: "error"});
+  //     return false;
+  //   }
+  //   if(!json.title) {
+  //     $scope.alerts.push({msg: "Title required to create new items", type: "error"});
+  //     return false;
+  //   }
+  //   delete json.id;
+  //   json.parentId = orgId;
+  //   var returnedJson = upsert('POST', orgId, json, $scope.sciencebaseUrl);
 
-    try
-    {
-      $scope.json = returnedJson;
+  //   try
+  //   {
+  //     $scope.json = returnedJson;
 
-      $scope.refresh();
-    }
-    catch(exception)
-    {
-      $scope.alerts.push({msg: exception, type: "error"});
-    }
+  //     $scope.refresh();
+  //   }
+  //   catch(exception)
+  //   {
+  //     $scope.alerts.push({msg: exception, type: "error"});
+  //   }
 
-    $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
-  };
+  //   $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
+  // };
 
   $scope.put = function() {
-    if (!$scope.json.id) return $scope.post();
+    if (!$scope.josso_check.user) {
+      $scope.alerts.push({msg: "You are not logged in.", type: "error"});
+      return false;
+    } 
 
+    var restType = "PUT";
     var json = $scope.json;
     json = $scope.prepareJson(json);
-    //delete the parent id so we don't move the item.
-    //TODO: have a checkbox if they want to move to the parentId
-    delete json.parentId;
-    var returnedJson = upsert('PUT', $scope.json.id, json, $scope.sciencebaseUrl);
+
+    if (!$scope.json.id) {
+      restType = "POST";
+      if(!json.title) {
+        $scope.alerts.push({msg: "Title required to create new items", type: "error"});
+        return false;
+      }
+      if (!$scope.json.parentId) {
+        $scope.alerts.push({msg: "Parent Id is required to create items.", type: "error"});
+        return false;
+      }
+      
+      delete json.id;
+    } 
+
+    var returnedJson = upsert(restType, $scope.json.id, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
+    $scope.devAlerts.push({msg: "returnedJson: " + $scope.prettyPrint(returnedJson), type: "success"});
 
     try
     {
@@ -603,8 +646,9 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
       $scope.alerts.push({msg: exception, type: "error"});
     }
 
-    if (!returnedJson.id) {
-      $scope.alerts.push({msg: "There was an error saving your item.", type: "error"});
+    if (!returnedJson || !returnedJson.id) {
+      $scope.alerts.push({msg: "DEPTH error: There was an error saving your item.", type: "error"});
+      $scope.devAlerts.push({msg: "Error on put of item, returnedJson = " + returnedJson, type: "error"});
     } 
     else {
       $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
@@ -845,7 +889,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     }
 
     var url = "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}";
-    url += "&format=json&max=1000&josso=" + $scope.josso;
+    url += "&format=json&max=1000&josso=" + $scope.josso_check.josso;
     url += "&fields=id,title,contacts,tags,facets,webLinks,body";
    
     $http.get($scope.sciencebaseUrl + url).

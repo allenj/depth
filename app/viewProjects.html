@@ -1,3 +1,9 @@
+<ul class="unstyled">
+  <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+    <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+  </li>
+</ul>
+
 <div class="container-fluid">
   <div class="row-fluid">
 
@@ -137,4 +143,19 @@
 
     </div> <!-- /body -->
   </div>
+</div>
+
+<br />
+
+<button class="btn btn-link offset12" id="show-json" onclick="show('json', true); return false;">Development Information</button>
+<div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+  <legend>Developer Errors</legend>
+  <ul class="unstyled">
+    <li ng-repeat="alert in devAlerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+      <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+    </li>
+  </ul>
+
+  <legend>json</legend>
+  <pre>{{prettyPrint(json)}}</pre>
 </div>

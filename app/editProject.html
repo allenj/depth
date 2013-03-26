@@ -1,3 +1,9 @@
+<ul class="unstyled">
+  <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+    <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+  </li>
+</ul>
+
 <div class="centered-edit container">
   <legend>Choose Project <button class="btn" onclick="show('sort-fields', true); return false;"><i class="icon-chevron-down"></i></button></legend>
 
@@ -156,6 +162,16 @@
       </div>
     </div>
 
+    <legend>Critical Information</legend>
+
+    <!-- Project Title -->
+    <div class="control-group">
+      <label class="control-label" for="title">Project Title</label>
+      <div class="controls">
+        <input type="text" ng-model="json.title" id="title" class="input-xxlarge" placeholder="project title" />
+      </div>
+    </div>
+
     <!-- Organization Type -->
     <ul class="unstyled" ng-controller="TagsCtrl">
       <li ng-repeat="tag in json.tags | filter:isOrganizationType" class="control-group">
@@ -165,7 +181,7 @@
             <option value="" ></option>
           </select>
           <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Type')">Add Organization Type</a>
-          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
+          <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
         </div>
       </li>
     </ul>
@@ -178,13 +194,18 @@
           <select id="organization_{{$index}}" ng-model="tag.name" ng-options="organization.title as organization.title for organization in organizations | orderBy: 'title'" class="span6">
             <option value=""></option>
           </select>
-          <a class="btn btn-info" ng-show="!isParent({{json.id}}, {{tag.name}}, {{organizations}})" ng-click="useAsParent({{tag.name}}, {{organizations}})">Set as parent</a>
           <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Name')">Add Organization</a>
           <a class="btn btn-danger" ng-show="!$last" ng-click="deleteTag()">X</a>
-          <span class="help-inline">This is the parent item in ScienceBase.</span>
+          <span class="help-inline success" ng-show="orgIsParent(json.parentId, tag.name, organizations)">This organization is the <a href="{{sciencebaseUrl}}/item/{{json.parentId}}" target="_blank">parent item</a> in ScienceBase.</span>
+          <span class="help-inline" ng-show="!orgIsParent(json.parentId, tag.name, organizations)" style="padding-top: 5px;">
+            <a class="btn btn-info" ng-click="setOrgAsParent(tag.name, organizations)">Set Org as parent</a>
+            or manually set Parent Id:
+            <input type="text" ng-model="json.parentId" placeholder="parentId" />
+          </span>
         </div>
       </li>
     </ul>
+
 
     <!-- Fiscal Year -->
     <ul class="unstyled" ng-controller="TagsCtrl">
@@ -215,30 +236,7 @@
     </ul>
 
 
-    <!-- Project Title -->
-    <div class="control-group">
-      <label class="control-label" for="title">Project Title</label>
-      <div class="controls">
-        <input type="text" ng-model="json.title" id="title" class="input-xxlarge" placeholder="project title" />
-      </div>
-    </div>
-
-    <!-- Funding Agency -->
-    <ul class="unstyled" ng-controller="ContactsCtrl">
-      <li ng-repeat="contact in json.contacts | filter:isFundingAgency" class="control-group">
-        <label class="control-label" for="fundingAgency_{{$index}}">{{contact.type}}</label>
-        <div class="controls">
-          <input id="fundingAgency_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
-          <a class="btn" ng-show="$last" ng-click="addBlankContact('Funding Agency')">Add Funding Agency</a>
-          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
-        </div>
-      </li>
-    </ul>
-
-    <!-- Project Type -->
-    <!-- <label class="control-label" for="projectType">Project Type</label>
-    <input id="projectType" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].projectType" placeholder="project type" />
-    <br /> -->
+    <legend>People</legend>
 
     <!-- Principal Investigator -->
     <ul class="unstyled" ng-controller="ContactsCtrl">
@@ -263,8 +261,6 @@
     </ul>
 
     <!-- Cooperators -->
-    <!-- <label class="control-label" for="contacts">Cooperators ({{cooperators()}})</label> -->
-    <!-- <br /><br /> -->
     <ul class="unstyled" ng-controller="ContactsCtrl">
       <li ng-repeat="contact in json.contacts | filter:isCooperator" class="control-group">
         <label class="control-label" for="contact_{{$index}}">{{contact.type}}</label>
@@ -272,6 +268,20 @@
           <input id="contact_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
           <input type="text" placeholder="email" ng-model="contact.email" />
           <input type="text" placeholder="organization" ng-model="contact.personsOrganization" />
+          <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
+        </div>
+      </li>
+    </ul>
+
+    <legend>Funding</legend>
+
+    <!-- Funding Agency -->
+    <ul class="unstyled" ng-controller="ContactsCtrl">
+      <li ng-repeat="contact in json.contacts | filter:isFundingAgency" class="control-group">
+        <label class="control-label" for="fundingAgency_{{$index}}">{{contact.type}}</label>
+        <div class="controls">
+          <input id="fundingAgency_{{$index}}" type="text" placeholder="contact name" ng-model="contact.name" />
+          <a class="btn" ng-show="$last" ng-click="addBlankContact('Funding Agency')">Add Funding Agency</a>
           <a class="btn btn-danger" ng-show="!$last" ng-click="deleteContact()">X</a>
         </div>
       </li>
@@ -292,6 +302,8 @@
       </li>
     </ul>
 
+    <legend>Additional Information</legend>
+
     <!-- Webpage -->
     <ul class="unstyled" ng-controller="WeblinksCtrl">
       <li ng-repeat="weblink in json.webLinks" class="control-group">
@@ -303,22 +315,6 @@
         </div>
       </li>
     </ul>
-
-    <!-- Abstract -->
-    <div class="control-group">
-      <label class="control-label" for="body">Abstract</label>
-      <div class="controls">
-        <textarea type="text" ng-model="json.body" id="body" class="input-largeBox" placeholder="abstract"></textarea>
-      </div>
-    </div>
-
-    <!-- Project Objectives -->
-    <div class="control-group">
-      <label class="control-label" for="projectObjectives">Project Objectives</label>
-      <div class="controls">
-        <textarea id="projectObjectives" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].objectives" placeholder="project objectives" class="input-largeBox"></textarea>
-      </div>
-    </div>
 
     <!-- keywords & locations -->
     <!-- keywords -->
@@ -343,6 +339,43 @@
       </li>
     </ul>
 
+    <!-- Abstract -->
+    <div class="control-group">
+      <label class="control-label" for="body">Abstract</label>
+      <div class="controls">
+        <textarea type="text" ng-model="json.body" id="body" class="input-largeBox" placeholder="abstract"></textarea>
+      </div>
+    </div>
+
+    <legend>Project Information</legend>
+
+    <!-- Project Status -->
+    <div class="control-group" ng-controller="FacetsCtrl">
+      <label class="control-label" for="projectStatus">Project Status</label>
+      <div class="controls">
+        <select ui-select2 id="projectStatus" ng-model="(json.facets | filter:isProject)[0].projectStatus" ng-options="status for status in projectStatuses" placeholder="project status" style="width: 60%;">
+        </select>
+      </div>
+    </div>
+
+    <!-- Project Objectives -->
+    <div class="control-group">
+      <label class="control-label" for="projectObjectives">Project Objectives</label>
+      <div class="controls">
+        <textarea id="projectObjectives" ng-controller="FacetsCtrl" type="text" ng-model="(json.facets | filter:isProject)[0].objectives" placeholder="project objectives" class="input-largeBox"></textarea>
+      </div>
+    </div>
+
+    <!-- Summary of Results -->
+    <div class="control-group" ng-controller="FacetsCtrl">
+      <label class="control-label" for="summary">Summary of Results</label>
+      <div class="controls">
+        <textarea id="summary" ng-model="(json.facets | filter:isProject)[0].summaryOfResults" placeholder="summary of results" class="input-largeBox"></textarea>
+      </div>
+    </div>
+
+    <legend>Products</legend>
+
     <!-- Expected Products -->
     <ul class="unstyled" ng-controller="FacetsCtrl">
       <li ng-repeat="product in (json.facets | filter:isProject)[0].projectProducts | filter:isExpectedProduct" class="control-group">
@@ -365,26 +398,10 @@
       </li>
     </ul>
 
-    <!-- Project Status -->
-    <div class="control-group" ng-controller="FacetsCtrl">
-      <label class="control-label" for="projectStatus">Project Status</label>
-      <div class="controls">
-        <select ui-select2 id="projectStatus" ng-model="(json.facets | filter:isProject)[0].projectStatus" ng-options="status for status in projectStatuses" placeholder="project status" style="width: 60%;">
-        </select>
-      </div>
-    </div>
-
-    <!-- Summary of Results -->
-    <div class="control-group" ng-controller="FacetsCtrl">
-      <label class="control-label" for="summary">Summary of Results</label>
-      <div class="controls">
-        <textarea id="summary" ng-model="(json.facets | filter:isProject)[0].summaryOfResults" placeholder="summary of results" class="input-largeBox"></textarea>
-      </div>
-    </div>
-
     <legend>
       NW CSC Science Agenda theme(s) Addressed
-        <a class="btn btn-info" href="{{sciencebaseUrl}}/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets" target="_blank">Source</a>
+      <a class="btn btn-info" href="http://www.doi.gov/csc/northwest/upload/NW-CSC-Science-Agenda-2012-2015.pdf" target="_blank">Explainations</a>
+      <a class="btn btn-info" href="{{sciencebaseUrl}}/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets" target="_blank">Source</a>
     </legend>
     <!-- Agenda from schema -->
     <ul class="unstyled" ng-controller="FacetsCtrl">
@@ -406,3 +423,18 @@
 
 
 </div> <!-- /centered-edit -->
+
+<br />
+
+<button class="btn btn-link offset12" id="show-json" onclick="show('json', true); return false;">Development Information</button>
+<div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+  <legend>Developer Errors</legend>
+  <ul class="unstyled">
+    <li ng-repeat="alert in devAlerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+      <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+    </li>
+  </ul>
+
+  <legend>json</legend>
+  <pre>{{prettyPrint(json)}}</pre>
+</div>
