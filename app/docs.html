@@ -1,0 +1,336 @@
+<style>      
+  /* Sidenav for Docs
+  -------------------------------------------------- */
+  
+  .bs-docs-sidenav {
+    width: 228px;
+    margin: 30px 0 0;
+    padding: 0;
+    background-color: #fff;
+    -webkit-border-radius: 6px;
+       -moz-border-radius: 6px;
+            border-radius: 6px;
+    -webkit-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+       -moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+            box-shadow: 0 1px 4px rgba(0,0,0,.065);
+  }
+  .bs-docs-sidenav > li > a {
+    display: block;
+    *width: 190px;
+    margin: 0 0 -1px;
+    padding: 8px 14px;
+    border: 1px solid #e5e5e5;
+  }
+  .bs-docs-sidenav > li:first-child > a {
+    -webkit-border-radius: 6px 6px 0 0;
+       -moz-border-radius: 6px 6px 0 0;
+            border-radius: 6px 6px 0 0;
+  }
+  .bs-docs-sidenav > li:last-child > a {
+    -webkit-border-radius: 0 0 6px 6px;
+       -moz-border-radius: 0 0 6px 6px;
+            border-radius: 0 0 6px 6px;
+  }
+  .bs-docs-sidenav > .active > a {
+    position: relative;
+    z-index: 2;
+    padding: 9px 15px;
+    border: 0;
+    text-shadow: 0 1px 0 rgba(0,0,0,.15);
+    -webkit-box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+       -moz-box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+            box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+  }
+  /* Chevrons */
+  .bs-docs-sidenav .icon-chevron-right {
+    float: right;
+    margin-top: 2px;
+    margin-right: -6px;
+    opacity: .25;
+  }
+  .bs-docs-sidenav > li > a:hover {
+    background-color: #f5f5f5;
+  }
+  .bs-docs-sidenav a:hover .icon-chevron-right {
+    opacity: .5;
+  }
+  .bs-docs-sidenav .active .icon-chevron-right,
+  .bs-docs-sidenav .active a:hover .icon-chevron-right {
+    background-image: url(/depth/img/glyphicons-halflings-white.png);
+    opacity: 1;
+  }
+  .bs-docs-sidenav.affix {
+    /*top: 100px;*/
+  }
+  .bs-docs-sidenav.affix-bottom {
+    position: absolute;
+    top: auto;
+    bottom: 270px;
+  }
+</style>
+
+<h1>DEPTH Project data structure</h1>
+<hr/>
+
+<div class="row">
+	<div class="span3 bs-docs-sidebar" stuck top="100" bottom="100">
+		<affix id="sidebar"></affix>
+	</div>
+
+	<div class="span9 affix-section">
+		<section id="title" name="Title" affix-scroll>
+			<div class="page-header">
+				<h1>Title <code>title: ""</code></h1>
+				<p>The Project Title is the item title in ScienceBase (SB).</p>
+			</div>
+		</section>
+		<section id="body" name="Body" affix-scroll>
+			<div class="page-header">
+				<h1>Body <code>body: ""</code></h1>
+				<p>The SB body maps to the abstract in DEPTH.</p>
+			</div>
+		</section>
+		<section id="tags" name="Tags" affix-scroll>
+			<div class="page-header">
+				<h1>Tags <code>tags: []</code></h1>
+				<p>Tags have an immense amount of power in ScienceBase and have been utilized to provide an easy way to search and sort through DEPTH projects. As a result of this, the only SB items that are considered DEPTH Projects are ones that contain a few very specific tags. This document was written to help provide you with a basic understanding of these tags and how you can leverage them for your own application.</p>
+			</div>
+		</section>
+		<section id="basicSearch" name="Basic Tag Search" affix-scroll>
+			<div class="page-header">
+				<h1>Basic Tag Search</h1>
+				<p>Here are a few searches used in DEPTH.</p>
+			</div>
+			<h3>Search for all correctly tagged Organizations</h3>
+			<p>This search uses tags with:
+				<ul>
+			 		<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel'</code></li>
+			 		<li><code>'type':'Label'</code></li>
+			 		<li><code>'name':'CSC' || 'LCC' || 'Other'</code></li>
+			 	</ul>
+			</p>
+			<pre class="prettyprint linenums"><a target="_blank" href="https://www.sciencebase.gov/catalog/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'LCC'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000">https://www.sciencebase.gov/catalog/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'LCC'}&conjunction=tags=OR</a></pre>
+			<h3>Search for all Projects</h3>
+			<p>This search uses tags with:
+				<ul>
+					<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type'</code></li>
+					<li><code>'type':'Label'</code></li>
+					<li><code>'name':</code> not used, so left out</li>
+				</ul>
+			</p>
+			<pre class="prettyprint linenums"><a target="_blank" href="https://www.sciencebase.gov/catalog/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,contacts&max=1000">https://www.sciencebase.gov/catalog/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json</a></pre>
+		</section>
+
+		<section id="tagDetails" name="Tag Details" affix-scroll>
+			<div class="page-header">
+				<h1>Tag Details</h1>
+				<p>In DEPTH managed projects for NCCWSC, etc. tags have been added to support ScienceBase's new vocabulary (<a href="https://www.sciencebase.gov/vocab">https://www.sciencebase.gov/vocab</a>) features as well as provide an easy way to access all DEPTH managed projects.</p>
+			</div>
+			<h5>OrgLabel</h5>
+			<p>Tagged on Organizations, this tag specifies the type of organization that this is.</p>
+			<ul>
+				<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel'</code></li>
+				<li><code>'type':'Label'</code></li>
+				<li><code>'name':'CSC' || 'LCC' || 'Other'</code></li>
+			</ul>
+			<h5>Organization Type</h5>
+			<p>Tagged on Projects, this tag specifies the parent organization's type.</p>
+			<ul>
+				<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type'</code></li>
+				<li><code>'type':'Label'</code></li>
+				<li><code>'name':'CSC' || 'LCC' || 'Other'</code></li>
+			</ul>
+			<h5>Fiscal Year</h5>
+			<p>Tagged on Projects, this tag specifies a single fiscal year.</p>
+			<ul>
+				<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year'</code></li>
+				<li><code>'type':'Label'</code></li>
+				<li><code>'name':'2010' || '2011' || etc</code></li>
+			</ul>
+			<h5>Organization Name</h5>
+			<p>Tagged on Projects, this tag specifies the Project Organization's name.</p>
+			<ul>
+				<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name'</code></li>
+				<li><code>'type':'Label'</code></li>
+				<li><code>'name': the name of the parent org, eg Alaska CSC</code></li>
+			</ul>
+			<h5>Project Type</h5>
+			<p>Tagged on Projects, this tag specifies the type of project.</p>
+			<ul>
+				<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type'</code></li>
+				<li><code>'type':'Label'</code></li>
+				<li><code>'name':'Science Project' || 'Science Support Project' || 'Other Project'</code></li>
+			</ul>
+			<h5>Keyword/Location</h5>
+			<p>Tagged on Projects, Keywords specify keywords of the project and Locations specify locations of the project</p>
+			<ul>
+				<li><code>'scheme':'http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword'</code></li>
+				<li>><code> || 'scheme' = http://www.sciencebase.gov/vocab/category/NCCWSC/Location'</code></li>
+				<li><code>'type':'Keyword' || 'Location'</code></li>
+				<li><code>'name': tag name</code></li>
+			</ul>
+		</section>
+		<section id="advancedSearch" name="Advanced Tag Search" affix-scroll>
+			<div class="page-header">
+				<h1>Advanced Tag Search</h1>
+				<p>An overview of using tags to search.</p>
+			</div>
+
+			<h3>The <code>filter</code> and <code>conjunction</code> parameters</h3>
+			<p>To search for multiple tags you will need to use the <code>filter</code> and <code>conjunction</code> parameters. The <code>filter</code> param specifies an individual parameter and is laid out like this: <code>&filter=$paramType=$param</code>. <code>$paramType</code> represents the plural version of the parameter you are searching on and <code>$param</code> is the JSON object you are searching for. You can chain multiple filters together to perform your query, when you do this you need to specify the <code>conjunction</code> parameter using the <code>$paramType</code> you are searching on and the conjunction type of <code>AND</code> or <code>OR</code>, like this <code>&conjunction=$paramType=AND</code>.</p>
+			<p>When searching on tags, which have three parts, (scheme, name, type) you can specify all of the parameters or any of them in combination, eg. <code>&filter=tags={'scheme':'customScheme','type':'type1','name':'tag%20name'}</code>. When specifying the <code>$param</code> do not use any spaces.</p>
+			<h3>Gotchas</h3>
+			<p>In some cases your tag may have special characters in one or more of the fields. In these cases you may have to play around with them and their http encoding (<a href="http://meyerweb.com/eric/tools/dencoder/">HTTP Encoder/Decoder</a>) to get them to work properly. For example, many tag scheme from the SB vocabulary which have spaces in the scheme name will have <code>%20</code> in their SB tag scheme. The percent sign in this statement needs to be encoded further to: <code>%2520</code> making the full scheme: <code>scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%2520Year'</code></p>
+
+			<h3>Examples with Tags</h3>
+			<p>Tag Filter 1
+				<ul>
+					<li><code>scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type'</code></li>
+					<li><code>type:'Label'</code></li>
+					<li><code>name:'Science Project'</code></li>
+					<li>Filter: <code>filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label',name:'Science%20Project'}</code></li>
+				</ul>
+				Tag Filter 2
+				<ul>
+					<li><code>scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%2520Year'</code></li>
+					<li><code>type:'Label'</code></li>
+					<li><code>name:'2011'</code></li>
+					<li>Filter: <code>filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%2520Year',type:'Label',name:'2011'}</code></li>
+				</ul>
+				Conjunction: <code>conjunction=tags=AND</code>
+			</p>
+
+			<pre class="prettyprint"><a href="https://www.sciencebase.gov/catalog/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label',name:'Science%20Project'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%2520Year',type:'Label',name:'2011'}&conjunction=tags=AND&format=json">https://www.sciencebase.gov/catalog/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label',name:'Science%20Project'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%2520Year',type:'Label',name:'2011'}&conjunction=tags=AND&format=json</a></pre>
+		</section>
+		<section id="contacts" name="Contacts" affix-scroll>
+			<div class="page-header">
+				<h1>Contacts <code>contacts: []</code></h1>
+				<p>There are multiple types of SB contacts used in DEPTH, each which is used very specifically. <code>Principal Investigator</code> are the PI of the project. <code>Cooperator/Partner</code> are the cooperators in the project. <code>Funding Agency</code> is a funding agency on the project.</p>
+				<h3>Principal Investigator <code>type:"Principal Investigator"</code></h3>
+				<p>There should be only one PI per project. The PI captures these fields inside DEPTH (SB field :: DEPTH field):</p>
+				<ul>
+					<li>name :: contact name</li>
+					<li>email :: email</li>
+					<li>organization.displayText :: affiliation</li>
+				</ul>
+				<h3>Cooperator/Partner <code>type:"Cooperator/Partner"</code></h3>
+				<p>There can be many cooperators on each project. Cooperators can also be of type Co-Investigator (<code>type:"Co-Investigator"</code>). Each cooperator captures these fields inside DEPTH (SB field :: DEPTH field):</p>
+				<ul>
+					<li>name :: contact name</li>
+					<li>email :: email</li>
+					<li>personsOrganization :: organization</li>
+				</ul>
+				<h3>Funding Agency <code>type:"Funding Agency"</code></h3>
+				<p>There can be many funding agencies on each project. Each funding agency captures these fields inside DEPTH (SB field :: DEPTH field):</p>
+				<ul>
+					<li>name :: contact name</li>
+				</ul>
+			</div>
+		</section>
+		<section id="weblinks" name="WebLinks" affix-scroll>
+			<div class="page-header">
+				<h1>WebLinks <code>webLinks: []</code></h1>
+				<p>Websites are stored in the SB <code>webLinks</code> field like this (SB field :: DEPTH field):</p>
+				<ul>
+					<li>uri :: webpage</li>
+					<li>name :: webpage name</li>
+				</ul>
+			</div>
+		</section>
+		<section id="facets" name="Facets" affix-scroll>
+			<div class="page-header">
+				<h1>Facets <code>facets: []</code></h1>
+				<p>DEPTH uses the Project Facet to store project information and the Expando Facet to store the NWCSC Science Agenda themes addressed.</p>
+			</div>
+			<h3>Project Facet <code>className: "gov.sciencebase.catalog.item.facet.ProjectFacet"</code></h3>
+			<p>DEPTH utilizes a number of fields in the Project Facet (also called Extensions in SB). It uses the String fields <code>projectStatus</code>, <code>objectives</code>, and <code>summaryOfResults</code> as well as the Array fields <code>funding</code> and <code>projectProducts</code>. Here are their mappings (SB :: DEPTH): </p>
+			<ul>
+				<li>projectStatus :: Project Status - This can be equal to one of the following 'Active', 'Approved', 'Completed', 'Funded', 'In Progress', or 'Proposed'</li>
+				<li>objectives :: Project Objectives - This is a string that contains all the project objectives. This can sometimes be very large.</li>
+				<li>summaryOfResults :: Summary of Results - This is a string that contains the summary of results. This can sometimes be very large.</li>
+				<li>funding :: Funding - Each funding entry in SB has two parts a fiscalYear and a fundingAmount. The fiscalYear corresponds with the Fiscal Year for the funding amount and should contain only the year (eg. '2013'). The fundingAmount corresponds to the Funding Amount as an Integer (eg. '1000' or '1000.00')</li>
+				<li>projectProducts :: Expected Products & Delivered Products - projectProducts in SB have two parts, status and productDescription. The status is 'Expected' or 'Delivered' and the productDescription is the Product Description.</li>
+			</ul>
+      <h4>Project Facet Example</h4>
+      <pre class="prettyprint">{
+  className: "gov.sciencebase.catalog.item.facet.ProjectFacet",
+  projectStatus: "Proposed",
+  objectives: "1. Plan 2. Work 3. Present",
+  summaryOfResults: "no results yet",
+  funding: [
+  {
+    fiscalYear: "2013",
+    fundingAmount: "100"
+  }
+  ],
+  projectProducts: [
+    {
+      productDescription: "A neat website",
+      status: "Expected"
+    },
+    {
+      productDescription: "A slick and neat website",
+      status: "Delivered"
+    }
+  ]
+}</pre>
+			<h3>Expando Facet <code>className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"</code></h3>
+			<p>The Expando Facet is used to store the Themes Addressed by each Project. Currently this is primarily used to store the NW CSC Science Agenda. The SB Expando Facet has only one field, the <code>object</code>. Inside of this <code>object</code> we have a Java Object for each agenda, which uses the same name as the name defined in the schema (currently this is not true, the name is currently just called 'themes'). Each agenda is then broken down into themes and each theme is broken down by the a, b, etc specific questions.</p>
+			<h4>Example</h4>
+			<pre class="prettyprint">{
+  className: "gov.sciencebase.catalog.item.facet.ExpandoFacet",
+  object: {
+    "themes": {
+      "1 - Climate Science and Modeling": {
+        "a": true,
+        "b": false,
+        "c": false,
+        "d": false
+      },
+      "2 - Response of Physical Systems to Climate Change": {
+        "a": false,
+        "b": false,
+        "c": true,
+        "d:" false,
+        "e:" false,
+        "f": false
+      }, 
+      "3 - Response of Biological Systems to Climate Change": {
+        "a": false,
+        "b": false,
+        "c": true,
+        "d": false,
+        "e": false,
+        "f": false,
+        "g": false
+      },
+      "4 - Vulnerability and Adaptation": {
+        "a": true,
+        "b": false,
+        "c": false,
+        "d": false,
+        "e": false
+      },
+      "5 - Monitoring and Observation Systems": {
+        "a": false,
+        "b": false,
+        "c": true
+      },
+      "6 - Data, Infrastructure, Analysis, and Modeling": {
+        "a": false,
+        "b": true,
+        "c": false,
+        "d": false,
+        "e": false
+      },
+      "7 - Communication of Science Findings": {
+        "a": false,
+        "b": false
+      }
+    }
+  }
+}</pre>
+		</section>
+	</div>
+</div>
+<div style="padding-bottom: 400px;"></div>

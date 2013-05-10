@@ -1,8 +1,8 @@
-var Depth = angular.module('depth', ['ngResource', 'ui']);
+var Depth = angular.module('depth', ['ngResource', 'ui', 'directive.affix']);
 
 Depth.config(function($routeProvider) {
     $routeProvider.
-      // when('/migrate', {controller:DepthCtrl, templateUrl:'migrate.html'}).
+      when('/docs', {controller:DocsCtrl, templateUrl:'docs.html'}).
       when('/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
       when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
       when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
@@ -13,9 +13,40 @@ Depth.value('ui.config', {
 });
 
 function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
+  // $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
+  $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
+  // ALERTS
   // $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
   $scope.alerts = [];
   $scope.devAlerts = [];
+
+  // View page variables
+  // $scope.view = {};
+  $scope.view = {chooseAgenda: {}};
+
+  // WATCHES
+  // Could go deeper and make this function faster and run less
+  $scope.$watch('filter.agenda', function(oldVal, newVal) {
+    if (!$scope.filter.agenda || !$scope.filter.agenda.themes) {
+      return;
+    }
+    var allTrue = true;
+    var allFalse = true;
+    for (var t in $scope.filter.agenda.themes) {
+      var themeTrue = true;
+      for (var o in $scope.filter.agenda.themes[t].options) {
+        if ($scope.filter.agenda.themes[t].options[o] !== true) {
+          themeTrue = false;
+          allTrue = false;
+        } else {
+          allFalse = false;
+        }
+      }
+      $scope.filter.agenda.themes[t].set = themeTrue;
+    }
+    $scope.filter.agenda.all = allTrue;
+    $scope.filter.agenda.none = allFalse;
+  }, true);
 
   $scope.closeAlert = function(index) {
     $scope.alerts.splice(index, 1);
@@ -36,7 +67,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     $location.path(route);
   };
 
-  $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   $scope.josso_check = {};
   $http.get("/depth/josso-auth/json-josso.php").
     success(function(data, status) {
@@ -57,13 +87,55 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
       });
   };
 
-  $scope.schema = {};
+  $scope.agendas = [];
+//   $scope.agendas = [{
+//       "name": "NCCWSC Agenda",
+//       "description":"",
+//       "url": "http://www.doi.gov/csc/northwest/upload/NW-CSC-Science-Agenda-2012-2015.pdf",
+//       "themes":[
+//       {
+//         "name": "Climate Science & Modeling",
+//         "number": 1,
+//         "options": {"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean"}
+//       },
+//       {
+//         "name":"Response of Physical Systems to Climate Change",
+//         "number": 2,
+//         "options": {"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e":"Boolean", "f":"Boolean"}
+//       },
+//       {
+//         "name":"Response of Biological Systems to Climate Change",
+//         "number":3,
+//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e": "Boolean", "f":"Boolean", "g":"Boolean"}
+//       },
+//       {
+//         "name":"Vulnerability and Adaptation",
+//         "number":4,
+//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e": "Boolean"}
+//       },
+//       {
+//         "name":"Monitoring and Observation Systems",
+//         "number":5,
+//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean"}
+//       },
+//       {
+//         "name":"Data, Infrastructure, Analysis, and Modeling",
+//         "number":6,
+//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e":"Boolean"}
+//       },
+//       {
+//         "name":"Communication of Science Findings",
+//         "number":7,
+//         "options":{"a":"Boolean", "b":"Boolean"}
+//       }
+//       ]
+// }];
   $http.get($scope.sciencebaseUrl + "/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets").
     success(function(data, status) {
-      $scope.schema = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.schema;
+      $scope.agendas = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.agendas;
     }).error(function (data, status, headers, config) {
       $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
-      $scope.devAlerts.push({msg: "failed to get schema\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
+      $scope.devAlerts.push({msg: "failed to get agendas\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
     });
 
   $scope.json = {};
@@ -75,7 +147,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
   $scope.json.identifiers = [];
   $scope.json.tags = [];
   $scope.json.dates = [];
-  $scope.json.webLinks = [{}];
+  $scope.json.webLinks = [];
 
   $scope.orgTypes = [
     {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
@@ -132,39 +204,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
 
   };
 
-  $scope.persistMigrate = function() {
-    if (!$scope.migrateProj) {
-      $scope.migrateProj = {};
-    }
-    // Facets
-    var projs = filterFilter($scope.migrateProj.facets, {className: "ProjectFacet"});
-    var projsLongName = filterFilter($scope.migrateProj.facets, {className: "gov.sciencebase.catalog.item.facet.ProjectFacet"});
-    var projsIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "ProjectFacet");
-    if (projs && (!projsLongName || projsLongName.length === 0)) {
-      $scope.migrateProj.facets[projsIdx].className = "gov.sciencebase.catalog.item.facet.ProjectFacet";
-    } 
-
-    var expandoIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "ExpandoFacet");
-    var expandoLongIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
-    if (expandoIdx > -1 && !expandoLongIdx > -1) {
-      $scope.migrateProj.facets[expandoIdx].className = "gov.sciencebase.catalog.item.facet.ExpandoFacet";
-    }
-
-    var projIdx = findIndexByKeyValue($scope.migrateProj.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
-    if(projIdx >= 0){
-      if(!$scope.migrateProj.facets[projIdx].funding){
-        $scope.migrateProj.facets[projIdx].funding = [];
-      }
-
-      var funds = $scope.migrateProj.facets[projIdx].funding;
-      if(funds.length === 0 || funds[funds.length-1].fiscalYear || funds[funds.length-1].fundingAmount) {
-        $scope.migrateProj.facets[projIdx].funding.push({fiscalYear: null, fundingAmount: null});
-      }
-
-    }
-
-  };
-
   $scope.persistNecessaryData = function() {
     // all json
     if (!$scope.json) $scope.json = {};
@@ -175,7 +214,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     if (!$scope.json.identifiers) $scope.json.identifiers = [];
     if (!$scope.json.facets) $scope.json.facets = [];
     if (!$scope.json.tags) $scope.json.tags = [];
-    if (!$scope.json.webLinks) $scope.json.webLinks = [{}];
+    if (!$scope.json.webLinks) $scope.json.webLinks = [];
 
     // Contacts
     $scope.persistContacts(["Principal Investigator", "Funding Agency", "Cooperator/Partner"]);
@@ -256,19 +295,19 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
       if (!$scope.json.facets[expandoIdx].object) {
         $scope.json.facets[expandoIdx].object = {};
       }
-      if (!$scope.json.facets[expandoIdx].object.themes) {
-        $scope.json.facets[expandoIdx].object.themes = {};
+      if (!$scope.json.facets[expandoIdx].object.agendas) {
+        $scope.json.facets[expandoIdx].object.agendas = [];
       }
-      for (var concept in $scope.schema) {
-        if (!$scope.json.facets[expandoIdx].object.themes[concept]) {
-          $scope.json.facets[expandoIdx].object.themes[concept] = {};
-        }
-        for (var theme in $scope.schema[concept]) {
-          if (!$scope.json.facets[expandoIdx].object.themes[concept][theme]) {
-            $scope.json.facets[expandoIdx].object.themes[concept][theme] = false;
-          }
-        }
-      }
+      // for (var concept in $scope.schema) {
+      //   if (!$scope.json.facets[expandoIdx].object.themes[concept]) {
+      //     $scope.json.facets[expandoIdx].object.themes[concept] = {};
+      //   }
+      //   for (var theme in $scope.schema[concept]) {
+      //     if (!$scope.json.facets[expandoIdx].object.themes[concept][theme]) {
+      //       $scope.json.facets[expandoIdx].object.themes[concept][theme] = false;
+      //     }
+      //   }
+      // }
     }
 
     // TODO: should change this to a $watch instead
@@ -409,25 +448,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     $scope.json.facets[projIdx].funding.splice($scope.json.facets[projIdx].funding.indexOf(this.fund), 1);
   };
 
-  // $scope.prodToBeta = function() {
-  //   for (var i = 0; i < $scope.allProjects.length; i++) {
-
-  //     var prodItem = getItemProd($scope.allProjects[i].id, );
-
-  //     try
-  //     {
-  //       $scope.json = prodItem;
-  //       $scope.persistNecessaryData();
-  //     }
-  //     catch(exception)
-  //     {
-  //       $scope.alerts.push({msg: exception, type: "error"});
-  //     }
-  //     $scope.put();
-  //   }
-
-  // };
-
   $scope.get = function () {
 
     if (!$scope.id) {
@@ -441,7 +461,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     try
     {
       $scope.json = json;
-      
+
       $scope.refresh();
 
       //clean body
@@ -490,8 +510,9 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     // Change the appropriate fields
     json.title = title;
 
-    // convert to JSON with angular to remove some crap
-    // json = angular.toJson(json);
+    // remove $$hashKeys
+    json = angular.toJson(json);
+    json = angular.fromJson(json);
 
     var returnedJson = upsert('POST', parentId, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
 
@@ -617,19 +638,16 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     json.contacts = filterFilter(json.contacts, $scope.filterBlankContacts);
     json.webLinks = filterFilter(json.webLinks, $scope.filterBlankWeblinks);
     json.tags = filterFilter(json.tags, $scope.filterBlankTags);
+    // json.dates.pop();
 
     var projIdx = findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ProjectFacet");
     json.facets[projIdx].projectProducts = filterFilter(json.facets[projIdx].projectProducts, $scope.filterBlankProjects);
     json.facets[projIdx].funding = filterFilter(json.facets[projIdx].funding, $scope.filterBlankFunds);
 
-    var expandoIdx = findIndexByKeyValue(json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
-    if (expandoIdx >= 0) {
-      for (var concept in json.facets[expandoIdx].object.themes) {
-        delete json.facets[expandoIdx].object.themes[concept]["$$hashKey"];
-      }
-    }
+    // remove $$hashKeys
+    json = angular.toJson(json);
+    json = angular.fromJson(json);
 
-    // json.dates.pop();
     return json;
   };
 
@@ -680,68 +698,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
 
     return true;
   };
-
-  // $scope.filterProjectsView = function(project) {
-
-  //   if ($scope.orgType && $scope.orgType.length > 0) {
-  //     var orgMatch = false;
-  //     for (var i = 0; i < $scope.orgType.length; i++) {
-  //       if ($scope.orgType[i].org &&
-  //           $scope.orgType[i].org !== "" &&
-  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: $scope.orgType[i].org}).length > 0) {
-  //         orgMatch = true;
-  //       }
-  //     }
-  //     if (!orgMatch) {
-  //       return false;
-  //     }
-  //   } 
- 
-  //   if ($scope.fiscalYear && $scope.fiscalYear.length > 0) {
-  //     var fyMatch = false;
-  //     for (var i = 0; i < $scope.fiscalYear.length; i++) {
-  //       if ($scope.fiscalYear[i] &&
-  //           $scope.fiscalYear[i] !== "" &&
-  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: $scope.fiscalYear[i]}).length > 0) {
-  //         fyMatch = true;
-  //       }
-  //     }
-  //     if (!fyMatch) {
-  //       return false;
-  //     }
-  //   }
-
-  //   if ($scope.projectType && $scope.projectType.length > 0) {
-  //     var typeMatch = false;
-  //     for (var i = 0; i < $scope.projectType.length; i++) {
-  //       if ($scope.projectType[i] &&
-  //           $scope.projectType[i] !== "" &&
-  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: $scope.projectType[i]}).length > 0) {
-  //         typeMatch = true;
-  //       }
-  //     }
-  //     if (!typeMatch) {
-  //       return false;
-  //     }
-  //   }
-
-  //   if ($scope.organization && $scope.organization.length > 0) {
-  //     var orgMatch = false;
-  //     for (var i = 0; i < $scope.organization.length; i++) {
-  //       if ($scope.organization[i].title &&
-  //           $scope.organization[i].title !== "" &&
-  //           filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: $scope.organization[i].title}).length > 0) {
-  //         orgMatch = true;
-  //       }
-  //     }
-  //     if (!orgMatch) {
-  //       return false;
-  //     }
-  //   }
-
-
-  //   return true;
-  // };
 
   $scope.totalFunding = function() {
     var filterParams = {
@@ -815,6 +771,10 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
 
   $scope.prettyPrint = function(json) {
     return JSON.stringify(json, undefined, 2);
+  };
+
+  $scope.getJsonObjectLength = function(jsonObj) {
+    return Object.keys(jsonObj).length;
   };
 
   $scope.getCsv = function() {
@@ -998,11 +958,11 @@ function ContactsCtrl($scope, filterFilter) {
   };
 
   $scope.isPrincipalInvestigator = function(contact) {
-    return (contact.type == "Principal Investigator");
+    return (contact.type === "Principal Investigator");
   };
 
   $scope.isCooperator = function(contact) {
-    return (contact.type == "Cooperator/Partner" || contact.type == "Co-Investigator");
+    return (contact.type === "Cooperator/Partner" || contact.type === "Co-Investigator");
   };
 
   $scope.fundingAgencies = function() {
@@ -1100,18 +1060,8 @@ function DatesCtrl($scope) {
   }
 }
 
-function FacetsCtrl($scope) {
-  $scope.facetType = function(){
-    switch ($scope.facet.className) {
-      case "gov.sciencebase.catalog.item.facet.ProjectFacet":
-        return "Project";
-        break;
-      default:
-        return $scope.facet.className;
-        break;
-      //TODO: add more facet types here
-    }
-  };
+function FacetsCtrl($scope, filterFilter) {
+
 
   $scope.isProject = function(facet) {
     return (facet.className === "gov.sciencebase.catalog.item.facet.ProjectFacet");
@@ -1128,6 +1078,83 @@ function FacetsCtrl($scope) {
   $scope.isDeliveredProduct = function(product) {
     return (product.status === "Delivered");
   }
+
+  $scope.addCurAgenda = function(agenda) {
+    var newAgenda = {};
+    newAgenda.name = agenda.name;
+    newAgenda.description = agenda.description;
+    newAgenda.url = agenda.url;
+    newAgenda.themes = [];
+
+    for (var i in agenda.themes) {
+      newAgenda.themes[i] = {};
+      newAgenda.themes[i].number = agenda.themes[i].number;
+      newAgenda.themes[i].name = agenda.themes[i].name;
+      var options = {};
+      for ( key in agenda.themes[i].options ) {
+        options[key] = false;
+      }
+      newAgenda.themes[newAgenda.themes.length-1].options = options;
+    }
+    var expandoIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    $scope.json.facets[expandoIdx].object.agendas.push(newAgenda);
+  };
+
+  $scope.addAgenda = function() {
+    if (!$scope.newAgenda || !$scope.newAgenda.name) {
+      console.log("Please choose an agenda");
+      return;
+    }
+    var expandoIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    if (expandoIdx >= 0) {
+      if ($scope.json.facets[expandoIdx].object && $scope.json.facets[expandoIdx].object.agendas) {
+        if (findIndexByKeyValue($scope.json.facets[expandoIdx].object.agendas, "name", $scope.newAgenda.name) >= 0) {
+          $scope.alerts.push({msg: "You have already added that agenda to this item.", type: "warn"});
+          return;
+        } 
+        else {
+          $scope.addCurAgenda($scope.newAgenda);
+        }
+      } 
+      else {
+        console.log("The expando facet is not being set up correctly. Expando: {{$scope.json.facets[expandoIdx]}}");
+        return;
+      }
+    }
+    else {
+      console.log("Expando facet not found.");
+      return;
+    }
+
+  };
+
+  $scope.deleteAgenda = function() {
+    var expandoIdx = findIndexByKeyValue($scope.json.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    $scope.json.facets[expandoIdx].object.agendas.splice($scope.json.facets[expandoIdx].object.agendas.indexOf(this.agenda), 1);
+  };
+
+  $scope.getAgenda = function() {
+    return $scope.getAgendaByName(this.agenda.name);
+  };
+
+  $scope.getAgendaByName = function(name) {
+    return $scope.agendas[findIndexByKeyValue($scope.agendas, "name", name)];
+  };
+
+  $scope.toggleQuestion = function(question, set) {
+    for (var i in question.options) {
+      question.options[i] = !set;
+    }
+  }
+
+  $scope.toggleAgenda = function(agenda, type) {
+    for (var t in agenda.themes) {
+      for (var o in agenda.themes[t].options) {
+        agenda.themes[t].options[o] = type;
+      }
+    }
+  }
+
 }
 
 var findIndexByKeyValue = function (list, key, value) {
@@ -1141,3 +1168,76 @@ var findIndexByKeyValue = function (list, key, value) {
   return -1;
 };
 
+Depth.run(function($rootScope, $location, $anchorScroll, $routeParams) {
+  $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
+    $location.hash($routeParams.scrollTo);
+    $anchorScroll();  
+  });
+})
+
+function DocsCtrl ($scope, $location, $anchorScroll, $routeParams) {
+
+};
+
+Depth.directive('stuck', function ($timeout, $window) {
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      var top = attrs.top;
+      // var bottom = attrs.bottom;
+      $window = angular.element($window);
+
+      var handler = function() {
+        // console.log("window scrolltop: " + $window.scrollTop());
+        // console.log("position: " + JSON.stringify(element.position()));
+
+        var distanceFromTop = element.position().top - $window.scrollTop();
+        // var distanceFromBottom = element.position().bottom - $window.scrollTop();
+        // console.log("distTop: " + distanceFromTop);
+        // console.log("distBottom: " + distanceFromBottom);
+
+        if (distanceFromTop < top) {
+          element.children().css({top: top + 'px', position:'fixed'});
+        } 
+        else {
+          element.children().css({top: 'auto', position: 'relative'});
+        }
+        // if (distanceFromBottom < bottom) {
+          // console.log("bottom out");
+        // }
+
+      }
+      $window.on('scroll', handler);
+
+    }
+  }
+});
+
+Depth.directive('radioButton', function() {
+  return {
+    restrict: 'E',
+    scope: {model: '=', number: '=', theme: '=', width: '='},
+    controller: function($scope, $element) {
+      $scope.$watch('model', function(oldVal, newVal) {
+        // Change "Boolean" values from model to Boolean false
+        if ($scope.model === "Boolean") $scope.model = false;
+      }, true);
+
+      $scope.realWidth = $scope.width*30;
+
+      $scope.activate = function() {
+        if ($scope.model) {
+          $scope.model = false; 
+        }
+        else { 
+          $scope.model = true; 
+        }
+      }
+    },
+    template: "<button style='width: {{realWidth}}px;' type='button' class='btn btn-mini' " +
+              "ng-class='{active: model}'" +
+              "ng-click='activate()'>" +
+              "{{number}}{{theme}}" +
+              "</button>"
+  }
+});

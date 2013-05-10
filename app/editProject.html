@@ -1,4 +1,4 @@
-<ul class="unstyled">
+<ul class="unstyled" stuck top="100">
   <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
     <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
   </li>
@@ -398,9 +398,39 @@
       </li>
     </ul>
 
+    <legend>Science Themes</legend>
+    <div ng-controller="FacetsCtrl">
+      <div class="control-group">
+        <label class="control-label" for="chooseAgenda">Add Agenda</label>
+        <div class="controls">
+          <select id="chooseAgenda" ng-model="newAgenda" ng-options="agenda as agenda.name for agenda in agendas">
+            <option>Choose Agenda</option>
+          </select>
+          <a class="btn" ng-click="addAgenda()">Add Agenda</a>
+        </div>
+      </div>
+      <ul class="unstyled" ng-repeat="agenda in (json.facets | filter:isExpando)[0].object.agendas">
+        <li class="control-group">
+          <label class="controls-label" for="agenda_{{$index}}"><b>{{agenda.name}}</b></label>
+          <div class="controls">
+            <a class="btn btn-info" href="{{getAgenda().url}}" target="_blank">{{agenda.name}} Explanation</a>
+            <a class="btn btn-danger" ng-click="deleteAgenda()">Remove {{agenda.name}}</a>
+          </div>
+        </li>
+        <li ng-repeat="question in agenda.themes" class="control-group">
+          <label class="controls-label">{{question.number}}. {{question.name}}</label>
+          <div class="controls" ng-repeat="(theme, value) in question.options | orderBy:theme">
+            <label class="checkbox inline" style="width: auto;">
+              <input class="inline" type="checkbox" ng-model="question.options[theme]" />{{theme}}
+            </label>
+          </div>
+        </li>
+      </ul>
+    </div>
+
     <legend>
       NW CSC Science Agenda theme(s) Addressed
-      <a class="btn btn-info" href="http://www.doi.gov/csc/northwest/upload/NW-CSC-Science-Agenda-2012-2015.pdf" target="_blank">Explainations</a>
+      <a class="btn btn-info" href="http://www.doi.gov/csc/northwest/upload/NW-CSC-Science-Agenda-2012-2015.pdf" target="_blank">Explanation</a>
       <a class="btn btn-info" href="{{sciencebaseUrl}}/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets" target="_blank">Source</a>
     </legend>
     <!-- Agenda from schema -->
@@ -409,7 +439,7 @@
         <label class="control-label" for="concept_{{$index}}">{{concept}}</label>
         <div class="controls" ng-repeat="(theme, type) in themes | orderBy:theme">
           <label class="checkbox inline" style="width: auto;">
-            <input class="inline" type="checkbox" ng-model="(json.facets | filter:isExpando)[0].object.themes[concept][theme]">{{theme}}
+            <input class="inline" type="checkbox" ng-model="(json.facets | filter:isExpando)[0].object.themes[concept][theme]" />{{theme}}
           </label>
         </div>
       </li>

@@ -79,6 +79,26 @@ Depth.filter('projectsFilter', function (filterFilter) {
         });
       }
 
+      // Filter by agenda
+      if (validProject && options.agenda && options.agenda.themes && options.agenda.themes.length > 0) {
+        validProject = false;
+        angular.forEach (options.agenda.themes, function (theme) {
+          var expandoIdx = findIndexByKeyValue(project.facets, "className", "ExpandoFacet");
+          if (expandoIdx >= 0 && project.facets[expandoIdx].object.agendas) {
+            var agendas = project.facets[expandoIdx].object.agendas;
+            for (var i in agendas) {
+              for (var j in agendas[i].themes) {
+                for (var k in agendas[i].themes[j].options) {
+                  if (agendas[i].themes[j].options[k] === true && options.agenda.themes[j].options[k] === true) {
+                    validProject = true;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
       // Filter by project
       if (validProject && options.projects && options.projects.length > 0) {
         validProject = false;
@@ -107,7 +127,7 @@ Depth.filter('filterOrgs', function (filterFilter) {
     var validOrgs = [];
     angular.forEach (orgs, function (org) {
       angular.forEach (options.orgTypes, function (orgType) {
-        if (filterFilter(org.tags, {scheme: "Project", type: "Label", name: orgType.org}).length > 0) {
+        if (filterFilter(org.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel", type: "Label", name: orgType.org}).length > 0) {
           validOrgs.push(org);
         }
       });
@@ -129,4 +149,5 @@ Depth.filter('filterParts', function () {
     });
     return validProjs;
   }
+
 });

@@ -4,6 +4,32 @@
   </li>
 </ul>
 
+<ul class="unstyled" ng-controller="FacetsCtrl">
+  <li>
+    <select id="chooseAgenda" ng-model="filter.agenda" ng-options="agenda as agenda.name for agenda in agendas">
+      <option value="">Choose Agenda</option>
+    </select>
+    <span ng-show="filter.agenda">
+      {{filter.agenda.name}} 
+      <a class="btn btn-info" href="{{filter.agenda.url}}" target="_blank">View Agenda</a>
+    </span>
+  </li>
+  <li ng-show="filter.agenda">
+    <span ng-repeat="question in filter.agenda.themes">
+      <button class="btn" ng-class="{active: question.set}" ng-click="toggleQuestion(question, question.set)">{{question.number}}</button>
+    </span>
+    <button class="btn" ng-class="{active: filter.agenda.all}" ng-click="toggleAgenda(filter.agenda, true)">all</button>
+    <button class="btn" ng-class="{active: filter.agenda.none}" ng-click="toggleAgenda(filter.agenda, false)">none</button>
+  </li>
+  <li>
+    <span ng-repeat="question in filter.agenda.themes">
+      <span style="width: auto;" ng-repeat="(theme, value) in question.options | orderBy:theme">
+        <radio-button number="question.number" theme="theme" model="question.options[theme]" width="1"></radio-button>
+      </span>
+    </span>
+  </li>
+</ul>
+
 <div class="container-fluid">
   <div class="row-fluid">
 
@@ -112,7 +138,7 @@
       <br />
 
       <legend>
-        Projects ({{(allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, projects: filter.projects}).length}}) 
+        Projects ({{(allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects}).length}}) 
         <button class="btn btn-info" id="show-csv" ng-click="getCsv()">Get CSV</button>
         <a class="btn btn-info" id="download" href="#" style="display: none;">Download</a>
       </legend>
@@ -122,7 +148,7 @@
 
       <!-- All Projects -->
       <ul class="unstyled">
-        <li ng-repeat="proj in allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, projects: filter.projects} | orderBy:'title'">
+        <li ng-repeat="proj in allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects} | orderBy:'title'">
           <div style="background-color: #eee;">
             <a href="{{sciencebaseUrl}}/item/{{proj.id}}" target="_blank">{{proj.title}}</a>
           </div>
