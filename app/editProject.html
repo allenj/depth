@@ -254,7 +254,6 @@
             <label class="control-label" for="piOrg_{{$index}}">PI Organization</label>
             <div class="controls">
               <input class="span5" id="piOrg_{{$index}}" type="text" placeholder="affiliation" ng-model="contact.organization.displayText" />
-              <!-- <input ng-controller="TagsCtrl" type="text" placeholder="organization type" ng-model="(json.tags | filter:isOrganizationType)[$index].name" /> -->
             </div>
           </div>
         </li>
@@ -303,6 +302,16 @@
     </ul>
 
     <legend>Additional Information</legend>
+
+    <!-- Dates -->
+    <ul class="unstyled" ng-controller="DatesCtrl">
+      <li ng-repeat="date in json.dates" class="control-group">
+        <label class="control-label" for="date_{{$index}}">{{date.label}}</label>
+        <div class="controls">
+          <input type="date" ng-model="date.dateString" />
+        </div>
+      </li>
+    </ul>
 
     <!-- Webpage -->
     <ul class="unstyled" ng-controller="WeblinksCtrl">
@@ -404,7 +413,7 @@
         <label class="control-label" for="chooseAgenda">Add Agenda</label>
         <div class="controls">
           <select id="chooseAgenda" ng-model="newAgenda" ng-options="agenda as agenda.name for agenda in agendas">
-            <option>Choose Agenda</option>
+            <option value="">Choose Agenda</option>
           </select>
           <a class="btn" ng-click="addAgenda()">Add Agenda</a>
         </div>

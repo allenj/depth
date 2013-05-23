@@ -87,10 +87,12 @@ Depth.filter('projectsFilter', function (filterFilter) {
           if (expandoIdx >= 0 && project.facets[expandoIdx].object.agendas) {
             var agendas = project.facets[expandoIdx].object.agendas;
             for (var i in agendas) {
-              for (var j in agendas[i].themes) {
-                for (var k in agendas[i].themes[j].options) {
-                  if (agendas[i].themes[j].options[k] === true && options.agenda.themes[j].options[k] === true) {
-                    validProject = true;
+              if (agendas[i].name === options.agenda.name) {
+                for (var j in agendas[i].themes) {
+                  for (var k in agendas[i].themes[j].options) {
+                    if (agendas[i].themes[j].options[k] === true && options.agenda.themes[j].options[k] === true) {
+                      validProject = true;
+                    }
                   }
                 }
               }

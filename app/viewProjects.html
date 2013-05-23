@@ -4,49 +4,24 @@
   </li>
 </ul>
 
-<ul class="unstyled" ng-controller="FacetsCtrl">
-  <li>
-    <select id="chooseAgenda" ng-model="filter.agenda" ng-options="agenda as agenda.name for agenda in agendas">
-      <option value="">Choose Agenda</option>
-    </select>
-    <span ng-show="filter.agenda">
-      {{filter.agenda.name}} 
-      <a class="btn btn-info" href="{{filter.agenda.url}}" target="_blank">View Agenda</a>
-    </span>
-  </li>
-  <li ng-show="filter.agenda">
-    <span ng-repeat="question in filter.agenda.themes">
-      <button class="btn" ng-class="{active: question.set}" ng-click="toggleQuestion(question, question.set)">{{question.number}}</button>
-    </span>
-    <button class="btn" ng-class="{active: filter.agenda.all}" ng-click="toggleAgenda(filter.agenda, true)">all</button>
-    <button class="btn" ng-class="{active: filter.agenda.none}" ng-click="toggleAgenda(filter.agenda, false)">none</button>
-  </li>
-  <li>
-    <span ng-repeat="question in filter.agenda.themes">
-      <span style="width: auto;" ng-repeat="(theme, value) in question.options | orderBy:theme">
-        <radio-button number="question.number" theme="theme" model="question.options[theme]" width="1"></radio-button>
-      </span>
-    </span>
-  </li>
-</ul>
 
 <div class="container-fluid">
   <div class="row-fluid">
 
-    <!-- Sidebar -->
-    <div class="span4 proj-view-sidebar">
+    <div style="text-align: center;">
+      <input type="text" ng-model="generalSearch" placeholder="general filter" /> 
+      <br />
+      <legend>Advanced Filters <button class="btn" onclick="show('advanced-search', true); return false;"><i class="icon-chevron-down"></i></button></legend>
+    </div>
 
-      <legend>Filter</legend>
+    <div id="advanced-search" style="display: none; background-color: #eeeeee; padding: 10px;">
 
-      <ul class="proj-view-sidenav unstyled" id="sort-fields" data-spy="affix" data-offset-top="200">
-      <!-- <div id="sort-fields" class="nav" style="" data-spy="affix" data-offset-top="200"> -->
+      <ul class="unstyled" id="sort-fields">
         <!-- Organization Type -->
         <li>
           <label class="control-label" for="orgType">Organization Types</label>
           <div class="controls">
-            <!-- <select id="orgType" ng-model="orgType" ng-options="orgType as orgType.title for orgType in orgTypes" class="span12" placeholder="organization type" multiple="multiple"> -->
             <select ui-select2 multiple ui-options="{multiple: true}" style="width: 100%;" ng-model="filter.orgTypes" ng-options="orgType as orgType.title for orgType in orgTypes" data-placeholder="organization type">
-              <!-- <option ng-repeat="orgType in orgTypes" value="{{orgType}}">{{orgType.title}}</option> -->
               <option></option>
             </select>
           </div>
@@ -126,48 +101,95 @@
 
       </ul> <!-- /sort-fields -->
 
-    </div> <!-- /sidebar -->
-    <div class="span8"> <!-- body -->
-
-      <!-- total funding -->
-      <!-- <div id="total" style="position: fixed; right: 0; top: 50%; background: darkgrey; width: 200px;">
-        Total Funding: ${{totalFunding()}}
-      </div> -->
-
-      <span>{{addRequiredFields()}}</span>
-      <br />
-
-      <legend>
-        Projects ({{(allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects}).length}}) 
-        <button class="btn btn-info" id="show-csv" ng-click="getCsv()">Get CSV</button>
-        <a class="btn btn-info" id="download" href="#" style="display: none;">Download</a>
-      </legend>
-      <!-- total funding -->
-      <h4>Total Funding: ${{totalFunding()}}</h4>
-      <br />
-
-      <!-- All Projects -->
-      <ul class="unstyled">
-        <li ng-repeat="proj in allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects} | orderBy:'title'">
-          <div style="background-color: #eee;">
-            <a href="{{sciencebaseUrl}}/item/{{proj.id}}" target="_blank">{{proj.title}}</a>
-          </div>
-          <ul class="unstyled" ng-controller="ContactsCtrl">
-            <li ng-repeat="pi in proj.contacts | filter:isPrincipalInvestigator">
-              PI: {{pi.name}}
-            </li>
-          </ul>
+      <!-- Agendas -->
+      <label for="chooseAgenda">Agendas</label>
+      <ul class="unstyled" ng-controller="FacetsCtrl">
+        <li>
+          <select id="chooseAgenda" ng-model="filter.agenda" ng-options="agenda as agenda.name for agenda in agendas">
+            <option value="">Choose Agenda</option>
+          </select>
+          <span ng-show="filter.agenda">
+            {{filter.agenda.name}} 
+            <a class="btn btn-info" href="{{filter.agenda.url}}" target="_blank">View Agenda</a>
+          </span>
+        </li>
+        <li ng-show="filter.agenda">
+          <button class="btn" ng-class="{active: filter.agenda.all}" ng-click="toggleAgenda(filter.agenda, true)">all</button>
+          <button class="btn" ng-class="{active: filter.agenda.none}" ng-click="toggleAgenda(filter.agenda, false)">none</button>
+        </li>
+        <li ng-show="filter.agenda">
+          <table>
+            <tr>
+              <td ng-repeat="question in filter.agenda.themes">
+                <button style="width: 100%;" class="btn" ng-class="{active: question.set}" ng-click="toggleQuestion(question, question.set)">{{question.number}}</button>
+              </td>
+            </tr>
+            <tr>
+              <td ng-repeat="question in filter.agenda.themes">
+                <span style="width: auto;" ng-repeat="(theme, value) in question.options | orderBy:theme">
+                  <radio-button number="question.number" theme="theme" model="question.options[theme]" width="1"></radio-button>
+                </span>
+              </td>
+            </tr>
+          </table>
         </li>
       </ul>
+    </div>
+  </div>
+</div>
 
+<div class="container-fluid">
+  <div class="row-fluid">
 
-      <button class="btn" onclick="show('csv', true); return false;">Show CSV</button>
-      <span class="help-inline">You must click Get CSV above first.</span>
-      <pre id="csv" style="display: none;">
-        {{csv}}
-      </pre>
+    <span>{{addRequiredFields()}}</span>
+    <br />
 
-    </div> <!-- /body -->
+    <legend style="text-align: center;">
+      Projects ({{(allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects}).length}}) 
+      <button class="btn btn-info" id="show-csv" ng-click="getCsv()">Get CSV</button>
+      <a class="btn btn-info" id="download" href="#" style="display: none;">Download</a>
+    </legend>
+    
+    <br />
+
+    <!-- All Projects -->
+    <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>Active Year(s)</th>
+          <th>Title</th>
+          <th>Principal Investigator(s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="proj in allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects} | filter:generalSearch | orderBy:'title'">
+          <td>
+            <!-- {{(proj.dates | filter:"Start")[0].dateString | date:'mediumDate'}} {{((proj.dates | filter:"Start").length > 0 && (proj.dates | filter:"End").length > 0) && "-" || ""}} -->
+            <!-- {{(proj.dates | filter:"End")[0].dateString | date:'mediumDate'}} -->
+            <b>{{(proj.dates | filter:"Start")[0].dateString}}</b> {{((proj.dates | filter:"Start").length > 0 && (proj.dates | filter:"End").length > 0) && "-" || ""}}
+            <b>{{(proj.dates | filter:"End")[0].dateString}}</b>
+          </td>
+          <td><a href="{{sciencebaseUrl}}/item/{{proj.id}}" target="_blank">{{proj.title}}</a></td>
+          <td>
+            <ul class="unstyled" ng-controller="ContactsCtrl">
+              <li ng-repeat="pi in proj.contacts | filter:isPrincipalInvestigator">
+                {{pi.name}}
+              </li>
+            </ul>
+          </td>
+      </tbody>
+    </table>
+
+    <!-- total funding -->
+    <h4 style="text-align: center;">Total Funding: {{totalFunding() | currency}}</h4>
+    <br />
+
+    <button class="btn" onclick="show('csv', true); return false;">Show CSV</button>
+    <span class="help-inline">You must click Get CSV above first.</span>
+    <pre id="csv" style="display: none;">
+      {{csv}}
+    </pre>
+
   </div>
 </div>
 

@@ -42,8 +42,8 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
-//$jossoServer = "my-beta.usgs.gov";
- $jossoServer = "my.usgs.gov";
+$jossoServer = "my-beta.usgs.gov";
+//$jossoServer = "my.usgs.gov";
 
 // Josso agent configuration
 // $josso_gatewayLoginUrl = 'http://localhost:8080/josso/signon/login.do';
