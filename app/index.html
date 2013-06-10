@@ -8,8 +8,6 @@
     <link href="css/select2.css" rel="stylesheet" />
     <link href="css/depth.css" rel="stylesheet" />
     <link href="img/favicon.jpg" rel="shortcut icon" />
-
-
 </head>
 <!-- <body data-spy="scroll" data-target=".proj-view-sidebar"> -->
 <body>
@@ -44,23 +42,45 @@
     </div>
   </div><!-- /navbar -->
 
+
   <div style="margin-top: 5px;">
     <div id="welcome" class="container">
       <div class="hero-unit" id="hero-unit">
-        <h1>
-          DEPTH
-          <div class="btn-group" ng-controller="DepthCtrl">
-            <button class="btn ng-class: {active:isActiveRoute('view')}" ng-click="setRoute('view')">View Report</button>
-            <button class="btn ng-class: {active:isActiveRoute('edit')}" ng-click="setRoute('edit')">Edit Projects</button>
-            <!-- <button class="btn ng-class: {active:isActiveRoute('edit')}" ng-click="setRoute('edit'); create();">Create Project</button> -->
-            <!-- <button class="btn" ng-click="testLoc()">{{urlSearch}}</button> -->
+        <div class="row">
+          <div class="span3">
+            <h1>DEPTH</h1>
           </div>
-        </h1>
-        <p>Data Entry for Project Tracking and Highlighting <br />
-        <i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
-        <!--[if lte IE 9]>
-        <h2 style="color: rgb(185, 74, 72);">This application has been optimized for use in modern web browsers. Please upgrade Internet Explorer to verison 10 (or higher) or use Chrome, Firefox, Safari, or Opera.</h2>
-        <![endif]-->
+          <div class="span6">
+            <br/>
+          </div>
+        </div>
+        <div ng-controller="DepthCtrl">
+          <!-- <button class="btn ng-class: {active:isActiveRoute('view')}" ng-click="setRoute('view')">View Report</button> -->
+          <p>Data Entry for Project Tracking and Highlighting</p>
+          <table class="unstyled">
+            <tr><td>
+              <button class="btn" ng-click="setRoute('view')" style="width: 100%"><i class="icon-search"></i> View Projects</button><br/>
+            </tr></td>
+            <tr><td>
+              <button class="btn" ng-click="setRoute('edit')" style="width: 100%"><i class="icon-pencil"></i> Edit Projects</button><br/>
+            </tr></td>
+            <tr><td>
+              <button class="btn" ng-click="setRoute('edit')" style="width: 100%"><i class="icon-plus"></i> Create Project</button><br/>
+            </tr></td>
+            <tr><td>
+              <button class="btn" ng-click="setRoute('agendas')" style="width: 100%"><i class="icon-leaf"></i> Edit Agendas</button><br/>
+            </tr></td>
+            <tr><td>
+              <button class="btn" ng-click="setRoute('docs')" style="width: 100%"><i class="icon-book"></i> Documentation</button><br/>
+            </tr></td>
+            <tr><td>
+              <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
+            </tr></td>
+          </table>
+          <!--[if lte IE 9]>
+          <h2 style="color: rgb(185, 74, 72);">This application has been optimized for use in modern web browsers. Please upgrade Internet Explorer to verison 10 (or higher) or use Chrome, Firefox, Safari, or Opera.</h2>
+          <![endif]-->
+        </div>
       </div>
     </div>
   </div>
@@ -93,18 +113,18 @@
 
   <!-- Javascript (down here so the page loads faster) -->
   <script src="js/jquery-1.9.1.min.js"></script>
-  <!-- // <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.js"></script> -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
-  <!-- // <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-resource.min.js"></script> -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular-resource.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-resource.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-cookies.min.js"></script>
   <script src="js/ui-bootstrap-tpls-0.2.0.min.js"></script>
-  <!-- // <script src="js/bootstrap-affix.js"></script> -->
   <script src="js/angular-ui.min.js"></script>
   <script src="js/select2.min.js"></script>
   <script src="js/sbRest.js"></script>
   <script src="js/affixDirective.js"></script>
   <script src="js/depth.js"></script>
   <script src="js/depthFilters.js"></script>
+  <script src="js/depthServices.js"></script>
+  <script src="js/agendaCtrl.js"></script>
   <script src="js/agnes.js"></script>
   <script src="https://my.usgs.gov/scripts/analytics/usgs-analytics.js"></script>
   <script>
