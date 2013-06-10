@@ -15,7 +15,7 @@
         <select id="orgType" ng-model="orgType" ng-options="orgType as orgType.title for orgType in orgTypes" class="input-xxlarge" placeholder="organization type">
           <option value="" >all organization types</option>
         </select>
-        <a class="btn btn-info" ng-show="orgType.id"href="{{sciencebaseUrl}}/item/{{orgType.id}}" target="_blank">View in SB</a>
+        <a class="btn btn-info" ng-show="orgType.id" href="{{sciencebaseUrl}}/item/{{orgType.id}}" target="_blank">View in SB</a>
       </div>
     </div>
 
@@ -308,7 +308,7 @@
       <li ng-repeat="date in json.dates" class="control-group">
         <label class="control-label" for="date_{{$index}}">{{date.label}}</label>
         <div class="controls">
-          <input type="date" ng-model="date.dateString" />
+          <input type="date" ng-model="date.dateString" placeholder="yyyy-MM-dd" />
         </div>
       </li>
     </ul>
