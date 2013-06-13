@@ -34,7 +34,7 @@
           <label class="control-label" for="organization">Organizations ({{(organizations | filterOrgs:{orgTypes: filter.orgTypes}).length}})</label>
           <div class="controls">
             <select ui-select2 multiple id="organization" style="width: 100%;" ng-model="prefilter.organizations" data-placeholder="choose organizations">
-              <option ng-repeat="organization in organizations | filterOrgs:{orgTypes: filter.orgTypes}" value="{{organization}}">{{organization.title}}</option>
+              <option ng-repeat="organization in organizations | filterOrgs:{orgTypes: filter.orgTypes} | orderBy:'title'" value="{{organization}}">{{organization.title}}</option>
             </select>
           </div>
         </li>
