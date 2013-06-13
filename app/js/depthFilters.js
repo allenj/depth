@@ -105,7 +105,7 @@ Depth.filter('projectsFilter', function (filterFilter) {
       if (validProject && options.projects && options.projects.length > 0) {
         validProject = false;
         angular.forEach (options.projects, function (filterProject) {
-          if (project === filterProject) {
+          if (project.id === filterProject.id) {
             validProject = true;
           }
         });

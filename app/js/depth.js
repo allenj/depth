@@ -1,6 +1,6 @@
 'use strict';
 
-var Depth = angular.module('depth', ['ngResource', 'ui', 'directive.affix', 'depth.services', 'ngCookies']);
+var Depth = angular.module('depth', ['ngResource', 'ui.bootstrap', 'directive.affix', 'depth.services', 'ngCookies', 'ui.select2']);
 
 Depth.config(function($routeProvider) {
     $routeProvider.
@@ -170,10 +170,81 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
     {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
     {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
     {title: "Other Project Community", org: "Other", id: "511ac38ee4b084e2824d6a26"}];
+
+  /*
+  * getJsonArray: parses an array of strings that are json into an array of json objects
+  * @arrayOfString an array of strings that are json
+  * @returns an array of json objects
+  */
+  $scope.parseJsonArray = function(arrayOfStrings) {
+    if (!arrayOfStrings) {
+      return "";
+    }
+    var jsons = [];
+    angular.forEach(arrayOfStrings, function(str) {
+      jsons.push(JSON.parse(str));
+    });
+    return jsons;
+  };
+
   $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
   $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other Project"}];
 
   $scope.filter = {orgTypes: null, organizations: null, fiscalYears: null, projectTypes: null, pis: null, keywords: null, projStatuses: null, projects: null};
+  $scope.prefilter = {orgTypes: null, organizations: null, fiscalYears: null, projectTypes: null, pis: null, keywords: null, projStatuses: null, projects: null};
+
+  // select2/angularui doesn't work quite right and so we need to parse strings into json
+  $scope.$watch('prefilter.orgTypes', function(oldVal, newVal){
+    $scope.filter.orgTypes = $scope.parseJsonArray($scope.prefilter.orgTypes);
+  }, true);
+  $scope.$watch('prefilter.organizations', function(oldVal, newVal) {
+    $scope.filter.organizations = $scope.parseJsonArray($scope.prefilter.organizations);
+  }, true);
+  $scope.$watch('prefilter.pis', function(oldVal, newVal) {
+    $scope.filter.pis = $scope.parseJsonArray($scope.prefilter.pis);
+  }, true);
+  $scope.$watch('prefilter.keywords', function(oldVal, newVal) {
+    $scope.filter.keywords = $scope.parseJsonArray($scope.prefilter.keywords);
+  }, true);
+  $scope.$watch('prefilter.projects', function(oldVal, newVal) {
+    $scope.filter.projects = $scope.parseJsonArray($scope.prefilter.projects);
+  }, true);
+
+  // other watches for the project view page filters
+  $scope.pis = [];
+  $scope.$watch('allProjects', function(oldVal, newVal){
+    var contacts = [];
+    var fullContacts = [];
+    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
+    var filteredProjects = $scope.allProjects;
+    for (var i = 0; i < filteredProjects.length; i++) {
+      var pis = filterFilter(filteredProjects[i].contacts, {type: "Principal Investigator"});
+      fullContacts = fullContacts.concat(pis);
+    }
+    for (var i = 0; i < fullContacts.length; i++) {
+      if (fullContacts[i]) {
+        var idx = findIndexByKeyValue(contacts, "name", fullContacts[i].name);
+        // console.log(fullContacts[i]);
+        if (idx === -1) contacts.push(fullContacts[i]);
+      }
+    }
+    // contacts = jQuery.unique(contacts);
+    $scope.pis = contacts;
+  }, true);
+  $scope.kws = [];
+  $scope.$watch('allProjects', function(oldVal, newVal){
+    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
+    var filteredProjects = $scope.allProjects;
+    var keywords = [];
+    for (var i = 0; i < filteredProjects.length; i++) {
+      var kws = filterFilter(filteredProjects[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"});
+      for (var j = 0; j < kws.length; j++) {
+        var idx = findIndexByKeyValue(keywords, "name", kws[j].name);
+        if (idx === -1) keywords.push(kws[j]);
+      }
+    }
+    $scope.kws = keywords;
+  }, true);
 
   $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
 
@@ -761,40 +832,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
       }
     }
     return funding;
-  };
-
-  $scope.allPIs = function() {
-    var contacts = [];
-    var fullContacts = [];
-    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
-    var filteredProjects = $scope.allProjects;
-    for (var i = 0; i < filteredProjects.length; i++) {
-      var pis = filterFilter(filteredProjects[i].contacts, {type: "Principal Investigator"});
-      fullContacts = fullContacts.concat(pis);
-    }
-    for (var i = 0; i < fullContacts.length; i++) {
-      if (fullContacts[i]) {
-        var idx = findIndexByKeyValue(contacts, "name", fullContacts[i].name);
-        // console.log(fullContacts[i]);
-        if (idx === -1) contacts.push(fullContacts[i]);
-      }
-    }
-    // contacts = jQuery.unique(contacts);
-    return contacts;
-  };
-
-  $scope.allKeywords = function() {
-    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
-    var filteredProjects = $scope.allProjects;
-    var keywords = [];
-    for (var i = 0; i < filteredProjects.length; i++) {
-      var kws = filterFilter(filteredProjects[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"});
-      for (var j = 0; j < kws.length; j++) {
-        var idx = findIndexByKeyValue(keywords, "name", kws[j].name);
-        if (idx === -1) keywords.push(kws[j]);
-      }
-    }
-    return keywords;
   };
 
   $scope.prettyPrint = function(json) {
