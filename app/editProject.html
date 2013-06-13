@@ -437,23 +437,6 @@
       </ul>
     </div>
 
-    <legend>
-      NW CSC Science Agenda theme(s) Addressed
-      <a class="btn btn-info" href="http://www.doi.gov/csc/northwest/upload/NW-CSC-Science-Agenda-2012-2015.pdf" target="_blank">Explanation</a>
-      <a class="btn btn-info" href="{{sciencebaseUrl}}/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets" target="_blank">Source</a>
-    </legend>
-    <!-- Agenda from schema -->
-    <ul class="unstyled" ng-controller="FacetsCtrl">
-      <li ng-repeat="(concept, themes) in schema" class="control-group">
-        <label class="control-label" for="concept_{{$index}}">{{concept}}</label>
-        <div class="controls" ng-repeat="(theme, type) in themes | orderBy:theme">
-          <label class="checkbox inline" style="width: auto;">
-            <input class="inline" type="checkbox" ng-model="(json.facets | filter:isExpando)[0].object.themes[concept][theme]" />{{theme}}
-          </label>
-        </div>
-      </li>
-    </ul>
-
     <!-- Save, Create -->
     <button class="btn btn-primary offset2" ng-show="json.id" ng-click="put()">Save Changes</button>
     <button class="btn btn-primary offset2" ng-show="!json.id" ng-click="put()">Create Project</button>
