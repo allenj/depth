@@ -15,14 +15,17 @@
     </div>
 
     <div id="advanced-search" style="display: none; background-color: #eeeeee; padding: 10px;">
+      <pre>filter: {{filter}}</pre>
+      <pre>pre: {{prefilter}}</pre>
+      <pre>orgTypes: {{filter.orgTypes}}</pre>
 
       <ul class="unstyled" id="sort-fields">
         <!-- Organization Type -->
         <li>
           <label class="control-label" for="orgType">Organization Types</label>
           <div class="controls">
-            <select ui-select2 multiple ui-options="{multiple: true}" style="width: 100%;" ng-model="filter.orgTypes" ng-options="orgType as orgType.title for orgType in orgTypes" data-placeholder="organization type">
-              <option></option>
+            <select ui-select2 multiple style="width: 100%;" ng-model="prefilter.orgTypes" data-placeholder="choose organization types">
+              <option ng-repeat="orgType in orgTypes" value="{{orgType}}">{{orgType.title}}</option>
             </select>
           </div>
         </li>
@@ -30,7 +33,8 @@
         <li>
           <label class="control-label" for="organization">Organizations ({{(organizations | filterOrgs:{orgTypes: filter.orgTypes}).length}})</label>
           <div class="controls">
-            <select ui-select2 multiple ui-options="{multiple: true}" id="organization" placeholder="org" style="width: 100%;" ng-model="filter.organizations" ng-options="organization as organization.title for organization in organizations | filterOrgs:{orgTypes: filter.orgTypes}">
+            <select ui-select2 multiple id="organization" style="width: 100%;" ng-model="prefilter.organizations" data-placeholder="choose organizations">
+              <option ng-repeat="organization in organizations | filterOrgs:{orgTypes: filter.orgTypes}" value="{{organization}}">{{organization.title}}</option>
             </select>
           </div>
         </li>
@@ -39,7 +43,8 @@
           <div class="control-group">
             <label class="control-label" for="fiscalYear">Fiscal Years</label>
             <div class="controls">
-              <select ui-select2 multiple ui-options="{multiple: true}" id="fiscalYear" ng-model="filter.fiscalYears" ng-options="fiscalYear.fy as fiscalYear.fy for fiscalYear in fiscalYears" style="width: 100%;" placeholder="fiscal years">
+              <select ui-select2 multiple id="fiscalYear" ng-model="filter.fiscalYears" style="width: 100%;" data-placeholder="choose fiscal years">
+                <option ng-repeat="fiscalYear in fiscalYears" value="{{fiscalYear.fy}}">{{fiscalYear.fy}}</option>
               </select>
             </div>
           </div>
@@ -49,7 +54,8 @@
           <div class="control-group">
             <label class="control-label" for="projectType">Project Types</label>
             <div class="controls">
-              <select ui-select2 multiple ui-options="{multiple: true}" id="projectType" ng-model="filter.projectTypes" ng-options="projType.type as projType.type for projType in projectTypes" style="width: 100%" placeholder="project types">
+              <select ui-select2 multiple id="projectType" ng-model="filter.projectTypes" style="width: 100%" data-placeholder="choose project types">
+                <option ng-repeat="projType in projectTypes" value="{{projType.type}}">{{projType.type}}</option>
               </select>
             </div>
           </div>
@@ -59,7 +65,8 @@
           <div class="control-group">
             <label class="control-label" for="pi">Principal Investigators</label>
             <div class="controls">
-              <select ui-select2 multiple ui-options="{multiple: true}" id="pi" ng-model="filter.pis" ng-options="pi as pi.name for pi in allPIs() | orderBy:'name'" style="width: 100%" placeholder="principal investigators">
+              <select ui-select2 multiple id="pi" ng-model="prefilter.pis" style="width: 100%" data-placeholder="choose pis">
+                <option ng-repeat="pi in pis | orderBy:'name'" value="{{pi}}">{{pi.name}}</option>
               </select>
             </div>
           </div>
@@ -69,7 +76,8 @@
           <div class="control-group">
             <label class="control-label" for="pi">Keywords</label>
             <div class="controls">
-              <select ui-select2 multiple ui-options="{multiple: true}" id="keywords" ng-model="filter.keywords" ng-options="kw as kw.name for kw in allKeywords() | orderBy:'name'" style="width: 100%;" placeholder="keywords">
+              <select ui-select2 multiple id="keywords" ng-model="prefilter.keywords" style="width: 100%;" data-placeholder="choose keywords">
+                <option ng-repeat="kw in kws | orderBy:'name'" value="{{kw}}">{{kw.name}}</option>
               </select>
             </div>
           </div>
@@ -79,7 +87,8 @@
           <div class="control-group">
             <label class="control-label" for="projStatuses">Project Statuses</label>
             <div class="controls">
-              <select ui-select2 multiple ui-options="{multiple: true}" id="projStatuses" ng-model="filter.projStatuses" ng-options="status for status in projectStatuses" style="width: 100%;" placeholder="project statuses">
+              <select ui-select2 multiple id="projStatuses" ng-model="filter.projStatuses" style="width: 100%;" data-placeholder="choose project statuses">
+                <option ng-repeat="status in projectStatuses" value="{{status}}">{{status}}</option>
               </select>
             </div>
           </div>
@@ -89,16 +98,12 @@
           <div class="control-group">
             <label class="control-label" for="project">Projects ({{(allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses}).length}})</label>
             <div class="controls">
-              <select ui-select2 multiple ui-options="{multiple: true}" id="project" ng-model="filter.projects" ng-options="proj as proj.title for proj in allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses} | orderBy:'title'" style="width: 100%;" placeholder="project names">
+              <select ui-select2 multiple id="project" ng-model="prefilter.projects" style="width: 100%;" data-placeholder="choose project names">
+                <option ng-repeat="proj in allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses} | orderBy:'title'" value="{{proj}}">{{proj.title}}</option>
               </select>
             </div>
           </div>
         </li>
-
-        <li>
-          <!-- {{allProjects | projectsFilter:{orgTypes: orgType} | orderBy:'title'}} -->
-        </li>
-
       </ul> <!-- /sort-fields -->
 
       <!-- Agendas -->
