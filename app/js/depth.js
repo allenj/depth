@@ -1180,7 +1180,7 @@ function FacetsCtrl($scope, filterFilter) {
       newAgenda.themes[i].number = agenda.themes[i].number;
       newAgenda.themes[i].name = agenda.themes[i].name;
       var options = {};
-      for ( key in agenda.themes[i].options ) {
+      for ( var key in agenda.themes[i].options ) {
         options[key] = false;
       }
       newAgenda.themes[newAgenda.themes.length-1].options = options;

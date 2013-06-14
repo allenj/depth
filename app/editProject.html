@@ -428,7 +428,7 @@
         </li>
         <li ng-repeat="question in agenda.themes" class="control-group">
           <label class="controls-label">{{question.number}}. {{question.name}}</label>
-          <div class="controls" ng-repeat="(theme, value) in question.options | orderBy:theme">
+          <div class="controls" ng-repeat="(theme, value) in question.options | orderBy:theme track by $index">
             <label class="checkbox inline" style="width: auto;">
               <input class="inline" type="checkbox" ng-model="question.options[theme]" />{{theme}}
             </label>
