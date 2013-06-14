@@ -4,12 +4,15 @@ var Depth = angular.module('depth', ['ngResource', 'ui.bootstrap', 'directive.af
 
 Depth.config(function($routeProvider) {
     $routeProvider.
+      when('/index', {controller:IndexCtrl, template:'communityIndex.html'}).
+      when('/index/nccwsc', {controller:IndexCtrl, template:'communityIndex.html'}).
+      when('/index/sandy', {controller:IndexCtrl, template:'communityIndex.html'}).
       when('/docs', {controller:DocsCtrl, templateUrl:'docs.html'}).
       when('/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
       when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
       when('/agendas', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
       when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
-      // otherwise({redirectTo:'/'});
+      otherwise({redirectTo:'/index'});
   });
 
 Depth.value('ui.config', {
