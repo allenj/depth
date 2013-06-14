@@ -1,1 +1,0 @@
-svn_username = Robb Prescott <rprescott@usgs.gov>
