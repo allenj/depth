@@ -32,8 +32,27 @@
   <!-- End USGS Header -->
 
   <div class="navbar navbar-static-top navbar-inverse">
-    <div class="navbar-inner">
-      <a class="brand" href="#">DEPTH Project Editor</a>
+    <div class="navbar-inner dropdown">
+      <a class="brand dropdown-toggle" style="display: inline;">DEPTH Project Editor</a>
+      <ul class="dropdown-menu" ng-controller="DepthCtrl">
+        <li>
+          <button class="btn btn-link" ng-click="setRoute('view')" style="width: 100%"><i class="icon-search"></i> View Projects</button>
+        </li>
+        <li>
+          <button class="btn btn-link" ng-click="setRoute('edit')" style="width: 100%"><i class="icon-pencil"></i> Edit Projects</button>
+        </li>
+        <li>
+          <button class="btn btn-link" ng-click="setRoute('edit')" style="width: 100%"><i class="icon-plus"></i> Create Project</button>
+        </li>
+        <li>
+          <button class="btn btn-link" ng-click="setRoute('agendas')" style="width: 100%"><i class="icon-leaf"></i> Edit Agendas</button>
+        </li>
+        <li>
+          <button class="btn btn-link" ng-click="setRoute('docs')" style="width: 100%"><i class="icon-book"></i> Documentation</button>
+        </li>
+      </ul>
+
+      <!-- <a class="brand" href="#">DEPTH Project Editor</a> -->
       <ul class="nav" style="float: right;" ng-controller="DepthCtrl">
         <li ng-show="josso_check.user" ><a href="#">{{josso_check.user}}</a></li>
         <li ng-show="!josso_check.user"><a href="/depth/josso-auth/josso-login.php">Login</a></li>
