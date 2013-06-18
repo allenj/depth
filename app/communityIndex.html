@@ -9,8 +9,13 @@
           <br/>
         </div>
       </div>
-      <div ng-controller="IndexCtrl">
-        <!-- <button class="btn ng-class: {active:isActiveRoute('view')}" ng-click="setRoute('view')">View Report</button> -->
+      <div ng-show="!projectSet">
+        <p>Data Entry for Project Tracking and Highlighting</p>
+        <button class="btn" ng-click="setRoute('index/csc')">CSC's and Partners</button>
+        <button class="btn" ng-click="setRoute('index/sandy')">Sandy</button>
+        <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
+      </div>
+      <div ng-show="projectSet === 'csc'">
         <p>Data Entry for Project Tracking and Highlighting</p>
         <table class="unstyled">
           <tr ng-repeat="link in links">
@@ -22,9 +27,19 @@
             <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
           </tr></td>
         </table>
-        <!--[if lte IE 9]>
-        <h2 style="color: rgb(185, 74, 72);">This application has been optimized for use in modern web browsers. Please upgrade Internet Explorer to verison 10 (or higher) or use Chrome, Firefox, Safari, or Opera.</h2>
-        <![endif]-->
+      </div>
+      <div ng-show="projectSet === 'sandy'">
+        <p>Data Entry for Project Tracking and Highlighting</p>
+        <table class="unstyled">
+          <tr ng-repeat="link in setLinks() | filter:index | filter:agendas">
+            <td>
+            <button class="btn" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
+            </td>
+          </tr>
+          <tr><td>
+            <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
+          </tr></td>
+        </table>
       </div>
     </div>
   </div>

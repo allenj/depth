@@ -5,8 +5,7 @@ var Depth = angular.module('depth', ['ngResource', 'ui.bootstrap', 'directive.af
 Depth.config(function($routeProvider) {
   $routeProvider.
     when('/', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/index/nccwsc', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/index/sandy', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
+    when('/index/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
     when('/docs', {controller:DocsCtrl, templateUrl:'docs.html'}).
     when('/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
     when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).

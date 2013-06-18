@@ -35,6 +35,9 @@
     <div class="navbar-inner dropdown">
       <a class="brand dropdown-toggle" style="display: inline;">DEPTH Project Editor</a>
       <ul class="dropdown-menu" ng-controller="IndexCtrl">
+        <li>
+          <button class="btn btn-link" ng-click="setRoute('index')" style="width: 100%"><i class='icon-home'></i> Home</button>
+        </li>
         <li ng-repeat="link in links">
           <button class="btn btn-link" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
         </li>
@@ -48,8 +51,13 @@
     </div>
   </div><!-- /navbar -->
 
-  <!-- Angular JS views -->
+  <!-- Angular JS views, aka 'the magic!' -->
   <div ng-view></div>
+  <!--[if lte IE 9]>
+    <div class="hero-unit">
+      <h2 style="color: rgb(185, 74, 72);">This application has been optimized for use in modern web browsers. Please upgrade Internet Explorer to verison 10 (or higher) or use Chrome, Firefox, Safari, or Opera.</h2>
+    </div> 
+  <![endif]-->
 
   <!-- USGS Footer -->
   <div style="margin-top: 50px; font-size: 93%; background:#ccc; border-bottom:1px solid #333; border-top:1px solid #333; padding: 0.2em;">
