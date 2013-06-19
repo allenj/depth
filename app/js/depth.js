@@ -43,8 +43,8 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   // $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
   // ALERTS
-  $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
-  // $scope.alerts = [];
+  // $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
+  $scope.alerts = [];
   $scope.devAlerts = [];
 
   // View page variables
