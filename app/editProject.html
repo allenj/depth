@@ -409,35 +409,38 @@
       </li>
     </ul>
 
-    <legend>Science Themes</legend>
-    <div ng-controller="FacetsCtrl">
-      <div class="control-group">
-        <label class="control-label" for="chooseAgenda">Add Agenda</label>
-        <div class="controls">
-          <select id="chooseAgenda" ng-model="newAgenda" ng-options="agenda as agenda.name for agenda in agendas">
-            <option value="">Choose Agenda</option>
-          </select>
-          <a class="btn" ng-click="addAgenda()">Add Agenda</a>
-        </div>
-      </div>
-      <ul class="unstyled" ng-repeat="agenda in (json.facets | filter:isExpando)[0].object.agendas">
-        <li class="control-group">
-          <label class="controls-label" for="agenda_{{$index}}"><b>{{agenda.name}}</b></label>
+    <!-- Agendas -->
+    <span ng-show="hasAgendas()">
+      <legend>Science Themes</legend>
+      <div ng-controller="FacetsCtrl">
+        <div class="control-group">
+          <label class="control-label" for="chooseAgenda">Add Agenda</label>
           <div class="controls">
-            <a class="btn btn-info" href="{{getAgenda().url}}" target="_blank">{{agenda.name}} Explanation</a>
-            <a class="btn btn-danger" ng-click="deleteAgenda()">Remove {{agenda.name}}</a>
+            <select id="chooseAgenda" ng-model="newAgenda" ng-options="agenda as agenda.name for agenda in agendas">
+              <option value="">Choose Agenda</option>
+            </select>
+            <a class="btn" ng-click="addAgenda()">Add Agenda</a>
           </div>
-        </li>
-        <li ng-repeat="question in agenda.themes" class="control-group">
-          <label class="controls-label">{{question.number}}. {{question.name}}</label>
-          <div class="controls" ng-repeat="(theme, value) in question.options | orderBy:theme track by $index">
-            <label class="checkbox inline" style="width: auto;">
-              <input class="inline" type="checkbox" ng-model="question.options[theme]" />{{theme}}
-            </label>
-          </div>
-        </li>
-      </ul>
-    </div>
+        </div>
+        <ul class="unstyled" ng-repeat="agenda in (json.facets | filter:isExpando)[0].object.agendas">
+          <li class="control-group">
+            <label class="controls-label" for="agenda_{{$index}}"><b>{{agenda.name}}</b></label>
+            <div class="controls">
+              <a class="btn btn-info" href="{{getAgenda().url}}" target="_blank">{{agenda.name}} Explanation</a>
+              <a class="btn btn-danger" ng-click="deleteAgenda()">Remove {{agenda.name}}</a>
+            </div>
+          </li>
+          <li ng-repeat="question in agenda.themes" class="control-group">
+            <label class="controls-label">{{question.number}}. {{question.name}}</label>
+            <div class="controls" ng-repeat="(theme, value) in question.options | orderBy:theme track by $index">
+              <label class="checkbox inline" style="width: auto;">
+                <input class="inline" type="checkbox" ng-model="question.options[theme]" />{{theme}}
+              </label>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </span>
 
     <!-- Save, Create -->
     <button class="btn btn-primary offset2" ng-show="json.id" ng-click="put()">Save Changes</button>

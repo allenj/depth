@@ -153,3 +153,14 @@ Depth.filter('filterParts', function () {
   }
 
 });
+
+Depth.filter('yearOnly', function() {
+  return function (date) {
+    if (date) {
+      return date.substring(0,4);
+    }
+    else {
+      return null;
+    }
+  }
+});

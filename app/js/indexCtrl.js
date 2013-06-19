@@ -1,47 +1,58 @@
 'use strict';
 
-function IndexCtrl($scope, filterFilter, $http, $location, $filter, $routeParams) {
+function IndexCtrl($scope, filterFilter, $http, $location, $filter, $routeParams, State) {
 	$scope.alerts = [];
 	$scope.devAlerts = [];
-  $scope.params = $routeParams;
-  $scope.projectSet = $scope.params.projectSet;
+  $scope.routeParams = $routeParams;
+  $scope.projectSet = $routeParams.projectSet;
   $scope.setInfo = {};
-  $scope.setInfo.projectSets = [
-    {name: "csc", hasAgenda: true, parentIds: []},
-    {name: "sandy", hasAgenda: false, parentIds: []}
-  ];
+  $scope.shared = State.shared;
+  $scope.projectSets = $scope.shared.projectSets;
+  $scope.currentSet = $scope.shared.currentSet;
+  $scope.links = $scope.shared.links;
+  $scope.currentSet = $scope.shared.currentSet;
+  $scope.curLinks = angular.copy($scope.links);
+
+  var refreshLinks = function() {
+    $scope.curLinks = angular.copy($scope.links);
+    if (!$scope.shared.currentSet.hasAgenda) {
+      var idx = findIndexByKeyValue($scope.curLinks, 'route', 'agendas')
+      if (idx > 0) {
+        $scope.curLinks.splice(idx, 1);
+      }
+    }
+  };
+
+  var setIdx = findIndexByKeyValue($scope.shared.projectSets, 'route', $scope.routeParams.projectSet);
+  if (setIdx < 0) {
+    $scope.shared.currentSet = {};
+    $location.path('/');
+  }
+  else {
+    $scope.shared.currentSet = $scope.shared.projectSets[setIdx];
+    refreshLinks();
+  }
+
+  // Watches
   $scope.$watch('projectSet', function(oldVal, newVal) {
-    var setIdx = findIndexByKeyValue($scope.setInfo.projectSets, 'name', $scope.projectSet);
+    var setIdx = findIndexByKeyValue($scope.shared.projectSets, 'route', $scope.projectSet);
     if (setIdx < 0) {
-      $scope.setInfo.currentSet = {};
+      $scope.shared.currentSet = {};
     }
     else {
-      $scope.setInfo.currentSet = $scope.setInfo.projectSets[setIdx];
+      $scope.shared.currentSet = $scope.shared.projectSets[setIdx];
+      refreshLinks();
     }
   }, true);
 
-
+  // Functions
 	$scope.setRoute = function(route) {
+    if ($scope.shared.currentSet.route && route !== "/") {
+      // route = route + "/" + $scope.shared.currentSet.route;
+      route = $scope.shared.currentSet.route + "/" + route;
+    }
    	$location.path(route);
   };
 
-	$scope.links = [
-    {route: "view", text: "<i class='icon-search'></i> View Projects"},
-    {route: "edit", text: "<i class='icon-pencil'></i> Edit Projects"},
-    {route: "edit", text: "<i class='icon-plus'></i> Create Project"},
-    {route: "agendas", text: "<i class='icon-leaf'></i> Edit Agendas"},
-    {route: "docs", text: "<i class='icon-book'></i> Documentation"}
-  ];
-
-  $scope.setLinks = function() {
-    var setLinks = $scope.links
-    if (!$scope.setInfo.currentSet.hasAgenda) {
-      var idx = findIndexByKeyValue($scope.links, 'route', 'agendas')
-      if (idx > 0) {
-        setLinks.splice(idx, 1);
-      }
-    }
-    return setLinks;
-  };
-
 }
+

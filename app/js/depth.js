@@ -4,14 +4,15 @@ var Depth = angular.module('depth', ['ngResource', 'ui.bootstrap', 'directive.af
 
 Depth.config(function($routeProvider) {
   $routeProvider.
-    when('/', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/index/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/docs', {controller:DocsCtrl, templateUrl:'docs.html'}).
-    when('/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
-    when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
-    when('/agendas', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
-    when('/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}).
-    otherwise({redirectTo:'/'});
+    when('/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
+    when('/:projectSet/index', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
+    when('/:projectSet/docs', {controller:DocsCtrl, templateUrl:'docs.html'}).
+    when('/:projectSet/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+    when('/:projectSet/edit/:itemId', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+    // when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
+    when('/:projectSet/agendas', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
+    when('/:projectSet/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
+    // otherwise({redirectTo:'/'});
 });
 
 Depth.value('ui.config', {
@@ -38,7 +39,7 @@ Depth.run(function($rootScope, $location, $anchorScroll, $routeParams) {
   });
 });
 
-function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
+function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams, State) {
   $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   // $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
   // ALERTS
@@ -49,6 +50,15 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
   // View page variables
   // $scope.view = {};
   $scope.view = {chooseAgenda: {}};
+
+  $scope.hasAgendas = function() {
+    if ($routeParams.projectSet === "csc") {
+      return true;
+    }
+    else { 
+      return false ; 
+    }
+  };
 
   // WATCHES
   // Could go deeper and make this function faster and run less
@@ -217,11 +227,10 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
 
   // other watches for the project view page filters
   $scope.pis = [];
-  $scope.$watch('allProjects', function(oldVal, newVal){
+  $scope.$watch('searchProjects', function(oldVal, newVal){
     var contacts = [];
     var fullContacts = [];
-    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
-    var filteredProjects = $scope.allProjects;
+    var filteredProjects = $scope.searchProjects;
     for (var i = 0; i < filteredProjects.length; i++) {
       var pis = filterFilter(filteredProjects[i].contacts, {type: "Principal Investigator"});
       fullContacts = fullContacts.concat(pis);
@@ -238,7 +247,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
   }, true);
   $scope.kws = [];
   $scope.$watch('allProjects', function(oldVal, newVal){
-    // var filteredProjects = filterFilter($scope.allProjects, $scope.filterProjectsView);
     var filteredProjects = $scope.allProjects;
     var keywords = [];
     for (var i = 0; i < filteredProjects.length; i++) {
@@ -249,6 +257,16 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter) {
       }
     }
     $scope.kws = keywords;
+  }, true);
+  $scope.searchProjects = [];
+  $scope.$watch('[allProjects, filter]', function(oldVal, newVal){
+    $scope.searchProjects = $filter('projectsFilter')($scope.allProjects, 
+      {
+        orgTypes: $scope.filter.orgTypes, 
+        orgs: $scope.filter.organizations, 
+        projType: $scope.filter.projectType
+      });
+
   }, true);
 
   $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];

@@ -40,7 +40,7 @@
         <!-- Fiscal Year -->
         <li>
           <div class="control-group">
-            <label class="control-label" for="fiscalYear">Fiscal Years</label>
+            <label class="control-label" for="fiscalYear">Fiscal Years ({{searchProjects.length}})</label>
             <div class="controls">
               <select ui-select2 multiple id="fiscalYear" ng-model="filter.fiscalYears" style="width: 100%;" data-placeholder="choose fiscal years">
                 <option ng-repeat="fiscalYear in fiscalYears" value="{{fiscalYear.fy}}">{{fiscalYear.fy}}</option>
@@ -62,7 +62,7 @@
         <!-- PI -->
         <li>
           <div class="control-group">
-            <label class="control-label" for="pi">Principal Investigators</label>
+            <label class="control-label" for="pi">Principal Investigators ({{pis.length}})</label>
             <div class="controls">
               <select ui-select2 multiple id="pi" ng-model="prefilter.pis" style="width: 100%" data-placeholder="choose pis">
                 <option ng-repeat="pi in pis | orderBy:'name'" value="{{pi}}">{{pi.name}}</option>
@@ -106,38 +106,40 @@
       </ul> <!-- /sort-fields -->
 
       <!-- Agendas -->
-      <label for="chooseAgenda">Agendas</label>
-      <ul class="unstyled" ng-controller="FacetsCtrl">
-        <li>
-          <select id="chooseAgenda" ng-model="filter.agenda" ng-options="agenda as agenda.name for agenda in agendas">
-            <option value="">Choose Agenda</option>
-          </select>
-          <span ng-show="filter.agenda">
-            {{filter.agenda.name}} 
-            <a class="btn btn-info" href="{{filter.agenda.url}}" target="_blank">View Agenda</a>
-          </span>
-        </li>
-        <li ng-show="filter.agenda">
-          <button class="btn" ng-class="{active: filter.agenda.all}" ng-click="toggleAgenda(filter.agenda, true)">all</button>
-          <button class="btn" ng-class="{active: filter.agenda.none}" ng-click="toggleAgenda(filter.agenda, false)">none</button>
-        </li>
-        <li ng-show="filter.agenda">
-          <table>
-            <tr>
-              <td ng-repeat="question in filter.agenda.themes">
-                <button style="width: 100%;" class="btn" ng-class="{active: question.set}" ng-click="toggleQuestion(question, question.set)">{{question.number}}</button>
-              </td>
-            </tr>
-            <tr>
-              <td ng-repeat="question in filter.agenda.themes">
-                <span style="width: auto;" ng-repeat="(theme, value) in question.options | orderBy:'theme' track by $index">
-                  <radio-button number="question.number" theme="theme" model="question.options[theme]" width="1"></radio-button>
-                </span>
-              </td>
-            </tr>
-          </table>
-        </li>
-      </ul>
+      <span ng-show="hasAgendas()">
+        <label for="chooseAgenda">Agendas</label>
+        <ul class="unstyled" ng-controller="FacetsCtrl">
+          <li>
+            <select id="chooseAgenda" ng-model="filter.agenda" ng-options="agenda as agenda.name for agenda in agendas">
+              <option value="">Choose Agenda</option>
+            </select>
+            <span ng-show="filter.agenda">
+              {{filter.agenda.name}} 
+              <a class="btn btn-info" href="{{filter.agenda.url}}" target="_blank">View Agenda</a>
+            </span>
+          </li>
+          <li ng-show="filter.agenda">
+            <button class="btn" ng-class="{active: filter.agenda.all}" ng-click="toggleAgenda(filter.agenda, true)">all</button>
+            <button class="btn" ng-class="{active: filter.agenda.none}" ng-click="toggleAgenda(filter.agenda, false)">none</button>
+          </li>
+          <li ng-show="filter.agenda">
+            <table>
+              <tr>
+                <td ng-repeat="question in filter.agenda.themes">
+                  <button style="width: 100%;" class="btn" ng-class="{active: question.set}" ng-click="toggleQuestion(question, question.set)">{{question.number}}</button>
+                </td>
+              </tr>
+              <tr>
+                <td ng-repeat="question in filter.agenda.themes">
+                  <span style="width: auto;" ng-repeat="(theme, value) in question.options | orderBy:'theme' track by $index">
+                    <radio-button number="question.number" theme="theme" model="question.options[theme]" width="1"></radio-button>
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </li>
+        </ul>
+      </span>
     </div>
   </div>
 </div>
@@ -170,8 +172,8 @@
           <td>
             <!-- {{(proj.dates | filter:"Start")[0].dateString | date:'mediumDate'}} {{((proj.dates | filter:"Start").length > 0 && (proj.dates | filter:"End").length > 0) && "-" || ""}} -->
             <!-- {{(proj.dates | filter:"End")[0].dateString | date:'mediumDate'}} -->
-            <b>{{(proj.dates | filter:"Start")[0].dateString}}</b> {{((proj.dates | filter:"Start").length > 0 && (proj.dates | filter:"End").length > 0) && "-" || ""}}
-            <b>{{(proj.dates | filter:"End")[0].dateString}}</b>
+            <b>{{(proj.dates | filter:"Start")[0].dateString | yearOnly}}</b> {{((proj.dates | filter:"Start").length > 0 && (proj.dates | filter:"End").length > 0) && "-" || ""}}
+            <b>{{(proj.dates | filter:"End")[0].dateString | yearOnly}}</b>
           </td>
           <td><a href="{{sciencebaseUrl}}/item/{{proj.id}}" target="_blank">{{proj.title}}</a></td>
           <td>

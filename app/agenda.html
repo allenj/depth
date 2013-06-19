@@ -4,96 +4,103 @@
   </li>
 </ul>
 
-<legend>
-  Agendas
-</legend>
+<div id="viewAgendas" style="display: block;">
+  <legend>
+    Agendas
+    <button class="btn" ng-click="agenda = newAgenda();">New</button>
+  </legend>
 
-<div ng-repeat="item in items | orderBy:'title'">
-  <table class="table" ng-show="item.agendas.length">
-    <caption><span style="font-weight: bold;">{{item.title}}</span> ({{item.agendas.length || 0}} Agendas)</caption>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th># themes</th>
-        <th>PDF Link</th>
-        <th></th>
+  <div ng-repeat="item in items | orderBy:'title'">
+    <table class="table" ng-show="item.agendas.length">
+      <caption><span style="font-weight: bold;">{{item.title}}</span> ({{item.agendas.length || 0}} Agendas)</caption>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th># themes</th>
+          <th>PDF Link</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tr ng-repeat="agenda in item.agendas track by $index">
+        <td>{{agenda.name}}</td>
+        <td>{{agenda.themes.length}}</td>
+        <td><a href="{{agenda.url}}">pdf</a></td>
+        <td><button class="btn" ng-click="edit(item, agenda)">edit</button></td>
+        <td><button class="btn" ng-click="deleteAgenda(item, agenda)">delete</button></td>
       </tr>
-    </thead>
-    <tr ng-repeat="agenda in item.agendas track by $index">
-      <td>{{agenda.name}}</td>
-      <td>{{agenda.themes.length}}</td>
-      <td><a href="{{agenda.url}}">pdf</a></td>
-      <td><button type="button" ng-click="deleteAgenda(item, agenda)">delete</button></td>
-    </tr>
-  </table>
+    </table>
+  </div>
 </div>
 
-<legend>
-  Agenda
-  <button class="btn" ng-click="agenda = newAgenda();">New</button>
-  <button class="btn" ng-click="addAgenda();">Add</button>
-  <button class="btn" ng-click="save();">save</button>
-</legend>
+<div id="editAgenda" style="display: none;">
+  <legend>
+    Agenda
+    <button class="btn" ng-click="view();">View Agendas</button>
+    <button class="btn" ng-click="agenda = newAgenda();">Clear</button>
+    <button class="btn btn-primary" ng-click="addAgenda();" ng-show="isNew">Add</button>
+    <button class="btn btn-primary" ng-click="save();" ng-show="!isNew">Save</button>
+  </legend>
 
-<ul class="unstyled" id="agenda-fields">
-  <li>
-    <label class="control-label" for="editAgenda">Edit Agenda</label>
-    <div class="controls">
-      <select id="editAgenda" ng-model="agenda" ng-options="agenda as agenda.name for agenda in agendas">
-        <option value=""></option>
-      </select>
-    </div>
-  </li>
-  <li>
-    <label class="control-label" for="parent">Parent</label>
-    <div class="controls">
-      <select id="parent" ng-model="agenda.id" ng-options="item.id as item.title for item in items">
-        <option value=""></option>
-      </select>
-    </div>
-  </li>
-  <li>
-    <label class="control-label" for="name">Name</label>
-    <div class="controls">
-      <input type="text" id="name" ng-model="agenda.name" />
-    </div>
-  </li>
-  <li>
-    <label class="control-label" for="description">Description</label>
-    <div class="controls">
-      <input type="text" id="description" ng-model="agenda.description" />
-    </div>
-  </li>
-  <li>
-    <label class="control-label" for="url">URL</label>
-    <div class="controls">
-      <input type="text" id="url" ng-model="agenda.url" />
-    </div>
-  </li>
-  <li>
-    <legend>Themes <button class="btn" ng-click="agenda.themes = addTheme(agenda.themes);">Add Theme</button></legend>
-    <ol>
-      <li ng-repeat="theme in agenda.themes">
-        <div class="controls">
-          <input type="text" id="theme_{{$index}}" ng-model="theme.name" />
-          <input type="hidden" value="{{$index}}" ng-model="theme.question" />
-          <button class="btn" ng-click="agenda.themes = removeTheme(agenda.themes, theme)">Remove Theme</button>
-        </div>
-        <ul class="inline">
-          <li><button class="btn" ng-click="theme.options = addOption(theme.options);" >+</button></li>
-          <li><button class="btn" ng-click="theme.options = removeOption(theme.options);">-</button></li>
-          <li ng-repeat="(key, value) in theme.options track by $index">{{key}}</li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-</ul>
+  <ul class="unstyled" id="agenda-fields">
+    <!-- <li>
+      <label class="control-label" for="editAgenda">Edit Agenda</label>
+      <div class="controls">
+        <select id="editAgenda" ng-model="agenda" ng-options="agenda as agenda.name for agenda in agendas">
+          <option value=""></option>
+        </select>
+      </div>
+    </li> -->
+    <li>
+      <label class="control-label" for="parent">Parent</label>
+      <div class="controls">
+        <select id="parent" ng-model="agenda.id" ng-options="item.id as item.title for item in items">
+          <option value=""></option>
+        </select>
+      </div>
+    </li>
+    <li>
+      <label class="control-label" for="name">Name</label>
+      <div class="controls">
+        <input type="text" id="name" ng-model="agenda.name" />
+      </div>
+    </li>
+    <li>
+      <label class="control-label" for="description">Description</label>
+      <div class="controls">
+        <input type="text" id="description" ng-model="agenda.description" />
+      </div>
+    </li>
+    <li>
+      <label class="control-label" for="url">URL</label>
+      <div class="controls">
+        <input type="text" id="url" ng-model="agenda.url" />
+      </div>
+    </li>
+    <li>
+      <legend>Themes <button class="btn" ng-click="agenda.themes = addTheme(agenda.themes);">Add Theme</button></legend>
+      <ol>
+        <li ng-repeat="theme in agenda.themes">
+          <div class="controls">
+            <input type="text" id="theme_{{$index}}" ng-model="theme.name" />
+            <input type="hidden" value="{{$index}}" ng-model="theme.question" />
+            <button class="btn" ng-click="agenda.themes = removeTheme(agenda.themes, theme)">Remove Theme</button>
+          </div>
+          <ul class="inline">
+            <li><button class="btn" ng-click="theme.options = addOption(theme.options);" >+</button></li>
+            <li><button class="btn" ng-click="theme.options = removeOption(theme.options);">-</button></li>
+            <li ng-repeat="(key, value) in theme.options track by $index">{{key}}</li>
+          </ul>
+        </li>
+      </ol>
+    </li>
+  </ul>
+</div>
 
 <br />
 
 <button class="btn btn-link offset12" id="show-json" onclick="show('json', true); return false;">Development Information</button>
-<!-- <div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;"> -->
-<div id="json" style="display: block; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+<div id="json" style="display: none; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;">
+<!-- <div id="json" style="display: block; outline: 1px solid #ccc; padding: 5px; margin: 5px; font-family: Menlo, Monaco, 'Courier New', monospace;"> -->
   <legend>Developer Errors</legend>
   <ul class="unstyled">
     <li ng-repeat="alert in devAlerts" class="alert alert-{{alert.type}}">{{alert.msg}}

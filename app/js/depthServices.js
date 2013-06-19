@@ -17,3 +17,22 @@ angular.module('depth.services', ['ngResource'])
 		});
 	})
 	.value('version', '0.1');
+
+Depth.factory('State', function() {
+	var currentSet = {};
+	var projectSets = [
+    {route: "csc", name: "CSCs & Partners", hasAgenda: true, parentIds: []},
+    {route: "sandy", name: "Sandy", hasAgenda: false, parentIds: []}
+  ];
+
+	var links = [
+    {route: "view", text: "<i class='icon-search'></i> View Projects"},
+    {route: "edit", text: "<i class='icon-pencil'></i> Edit Projects"},
+    {route: "edit/create", text: "<i class='icon-plus'></i> Create Project"},
+    {route: "agendas", text: "<i class='icon-leaf'></i> Edit Agendas"},
+    {route: "docs", text: "<i class='icon-book'></i> Documentation"}
+  ];
+
+  return {shared: {currentSet: currentSet, projectSets: projectSets, links: links}};
+
+});

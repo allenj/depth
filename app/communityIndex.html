@@ -6,19 +6,22 @@
           <h1>DEPTH</h1>
         </div>
         <div class="span6">
-          <br/>
         </div>
       </div>
+      <!-- No project selected -->
       <div ng-show="!projectSet">
         <p>Data Entry for Project Tracking and Highlighting</p>
-        <button class="btn" ng-click="setRoute('index/csc')">CSC's and Partners</button>
-        <button class="btn" ng-click="setRoute('index/sandy')">Sandy</button>
         <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
+        <p style="font-style: italic;">Please select your project set:</p>
+        <span ng-repeat="set in projectSets">
+          <button class="btn" ng-click="setRoute(set.route + '/index')">{{set.name}}</button>
+        </span>
       </div>
+      <!-- csc selected -->
       <div ng-show="projectSet === 'csc'">
         <p>Data Entry for Project Tracking and Highlighting</p>
         <table class="unstyled">
-          <tr ng-repeat="link in links">
+          <tr ng-repeat="link in curLinks">
             <td>
             <button class="btn" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
             </td>
@@ -28,10 +31,11 @@
           </tr></td>
         </table>
       </div>
+      <!-- sandy selected -->
       <div ng-show="projectSet === 'sandy'">
         <p>Data Entry for Project Tracking and Highlighting</p>
         <table class="unstyled">
-          <tr ng-repeat="link in setLinks() | filter:index | filter:agendas">
+          <tr ng-repeat="link in curLinks">
             <td>
             <button class="btn" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
             </td>

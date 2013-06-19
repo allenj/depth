@@ -7,6 +7,8 @@ function AgendaCtrl($scope, filterFilter, $http, $location, $filter, Item, Items
 	$scope.agendas = [];
 	$scope.items = [];
 
+	$scope.isNew = true;
+
 	// Get all the agendas for an item
 	$scope.getAgendas = function(item) {
 		if (!item) {
@@ -103,8 +105,19 @@ function AgendaCtrl($scope, filterFilter, $http, $location, $filter, Item, Items
 		return $scope.items[idx];
 	};
 
+	// edit an agenda
+	$scope.edit = function(item, agenda) {
+		$scope.isNew = false;
+		$scope.agenda = agenda;
+		show('editAgenda', false);
+		show('viewAgendas', true);
+	};
+
 	// clear the agenda
 	$scope.newAgenda = function() {
+		show('editAgenda', false);
+		show('viewAgendas', true);
+		$scope.isNew = true;
 		var agenda = 
 		{
 			name: "",
@@ -122,8 +135,12 @@ function AgendaCtrl($scope, filterFilter, $http, $location, $filter, Item, Items
 			}
 			]
 		};
-
 		return agenda;
+	};
+
+	$scope.view = function() {
+		show('viewAgendas', false);
+		show('editAgenda', true);
 	};
 
 	$scope.addTheme = function(themes) {
