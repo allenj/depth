@@ -40,7 +40,7 @@
         <!-- Fiscal Year -->
         <li>
           <div class="control-group">
-            <label class="control-label" for="fiscalYear">Fiscal Years ({{searchProjects.length}})</label>
+            <label class="control-label" for="fiscalYear">Fiscal Years</label>
             <div class="controls">
               <select ui-select2 multiple id="fiscalYear" ng-model="filter.fiscalYears" style="width: 100%;" data-placeholder="choose fiscal years">
                 <option ng-repeat="fiscalYear in fiscalYears" value="{{fiscalYear.fy}}">{{fiscalYear.fy}}</option>
