@@ -21,7 +21,7 @@
       <div ng-show="projectSet === 'csc'">
         <p>Data Entry for Project Tracking and Highlighting</p>
         <table class="unstyled">
-          <tr ng-repeat="link in curLinks">
+          <tr ng-repeat="link in shared.curLinks">
             <td>
             <button class="btn" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
             </td>
@@ -35,7 +35,7 @@
       <div ng-show="projectSet === 'sandy'">
         <p>Data Entry for Project Tracking and Highlighting</p>
         <table class="unstyled">
-          <tr ng-repeat="link in curLinks">
+          <tr ng-repeat="link in shared.curLinks">
             <td>
             <button class="btn" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
             </td>

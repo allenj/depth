@@ -36,9 +36,9 @@
       <a class="brand dropdown-toggle" style="display: inline;">DEPTH Project Editor</a>
       <ul class="dropdown-menu" ng-controller="IndexCtrl">
         <li>
-          <button class="btn btn-link" ng-click="setRoute('/')" style="width: 100%"><i class='icon-home'></i> Home</button>
+          <button class="btn btn-link" ng-click="setRoute('/')" style="width: 100%"><i class='icon-home'></i> Choose Project Set</button>
         </li>
-        <li ng-repeat="link in curLinks">
+        <li ng-repeat="link in shared.curLinks">
           <button class="btn btn-link" ng-click="setRoute(link.route)" style="width: 100%" ng-bind-html-unsafe="link.text"></button>
         </li>
       </ul>

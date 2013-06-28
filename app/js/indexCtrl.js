@@ -11,17 +11,22 @@ function IndexCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.currentSet = $scope.shared.currentSet;
   $scope.links = $scope.shared.links;
   $scope.currentSet = $scope.shared.currentSet;
-  $scope.curLinks = angular.copy($scope.links);
+  $scope.shared.curLinks = angular.copy($scope.links);
 
   var refreshLinks = function() {
-    $scope.curLinks = angular.copy($scope.links);
+    $scope.shared.curLinks = angular.copy($scope.links);
+    // Had to use some jQuery to see if the object is empty
+    if ($.isEmptyObject($scope.shared.currentSet)) {
+      $scope.shared.curLinks = [];
+    } 
     if (!$scope.shared.currentSet.hasAgenda) {
-      var idx = findIndexByKeyValue($scope.curLinks, 'route', 'agendas')
+      var idx = findIndexByKeyValue($scope.shared.curLinks, 'route', 'agendas')
       if (idx > 0) {
-        $scope.curLinks.splice(idx, 1);
+        $scope.shared.curLinks.splice(idx, 1);
       }
     }
   };
+  refreshLinks();
 
   var setIdx = findIndexByKeyValue($scope.shared.projectSets, 'route', $scope.routeParams.projectSet);
   if (setIdx < 0) {
@@ -34,7 +39,7 @@ function IndexCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   }
 
   // Watches
-  $scope.$watch('projectSet', function(oldVal, newVal) {
+  $scope.$watch('projectSets', function(oldVal, newVal) {
     var setIdx = findIndexByKeyValue($scope.shared.projectSets, 'route', $scope.projectSet);
     if (setIdx < 0) {
       $scope.shared.currentSet = {};
