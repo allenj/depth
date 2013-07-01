@@ -7,29 +7,29 @@ Depth.directive('stuck', function ($timeout, $window) {
       $window = angular.element($window);
 
       var handler = function() {
-        // console.log("window scrolltop: " + $window.scrollTop());
-        // console.log("position: " + JSON.stringify(element.position()));
 
         var distanceFromTop = element.position().top - $window.scrollTop();
-        // var distanceFromBottom = element.position().bottom - $window.scrollTop();
-        // console.log("distTop: " + distanceFromTop);
-        // console.log("distBottom: " + distanceFromBottom);
 
+        // By making a second element we can avoid the 'jump' that comes from moving divs
+        // This will only work for elements that span the entire width of the browser
+        var secondElement = angular.element('#error-bar');
         if (distanceFromTop < top) {
-          element.children().css({top: top + 'px', position:'fixed'});
+          if (!secondElement || ! secondElement.attr('id') || secondElement.attr('id') !== 'error-bar') {
+            secondElement = element.clone();
+            secondElement.attr('id', 'error-bar');
+            element.append(secondElement);
+          }
+          secondElement.children().css({top: top + 'px', position:'fixed'});
           // element.css({top: top + 'px', position: 'fixed', width: '100%'});
         } 
         else {
-          element.children().css({top: 'auto', position: 'relative'});
-          // element.css({top: 'auto', position: 'relative'});
+          // element.children().css({top: 'auto', position: 'relative'});
+          if (secondElement) {
+            secondElement.remove();
+          }
         }
-        // if (distanceFromBottom < bottom) {
-          // console.log("bottom out");
-        // }
-
       }
       $window.on('scroll', handler);
-
     }
   }
 });
