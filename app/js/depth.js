@@ -10,7 +10,7 @@ Depth.config(function($routeProvider) {
     when('/index/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
     when('/docs/:projectSet', {controller:DocsCtrl, templateUrl:'docs.html'}).
     when('/edit/:projectSet', {controller:DepthCtrl, templateUrl:'editProject.html'}).
-    when('/edit/:projectSet/:itemId', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+    when('/edit/:itemId/:projectSet', {controller:DepthCtrl, templateUrl:'editProject.html'}).
     // when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
     when('/agendas/:projectSet', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
     when('/view/:projectSet', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
@@ -105,6 +105,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $http.get("/depth/josso-auth/json-josso.php").
     success(function(data, status) {
       $scope.josso_check = data;
+      $scope.refresh();
     }).error(function (data, status, headers, config) {
       $scope.alerts.push({msg: "DEPTH error: Security Check Failed.", type: "error"})
       $scope.devAlerts.push({msg: "failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
@@ -115,6 +116,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     $http.get("/depth/josso-auth/json-josso.php").
       success(function(data, status) {
         $scope.josso_check = data;
+        $scope.refresh();
       }).error(function (data, status, headers, config) {
         // alert("failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
         $scope.josso_check = {};
@@ -122,48 +124,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   };
 
   $scope.agendas = [];
-//   $scope.agendas = [{
-//       "name": "NCCWSC Agenda",
-//       "description":"",
-//       "url": "http://www.doi.gov/csc/northwest/upload/NW-CSC-Science-Agenda-2012-2015.pdf",
-//       "themes":[
-//       {
-//         "name": "Climate Science & Modeling",
-//         "number": 1,
-//         "options": {"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean"}
-//       },
-//       {
-//         "name":"Response of Physical Systems to Climate Change",
-//         "number": 2,
-//         "options": {"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e":"Boolean", "f":"Boolean"}
-//       },
-//       {
-//         "name":"Response of Biological Systems to Climate Change",
-//         "number":3,
-//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e": "Boolean", "f":"Boolean", "g":"Boolean"}
-//       },
-//       {
-//         "name":"Vulnerability and Adaptation",
-//         "number":4,
-//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e": "Boolean"}
-//       },
-//       {
-//         "name":"Monitoring and Observation Systems",
-//         "number":5,
-//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean"}
-//       },
-//       {
-//         "name":"Data, Infrastructure, Analysis, and Modeling",
-//         "number":6,
-//         "options":{"a":"Boolean", "b":"Boolean", "c":"Boolean", "d":"Boolean", "e":"Boolean"}
-//       },
-//       {
-//         "name":"Communication of Science Findings",
-//         "number":7,
-//         "options":{"a":"Boolean", "b":"Boolean"}
-//       }
-//       ]
-// }];
   $http.get($scope.sciencebaseUrl + "/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets").
     success(function(data, status) {
       $scope.agendas = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.agendas;
@@ -239,10 +199,12 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     }
     for (var i = 0; i < fullContacts.length; i++) {
       if (fullContacts[i]) {
+        // Only put in unique contacts (aka ones that aren't already in contacts)
         var idx = findIndexByKeyValue(contacts, "name", fullContacts[i].name);
-        // console.log(fullContacts[i]);
-        if (idx === -1) contacts.push(fullContacts[i]);
-      }
+        if (idx === -1) {
+          contacts.push(fullContacts[i]);
+        }
+      } 
     }
     // contacts = jQuery.unique(contacts);
     $scope.pis = contacts;
@@ -293,7 +255,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
 
   $scope.refresh = function() {
     if (!$scope.josso_check) { $scope.recheckJosso(); }
-    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,dates&max=1000&josso=" + $scope.josso_check.josso).
+    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,dates,contacts&max=1000&josso=" + $scope.josso_check.josso).
       success(function(data, status) {
         $scope.allProjects = data.items;
         // set project
@@ -315,7 +277,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
         $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
         $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
       });
-
   };
 
   $scope.persistNecessaryData = function() {
@@ -635,6 +596,15 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
 
     var returnedJson = upsert('POST', parentId, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
 
+    if (returnedJson && !returnedJson.id) {
+      $scope.alerts.push({msg: returnedJson, type: "error"});
+      return false;
+    }
+    else if (!returnedJson || !returnedJson.id) {
+      $scope.alerts.push({msg: "An error occurred, please make sure you are logged in and have appropriate permissions.", type: "error"});
+      return false;
+    }
+
     try
     {
       $scope.json = returnedJson;
@@ -672,12 +642,20 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     json.title = $scope.newOrg.title;
     json.tags = [{scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel", type:"Label", name: $scope.newOrg.parent.org}];
     json.body = $scope.newOrg.body;
-    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email}];
+    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email, type: "person"}];
 
 
     var returnedJson = upsert('POST', json.parentId, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
 
     // show("edit-fields", false);
+    if (returnedJson && !returnedJson.id) {
+      $scope.alerts.push({msg: returnedJson, type: "error"});
+      return false;
+    }
+    else if (!returnedJson || !returnedJson.id) {
+      $scope.alerts.push({msg: "An error occurred, please make sure you are logged in and have appropriate permissions.", type: "error"});
+      return false;
+    }
 
     try
     {
@@ -690,10 +668,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     } 
     // show("create-org", true);
     // show("sort-fields", true); 
-    if (!returnedJson || !returnedJson.id) {
-      $scope.alerts.push({msg: "An error occurred, please make sure you are logged in and have appropriate permissions.", type: "error"});
-      return false;
-    }
+
     $scope.alerts.push({msg: "Successfully created Organization " + returnedJson.id + ".", type: "success"});
   };
 
@@ -729,7 +704,15 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     } 
 
     var returnedJson = upsert(restType, $scope.json.id, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
-    $scope.devAlerts.push({msg: "returnedJson: " + $scope.prettyPrint(returnedJson), type: "success"});
+
+    if (returnedJson && !returnedJson.id) {
+      $scope.alerts.push({msg: returnedJson, type: "error"});
+      return false;
+    }
+    else if (!returnedJson || !returnedJson.id) {
+      $scope.alerts.push({msg: "An error occurred, please make sure you are logged in and have appropriate permissions.", type: "error"});
+      return false;
+    }
 
     try
     {
@@ -742,13 +725,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
       $scope.alerts.push({msg: exception, type: "error"});
     }
 
-    if (!returnedJson || !returnedJson.id) {
-      $scope.alerts.push({msg: "DEPTH error: There was an error saving your item.", type: "error"});
-      $scope.devAlerts.push({msg: "Error on put of item, returnedJson = " + returnedJson, type: "error"});
-    } 
-    else {
-      $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
-    }
+    $scope.alerts.push({msg: "Successfully saved item " + returnedJson.id + ".", type: "success"});
 
   };
 

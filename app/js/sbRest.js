@@ -109,7 +109,7 @@ function upsert(type, id, json, sbUrl, josso)
     dataType: 'json',
     async: false,
     success: function(data) { returnedJson = jQuery.extend(true, {}, data); },
-    failure: function(data) { returnedJson = {"error": data}; },
+    error: function(data) { returnedJson = data.responseText; },
     beforeSend: function(request)
     {
       request.setRequestHeader("Accept", "application/json");
