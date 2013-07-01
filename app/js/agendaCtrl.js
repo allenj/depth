@@ -69,10 +69,10 @@ function AgendaCtrl($scope, filterFilter, $http, $location, $filter, Item, Items
 		// $scope.agendas.push($scope.agenda);
 		var itemIdx = findIndexByKeyValue($scope.items, 'id', $scope.agenda.id);
 		var item = $scope.items[itemIdx];
-	    var expandoIdx = findIndexByKeyValue(item.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
-	    item.facets[expandoIdx].object.agendas.push($scope.agenda);
+    var expandoIdx = findIndexByKeyValue(item.facets, "className", "gov.sciencebase.catalog.item.facet.ExpandoFacet");
+    item.facets[expandoIdx].object.agendas.push($scope.agenda);
 
-	    item.$update({josso: $cookies["JOSSO_SESSIONID"]});
+    item.$update({josso: $cookies["JOSSO_SESSIONID"]}, function() { refreshItems(); });
 	};
 
 	// Save agenda changes (except parent change)
@@ -94,9 +94,8 @@ function AgendaCtrl($scope, filterFilter, $http, $location, $filter, Item, Items
 			{
 				josso: $cookies["JOSSO_SESSIONID"]
 			}, function() {
-				item = new Item(item);
+				refreshItems();
 			});
-		refreshItems();
 	};
 
 	// get parent item by id
