@@ -7,13 +7,13 @@ var Depth = angular.module('depth', ['ngResource', 'ui.bootstrap', 'directive.af
 Depth.config(function($routeProvider) {
   $routeProvider.
     when('/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/:projectSet/index', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/:projectSet/docs', {controller:DocsCtrl, templateUrl:'docs.html'}).
-    when('/:projectSet/edit', {controller:DepthCtrl, templateUrl:'editProject.html'}).
-    when('/:projectSet/edit/:itemId', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+    when('/index/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
+    when('/docs/:projectSet', {controller:DocsCtrl, templateUrl:'docs.html'}).
+    when('/edit/:projectSet', {controller:DepthCtrl, templateUrl:'editProject.html'}).
+    when('/edit/:projectSet/:itemId', {controller:DepthCtrl, templateUrl:'editProject.html'}).
     // when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
-    when('/:projectSet/agendas', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
-    when('/:projectSet/view', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
+    when('/agendas/:projectSet', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
+    when('/view/:projectSet', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
     // otherwise({redirectTo:'/'});
 });
 

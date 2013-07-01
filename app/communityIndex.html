@@ -14,7 +14,7 @@
         <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
         <p style="font-style: italic;">Please select your project set:</p>
         <span ng-repeat="set in projectSets">
-          <button class="btn" ng-click="setRoute(set.route + '/index')">{{set.name}}</button>
+          <button class="btn" ng-click="setRoute('index/' + set.route)">{{set.name}}</button>
         </span>
       </div>
       <!-- csc selected -->

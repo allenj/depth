@@ -53,8 +53,8 @@ function IndexCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   // Functions
 	$scope.setRoute = function(route) {
     if ($scope.shared.currentSet.route && route !== "/") {
-      // route = route + "/" + $scope.shared.currentSet.route;
-      route = $scope.shared.currentSet.route + "/" + route;
+      route = route + "/" + $scope.shared.currentSet.route;
+      // route = $scope.shared.currentSet.route + "/" + route;
     }
    	$location.path(route);
   };
