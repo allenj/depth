@@ -678,6 +678,10 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     show("edit-fields", false);
     show("sort-fields", true); 
   };
+  if ($routeParams.itemId === "create") {
+    $scope.create();
+  }
+
 
   $scope.put = function() {
     if (!$scope.josso_check.user) {
