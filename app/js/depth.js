@@ -236,7 +236,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
 
   $scope.allProjects = [];
-  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,contacts,dates&max=1000&josso=" + $scope.josso_check.josso).
+  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType',type:'Label'}&format=json&fields=tags,title,facets,contacts,dates&max=1000&josso=" + $scope.josso_check.josso).
     success(function(data, status) {
       $scope.allProjects = data.items;
     }).error(function (data, status, headers, config) {
@@ -255,7 +255,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
 
   $scope.refresh = function() {
     if (!$scope.josso_check) { $scope.recheckJosso(); }
-    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}&format=json&fields=tags,title,facets,dates,contacts&max=1000&josso=" + $scope.josso_check.josso).
+    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType',type:'Label'}&format=json&fields=tags,title,facets,dates,contacts&max=1000&josso=" + $scope.josso_check.josso).
       success(function(data, status) {
         $scope.allProjects = data.items;
         // set project
@@ -270,7 +270,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
       success(function(data, status) {
         $scope.organizations = data.items;
         // set organization
-        if (hasTags && filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"})[0]) {
+        if (hasTags && filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName", type: "Label"})[0]) {
           $scope.organization = organization.name;
         }
       }).error(function (data, status, headers, config) {
@@ -301,10 +301,10 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
 
     // Tags
     $scope.persistTags([
-      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label"}, 
-      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label"}, 
-      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"}, 
-      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/FiscalYear", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationType", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName", type: "Label"}, 
+      {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType", type: "Label"}, 
       {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Keyword", type: "Keyword"}, 
       {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Location", type: "Location"}]);
 
@@ -780,16 +780,16 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     if ($scope.orgType && 
         $scope.orgType.org && 
         $scope.orgType.org !== "" && 
-        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: $scope.orgType.org}).length === 0) {
+        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationType", type: "Label", name: $scope.orgType.org}).length === 0) {
       return false;
     }
 
-    var fyTag = {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: $scope.fiscalYear};
+    var fyTag = {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/FiscalYear", type: "Label", name: $scope.fiscalYear};
     if ($scope.fiscalYear && $scope.fiscalYear !== "" && filterFilter(project.tags, fyTag).length === 0) {
       return false;
     }
 
-    var projTypeTag = {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: $scope.projectType};
+    var projTypeTag = {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType", type: "Label", name: $scope.projectType};
     if ($scope.projectType && $scope.projectType !== "" && filterFilter(project.tags, projTypeTag).length === 0) {
       return false;
     }
@@ -797,7 +797,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     if ($scope.organization &&
         $scope.organization.title && 
         $scope.organization.title !== "" && 
-        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: $scope.organization.title}).length === 0) {
+        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName", type: "Label", name: $scope.organization.title}).length === 0) {
       return false;
     }
 
@@ -865,7 +865,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
       return;
     }
 
-    var url = "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%2520Type',type:'Label'}";
+    var url = "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType',type:'Label'}";
     url += "&format=json&max=1000&josso=" + $scope.josso_check.josso;
     url += "&fields=id,title,contacts,tags,facets,webLinks,body,dates";
    
@@ -910,21 +910,21 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
           flatProject["Project Title"] = fullJsonItems[i].title;
 
           // Tags - Funding Agency
-          var fundingAgencies = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label"});
+          var fundingAgencies = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationType", type: "Label"});
           for (var fa in fundingAgencies) {
             if (flatProject["Funding Agency"] === "") flatProject["Funding Agency"] = fundingAgencies[fa].name;
             else flatProject["Funding Agency"] += ", " + fundingAgencies[fa].name;
           }
 
           // Tags - Organization Name
-          var affiliations = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label"});
+          var affiliations = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName", type: "Label"});
           for (var affil in affiliations) {
             if (flatProject["Affiliation (CSC)"] === "") flatProject["Affiliation (CSC)"] = affiliations[affil].name;
             else flatProject["Affiliation (CSC)"] += ", " + affiliations[affil].name;
           }
 
           // Tags - Fiscal Year
-          var fys = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label"});
+          var fys = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/FiscalYear", type: "Label"});
           for (var fy in fys) {
             if (flatProject["Fiscal Year"] === "") flatProject["Fiscal Year"] = fys[fy].name;
             else flatProject["Fiscal Year"] += ", " + fys[fy].name;
@@ -945,7 +945,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
           }
 
           // Tags - Project Type
-          var types = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label"});
+          var types = filterFilter(fullJsonItems[i].tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType", type: "Label"});
           for (var type in types) {
             if (flatProject["Project Type"] === "") flatProject["Project Type"] = types[type].name;
             else flatProject["Project Type"] += ", " + types[type].name;
@@ -1100,7 +1100,7 @@ function TagsCtrl($scope) {
   };
 
   $scope.isFiscalYear = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/FiscalYear");
   };
 
   $scope.isKeyword = function(tag) {
@@ -1112,15 +1112,15 @@ function TagsCtrl($scope) {
   };
 
   $scope.isOrganizationType = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationType");
   };
 
   $scope.isOrganizationName = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName");
   };
 
   $scope.isProjectType = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type");
+    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType");
   };
 
 }

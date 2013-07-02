@@ -8,7 +8,7 @@ Depth.filter('projectsFilter', function (filterFilter) {
       if (validProject && options.orgTypes && options.orgTypes.length > 0) {
         validProject = false;
         angular.forEach (options.orgTypes, function (orgType) {
-          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Type", type: "Label", name: orgType.org}).length > 0) {
+          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationType", type: "Label", name: orgType.org}).length > 0) {
             validProject = true;
           }
         });
@@ -18,7 +18,7 @@ Depth.filter('projectsFilter', function (filterFilter) {
       if (validProject && options.orgs && options.orgs.length > 0) {
         validProject = false;
         angular.forEach (options.orgs, function (org) {
-          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Organization%20Name", type: "Label", name: org.title}).length > 0) {
+          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName", type: "Label", name: org.title}).length > 0) {
             validProject = true;
           }
         });
@@ -28,7 +28,7 @@ Depth.filter('projectsFilter', function (filterFilter) {
       if (validProject && options.fys && options.fys.length > 0) {
         validProject = false;
         angular.forEach (options.fys, function (fy) {
-          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Fiscal%20Year", type: "Label", name: fy}).length > 0) {
+          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/FiscalYear", type: "Label", name: fy}).length > 0) {
             validProject = true;
           }
         });
@@ -38,7 +38,7 @@ Depth.filter('projectsFilter', function (filterFilter) {
       if (validProject && options.projTypes && options.projTypes.length > 0) {
         validProject = false;
         angular.forEach (options.projTypes, function (projType) {
-          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/Project%20Type", type: "Label", name: projType}).length > 0) {
+          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType", type: "Label", name: projType}).length > 0) {
             validProject = true;
           }
         });

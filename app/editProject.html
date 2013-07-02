@@ -183,7 +183,7 @@
             <option value="" ></option>
           </select>
           <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
-          <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Type')">Add Organization Type</a>
+          <a class="btn" ng-show="$last" ng-click="addBlankTag('OrganizationType')">Add Organization Type</a>
         </div>
       </li>
     </ul>
@@ -197,7 +197,7 @@
             <option value=""></option>
           </select>
           <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
-          <a class="btn" ng-show="$last" ng-click="addBlankTag('Organization Name')">Add Organization</a>
+          <a class="btn" ng-show="$last" ng-click="addBlankTag('OrganizationName')">Add Organization</a>
           <span class="help-inline success" ng-show="orgIsParent(json.parentId, tag.name, organizations)">This organization is the <a href="{{sciencebaseUrl}}/item/{{json.parentId}}" target="_blank">parent item</a> in ScienceBase.<a class="btn btn-link" ng-click="json.parentId = ''">Change Parent Id.</a></span>
           <span class="help-inline" ng-show="!orgIsParent(json.parentId, tag.name, organizations)" style="padding-top: 5px;">
             <a class="btn btn-info" ng-click="setOrgAsParent(tag.name, organizations)">Set Org as parent</a>
@@ -218,7 +218,7 @@
             <option value="" ></option>
           </select>
           <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
-          <a class="btn" ng-show="$last" ng-click="addBlankTag('Fiscal Year')">Add Fiscal Year</a>
+          <a class="btn" ng-show="$last" ng-click="addBlankTag('FiscalYear')">Add Fiscal Year</a>
         </div>
       </li>
     </ul>
@@ -232,7 +232,7 @@
             <option value="" ></option>
           </select>
           <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
-          <a class="btn" ng-show="$last" ng-click="addBlankTag('Project Type')">Add Project Type</a>
+          <a class="btn" ng-show="$last" ng-click="addBlankTag('ProjectType')">Add Project Type</a>
         </div>
       </li>
     </ul>
