@@ -292,7 +292,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     if (!$scope.json.webLinks) $scope.json.webLinks = [];
 
     // Contacts
-    $scope.persistContacts([{type: "Principal Investigator", "Funding Agency", "Cooperator/Partner"]);
+    $scope.persistContacts(["Principal Investigator", "Funding Agency", "Cooperator/Partner"]);
 
     var coops = filterFilter($scope.json.contacts, {type: "Cooperator/Partner"});
     if(coops[coops.length-1].name){
