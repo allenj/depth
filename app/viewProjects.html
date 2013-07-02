@@ -1,8 +1,10 @@
-<ul class="unstyled">
-  <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
-    <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
-  </li>
-</ul>
+<div stuck top="0">
+  <ul class="unstyled" style="width: 100%;">
+    <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+      <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+    </li>
+  </ul>
+</div>
 
 <div class="container-fluid">
   <div class="row-fluid">
