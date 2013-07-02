@@ -20,10 +20,8 @@ Depth.directive('stuck', function ($timeout, $window) {
             element.append(secondElement);
           }
           secondElement.children().css({top: top + 'px', position:'fixed'});
-          // element.css({top: top + 'px', position: 'fixed', width: '100%'});
         } 
         else {
-          // element.children().css({top: 'auto', position: 'relative'});
           if (secondElement) {
             secondElement.remove();
           }

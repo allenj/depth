@@ -30,7 +30,7 @@ Depth.factory('State', function() {
     {route: "edit", text: "<i class='icon-pencil'></i> Edit Projects"},
     {route: "edit/create", text: "<i class='icon-plus'></i> Create Project"},
     {route: "agendas", text: "<i class='icon-leaf'></i> Edit Agendas"},
-    {route: "docs", text: "<i class='icon-book'></i> Documentation"}
+    {route: "docs", text: "<i class='icon-book'></i> Developer Documentation"}
   ];
 
   return {shared: {currentSet: currentSet, projectSets: projectSets, links: links}};

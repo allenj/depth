@@ -13,8 +13,8 @@ Depth.config(function($routeProvider) {
     when('/edit/:itemId/:projectSet', {controller:DepthCtrl, templateUrl:'editProject.html'}).
     // when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
     when('/agendas/:projectSet', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
-    when('/view/:projectSet', {controller:DepthCtrl, templateUrl:'viewProjects.html'}); //.
-    // otherwise({redirectTo:'/'});
+    when('/view/:projectSet', {controller:DepthCtrl, templateUrl:'viewProjects.html'}).
+    otherwise({redirectTo:'/'});
 });
 
 // I think this is suppose to create spinners whenever data is loading. It does not work.
@@ -45,8 +45,8 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   // $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
   // ALERTS
-  // $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
-  $scope.alerts = [];
+  $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}, {msg: "message 2", type: "error"}];
+  // $scope.alerts = [];
   $scope.devAlerts = [];
 
   // View page variables
