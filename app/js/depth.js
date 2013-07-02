@@ -42,17 +42,28 @@ Depth.run(function($rootScope, $location, $anchorScroll, $routeParams) {
 
 // The main Depth Controller
 function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams, State) {
+  // Set ScienceBase URL
   // $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
+
+  // Load config file
+  $scope.depthConfig = {};
+  var configLoaded = false;
+  $http.get('depthConfig.json').success(function(data){
+    $scope.depthConfig = data;
+    configLoaded = true;
+  });
+
   // ALERTS
   $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
   // $scope.alerts = [];
   $scope.devAlerts = [];
 
-  // View page variables
-  // $scope.view = {};
-  $scope.view = {chooseAgenda: {}};
+  $scope.closeAlert = function(index) {
+    $scope.alerts.splice(index, 1);
+  };
 
+  // View page variables
   $scope.hasAgendas = function() {
     if ($routeParams.projectSet === "csc") {
       return true;
@@ -63,7 +74,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   };
 
   // WATCHES
-  // Could go deeper and make this function faster and run less
   $scope.$watch('filter.agenda', function(oldVal, newVal) {
     if (!$scope.filter.agenda || !$scope.filter.agenda.themes) {
       return;
@@ -86,42 +96,19 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     $scope.filter.agenda.none = allFalse;
   }, true);
 
-  $scope.closeAlert = function(index) {
-    $scope.alerts.splice(index, 1);
-  };
-
-  $scope.testLoc = function() {
-    $location.search({id: "test"});
-    $location.path("/edit");
-  };
-
-  $scope.urlSearch = $location.search();
-
-  $scope.isActiveRoute = function(route) {
-   return '/' + route === $location.path();
-  };
-
-  $scope.josso_check = {};
-  $http.get("/depth/josso-auth/json-josso.php").
-    success(function(data, status) {
-      $scope.josso_check = data;
-      $scope.refresh();
-    }).error(function (data, status, headers, config) {
-      $scope.alerts.push({msg: "DEPTH error: Security Check Failed.", type: "error"})
-      $scope.devAlerts.push({msg: "failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-    });
-
-  $scope.recheckJosso = function() {
+  // Check for Josso, if found refresh the items
+  $scope.checkJosso = function() {
     $scope.josso_check = {};
     $http.get("/depth/josso-auth/json-josso.php").
       success(function(data, status) {
         $scope.josso_check = data;
         $scope.refresh();
       }).error(function (data, status, headers, config) {
-        // alert("failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config);
-        $scope.josso_check = {};
+        $scope.alerts.push({msg: "DEPTH error: Security Check Failed.", type: "error"})
+        $scope.devAlerts.push({msg: "failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
       });
   };
+  $scope.checkJosso();
 
   $scope.agendas = [];
   $http.get($scope.sciencebaseUrl + "/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets").
@@ -254,7 +241,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     });
 
   $scope.refresh = function() {
-    if (!$scope.josso_check) { $scope.recheckJosso(); }
+    if (!$scope.josso_check) { $scope.checkJosso(); }
     $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType',type:'Label'}&format=json&fields=tags,title,facets,dates,contacts&max=1000&josso=" + $scope.josso_check.josso).
       success(function(data, status) {
         $scope.allProjects = data.items;
