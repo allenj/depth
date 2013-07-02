@@ -16,7 +16,7 @@ function AgendaCtrl($scope, filterFilter, $http, $location, $filter, Item, Items
 		}
 		var agendas;
 		var expandos = filterFilter(item.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"});
-		if (expandos.length > 0) {
+		if (expandos && expandos.length > 0) {
 			for (var i in expandos[0].object.agendas) {
 				expandos[0].object.agendas[i].id = item.id;
 			}
