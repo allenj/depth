@@ -20,10 +20,6 @@ angular.module('depth.services', ['ngResource'])
 
 Depth.factory('State', function() {
 	var currentSet = {};
-	var projectSets = [
-    {route: "csc", name: "CSCs & Partners", hasAgenda: true, parentIds: []},
-    {route: "sandy", name: "Sandy", hasAgenda: false, parentIds: []}
-  ];
 
 	var links = [
     {route: "view", text: "<i class='icon-search'></i> View Projects"},
@@ -33,6 +29,6 @@ Depth.factory('State', function() {
     {route: "docs", text: "<i class='icon-book'></i> Developer Documentation"}
   ];
 
-  return {shared: {currentSet: currentSet, projectSets: projectSets, links: links}};
+  return {shared: {currentSet: currentSet, links: links, projectSets: {}}};
 
 });

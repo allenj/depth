@@ -14,9 +14,10 @@
         <p><i class="icon-globe"></i> Powered by <a href="https://www.sciencebase.gov/catalog">ScienceBase</a></p>
         <p style="font-style: italic;">Please select your project set:</p>
         <span ng-repeat="set in projectSets">
-          <button class="btn" ng-click="setRoute('index/' + set.route)">{{set.name}}</button>
+          <button class="btn" ng-click="setRoute('index/' + set.shortName)">{{set.longName}}</button>
         </span>
       </div>
+      {{shared.currentSet}}
       <!-- csc selected -->
       <div ng-show="projectSet === 'csc'">
         <p>Data Entry for Project Tracking and Highlighting</p>
