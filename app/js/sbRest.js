@@ -54,32 +54,6 @@ function getItem(id, sbUrl, josso)
   return json;  
 }
 
-// function getItemProd(id, sbUrl)
-// {
-//   var josso = checkCookie();
-//   var itemUrl = sbUrl + "/item/" + id + "?josso=" + josso + "&format=json";
-
-//   var json;
-
-//   $.ajax({
-//     type: 'GET',
-//     url: itemUrl,
-//     crossDomain: true,
-//     dataType: 'json',
-//     async: false,
-//     success: function(data) { 
-//       json = jQuery.extend(true, {}, data);
-//     },
-//     failure: function(data) { json = {"error": data}; },
-//     beforeSend: function(request)
-//     {
-//       request.setRequestHeader("Accept", "application/json");
-//       request.setRequestHeader("Content-Type", "application/json");
-//     } 
-//   });
-//   return json;  
-// }
-
 function upsert(type, id, json, sbUrl, josso)
 {
   // var josso = checkCookie();
