@@ -45,8 +45,8 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
   // $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
   // ALERTS
-  $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}, {msg: "message 2", type: "error"}];
-  // $scope.alerts = [];
+  // $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}, {msg: "message 2", type: "error"}];
+  $scope.alerts = [];
   $scope.devAlerts = [];
 
   // View page variables
@@ -292,7 +292,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     if (!$scope.json.webLinks) $scope.json.webLinks = [];
 
     // Contacts
-    $scope.persistContacts(["Principal Investigator", "Funding Agency", "Cooperator/Partner"]);
+    $scope.persistContacts([{type: "Principal Investigator", "Funding Agency", "Cooperator/Partner"]);
 
     var coops = filterFilter($scope.json.contacts, {type: "Cooperator/Partner"});
     if(coops[coops.length-1].name){
