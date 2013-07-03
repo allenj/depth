@@ -629,7 +629,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     json.title = $scope.newOrg.title;
     json.tags = [{scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel", type:"Label", name: $scope.newOrg.parent.org}];
     json.body = $scope.newOrg.body;
-    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email, type: "person"}];
+    json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email, type: "Contact"}];
 
 
     var returnedJson = upsert('POST', json.parentId, json, $scope.sciencebaseUrl, $scope.josso_check.josso);
