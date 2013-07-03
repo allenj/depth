@@ -4,6 +4,7 @@
     {
       "longName": "DOI Climate Science Center Projects",
       "shortName": "csc",
+      "vocabName": "NCCWSC",
       "communities":[
         {"title": "National Climate Change and Wildlife Science Center", "orgType": "CSC", "id": "4f4e476ae4b07f02db47e13b"}, 
         {"title": "Landscape Conservation Management and Analysis Portal", "orgType": "LCC", "id":"4f4e476ee4b07f02db47e164"}, 
@@ -13,6 +14,7 @@
     {
       "longName": "USGS Hurricane Sandy Response Team Projects",
       "shortName": "sandy",
+      "vocabName": "Sandy",
       "communities":[
         {"title": "Hurricane Sandy", "orgType": "Sandy", "id":"519bee13e4b0e4e151f0232c"}
       ]

@@ -58,12 +58,11 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.alerts = [{msg: "WARNING: DEPTH is currently pointed at SB Production. Any changes you make will be PERMANENT!", type: "warning"}];
   // $scope.alerts = [];
   $scope.devAlerts = [];
-
   $scope.closeAlert = function(index) {
     $scope.alerts.splice(index, 1);
   };
 
-  // View page variables
+  // whether or not to show the agenda, should remove once we have sessions figured out
   $scope.hasAgendas = function() {
     if ($routeParams.projectSet === "csc") {
       return true;
@@ -73,7 +72,88 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     }
   };
 
-  // WATCHES
+  // Check for Josso, if found refresh the items
+  $scope.checkJosso = function() {
+    $scope.josso_check = {};
+    $http.get("/depth/josso-auth/json-josso.php").
+      success(function(data, status) {
+        $scope.josso_check = data;
+        $scope.refreshData();
+      }).error(function (data, status, headers, config) {
+        $scope.alerts.push({msg: "DEPTH error: Security Check Failed.", type: "error"})
+        $scope.devAlerts.push({msg: "failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
+      });
+  };
+  $scope.checkJosso();
+
+  // Set up the json for the edit form
+  $scope.json = {};
+  $scope.json.id = "";
+  $scope.json.parentId = "";
+  $scope.json.contacts = [];
+  $scope.json.alternateTitles = [];
+  $scope.json.facets = [];
+  $scope.json.identifiers = [];
+  $scope.json.tags = [];
+  $scope.json.dates = [];
+  $scope.json.webLinks = [];
+
+  $scope.orgTypes = [
+    {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
+    {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
+    {title: "Other Project Community", org: "Other", id: "511ac38ee4b084e2824d6a26"}];
+
+  // Some defaults for fields
+  $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
+  $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other Project"}];
+  $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
+
+  // Load the projects and organizations
+  $scope.currentSet = State.shared.currentSet;
+  $scope.vocabName = $scope.currentSet.vocabName;
+  $scope.allProjects = [], $scope.organizations = [];
+  $scope.refreshData = function() {
+    if (!$scope.josso_check) { $scope.checkJosso(); }
+    $scope.allProjects = [];
+    var projectTypeScheme = "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/ProjectType";
+    var projectsUrl = "/items?q=&filter=tags={scheme:'" + projectTypeScheme + "',type:'Label'}&format=json&fields=tags,title,facets,dates,contacts&max=1000&josso=" + $scope.josso_check.josso;
+    $http.get($scope.sciencebaseUrl + projectsUrl).
+      success(function(data, status) {
+        $scope.allProjects = data.items;
+        // set project
+        $scope.project = filterFilter($scope.allProjects, {id: $scope.json.id})[0];
+      }).error(function (data, status, headers, config) {
+        $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+        $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
+      });
+
+    $scope.organizations = [];
+    var hasTags = $scope.json && $scope.json.tags;
+    var orgLabelScheme = "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/OrgLabel";
+    var orgsUrl = $scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'" + orgLabelScheme + "',type:'Label'}&format=json&fields=tags,title&max=1000&josso=" + $scope.josso_check.josso;
+    $http.get(orgsUrl).
+      success(function(data, status) {
+        $scope.organizations = data.items;
+        // set organization
+        if (hasTags && filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/OrganizationName", type: "Label"})[0]) {
+          $scope.organization = organization.name;
+        }
+      }).error(function (data, status, headers, config) {
+        $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+        $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
+      });
+  };
+
+  // Load the agendas, TODO: get rid of hardcoding
+  $scope.agendas = [];
+  $http.get($scope.sciencebaseUrl + "/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets").
+    success(function(data, status) {
+      $scope.agendas = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.agendas;
+    }).error(function (data, status, headers, config) {
+      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
+      $scope.devAlerts.push({msg: "failed to get agendas\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
+    });
+  // watch the agenda for changes
   $scope.$watch('filter.agenda', function(oldVal, newVal) {
     if (!$scope.filter.agenda || !$scope.filter.agenda.themes) {
       return;
@@ -96,64 +176,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     $scope.filter.agenda.none = allFalse;
   }, true);
 
-  // Check for Josso, if found refresh the items
-  $scope.checkJosso = function() {
-    $scope.josso_check = {};
-    $http.get("/depth/josso-auth/json-josso.php").
-      success(function(data, status) {
-        $scope.josso_check = data;
-        $scope.refresh();
-      }).error(function (data, status, headers, config) {
-        $scope.alerts.push({msg: "DEPTH error: Security Check Failed.", type: "error"})
-        $scope.devAlerts.push({msg: "failed josso_check\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-      });
-  };
-  $scope.checkJosso();
-
-  $scope.agendas = [];
-  $http.get($scope.sciencebaseUrl + "/item/4f4e476ae4b07f02db47e13b?format=json&fields=facets").
-    success(function(data, status) {
-      $scope.agendas = filterFilter(data.facets, {className: "gov.sciencebase.catalog.item.facet.ExpandoFacet"})[0].object.agendas;
-    }).error(function (data, status, headers, config) {
-      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
-      $scope.devAlerts.push({msg: "failed to get agendas\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-    });
-
-  $scope.json = {};
-  $scope.json.id = "";
-  $scope.json.parentId = "";
-  $scope.json.contacts = [];
-  $scope.json.alternateTitles = [];
-  $scope.json.facets = [];
-  $scope.json.identifiers = [];
-  $scope.json.tags = [];
-  $scope.json.dates = [];
-  $scope.json.webLinks = [];
-
-  $scope.orgTypes = [
-    {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
-    {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
-    {title: "Other Project Community", org: "Other", id: "511ac38ee4b084e2824d6a26"}];
-
-  /*
-  * getJsonArray: parses an array of strings that are json into an array of json objects
-  * @arrayOfString an array of strings that are json
-  * @returns an array of json objects
-  */
-  $scope.parseJsonArray = function(arrayOfStrings) {
-    if (!arrayOfStrings) {
-      return "";
-    }
-    var jsons = [];
-    angular.forEach(arrayOfStrings, function(str) {
-      jsons.push(JSON.parse(str));
-    });
-    return jsons;
-  };
-
-  $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
-  $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other Project"}];
-
+  // View page Filters (and prefilters because angularui doesn't work quite right)
   $scope.filter = {orgTypes: null, organizations: null, fiscalYears: null, projectTypes: null, pis: null, keywords: null, projStatuses: null, projects: null};
   $scope.prefilter = {orgTypes: null, organizations: null, fiscalYears: null, projectTypes: null, pis: null, keywords: null, projStatuses: null, projects: null};
 
@@ -220,52 +243,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
 
   }, true);
 
-  $scope.projectStatuses = ["Active", "Approved", "Completed", "Funded", "In Progress", "Proposed"];
-
-  $scope.allProjects = [];
-  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType',type:'Label'}&format=json&fields=tags,title,facets,contacts,dates&max=1000&josso=" + $scope.josso_check.josso).
-    success(function(data, status) {
-      $scope.allProjects = data.items;
-    }).error(function (data, status, headers, config) {
-      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
-      $scope.devAlerts.push({msg: "failed to get projects\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-    });
-
-  $scope.organizations = [];
-  $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'LCC'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso_check.josso).
-    success(function(data, status) {
-      $scope.organizations = data.items;
-    }).error(function (data, status, headers, config) {
-      $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
-      $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-    });
-
-  $scope.refresh = function() {
-    if (!$scope.josso_check) { $scope.checkJosso(); }
-    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/Project/ProjectType',type:'Label'}&format=json&fields=tags,title,facets,dates,contacts&max=1000&josso=" + $scope.josso_check.josso).
-      success(function(data, status) {
-        $scope.allProjects = data.items;
-        // set project
-        $scope.project = filterFilter($scope.allProjects, {id: $scope.json.id})[0];
-      }).error(function (data, status, headers, config) {
-        $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
-        $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-      });
-
-    var hasTags = $scope.json && $scope.json.tags;
-    $http.get($scope.sciencebaseUrl + "/items?q=&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'CSC'}&filter=tags={scheme:'http://www.sciencebase.gov/vocab/category/NCCWSC/OrgLabel',type:'Label',name:'Other'}&conjunction=tags=OR&format=json&fields=tags,title&max=1000&josso=" + $scope.josso_check.josso).
-      success(function(data, status) {
-        $scope.organizations = data.items;
-        // set organization
-        if (hasTags && filterFilter($scope.json.tags, {scheme: "http://www.sciencebase.gov/vocab/category/NCCWSC/Project/OrganizationName", type: "Label"})[0]) {
-          $scope.organization = organization.name;
-        }
-      }).error(function (data, status, headers, config) {
-        $scope.alerts.push({msg: "DEPTH error: failed to load necessary data.", type: "error"});
-        $scope.devAlerts.push({msg: "failed to get orgs\nstatus: " + status + "\ndata: " + data + "\nheaders: " + headers + "\nconfig: " + config, type: "error"});
-      });
-  };
-
+  // Make sure the data in the form stays in good shape
   $scope.persistNecessaryData = function() {
     // all json
     if (!$scope.json) $scope.json = {};
@@ -529,7 +507,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     {
       $scope.json = json;
 
-      $scope.refresh();
+      $scope.refreshData();
 
       //clean body
     }
@@ -596,7 +574,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     {
       $scope.json = returnedJson;
 
-      $scope.refresh();
+      $scope.refreshData();
     }
     catch(exception)
     {
@@ -647,7 +625,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     try
     {
       $scope.json = returnedJson;
-      $scope.refresh();
+      $scope.refreshData();
     }
     catch(exception)
     {
@@ -709,7 +687,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     {
       $scope.json = returnedJson;
 
-      $scope.refresh();
+      $scope.refreshData();
     }
     catch(exception)
     {
@@ -1032,6 +1010,22 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     
   };
 
+  /*
+  * getJsonArray: parses an array of strings that are json into an array of json objects
+  * @arrayOfString an array of strings that are json
+  * @returns an array of json objects
+  */
+  $scope.parseJsonArray = function(arrayOfStrings) {
+    if (!arrayOfStrings) {
+      return "";
+    }
+    var jsons = [];
+    angular.forEach(arrayOfStrings, function(str) {
+      jsons.push(JSON.parse(str));
+    });
+    return jsons;
+  };
+
 }
 
 function ContactsCtrl($scope, filterFilter) {
@@ -1249,8 +1243,4 @@ var findIndexByKeyValue = function (list, key, value) {
   }
   return -1;
 };
-
-
-
-
 
