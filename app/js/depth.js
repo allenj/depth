@@ -98,11 +98,6 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   $scope.json.dates = [];
   $scope.json.webLinks = [];
 
-  $scope.orgTypes = [
-    {title: "National Climate Change and Wildlife Science Center", org: "CSC", id: "4f4e476ae4b07f02db47e13b"}, 
-    {title: "Landscape Conservation Management and Analysis Portal", org: "LCC", id:"4f4e476ee4b07f02db47e164"}, 
-    {title: "Other Project Community", org: "Other", id: "511ac38ee4b084e2824d6a26"}];
-
   // Some defaults for fields
   $scope.fiscalYears = [{fy: "2008"}, {fy: "2009"}, {fy: "2010"}, {fy: "2011"}, {fy: "2012"}, {fy: "2013"}];
   $scope.projectTypes = [{type: "Science Project"}, {type: "Science Support Project"}, {type: "Other Project"}];
@@ -111,6 +106,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
   // Load the projects and organizations
   $scope.currentSet = State.shared.currentSet;
   $scope.vocabName = $scope.currentSet.vocabName;
+  $scope.orgTypes = $scope.currentSet.communities;
   $scope.allProjects = [], $scope.organizations = [];
   $scope.refreshData = function() {
     if (!$scope.josso_check) { $scope.checkJosso(); }
@@ -743,9 +739,9 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
 
   $scope.filterProjects = function(project) {
     if ($scope.orgType && 
-        $scope.orgType.org && 
-        $scope.orgType.org !== "" && 
-        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/OrganizationType", type: "Label", name: $scope.orgType.org}).length === 0) {
+        $scope.orgType.orgType && 
+        $scope.orgType.orgType !== "" && 
+        filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/OrganizationType", type: "Label", name: $scope.orgType.orgType}).length === 0) {
       return false;
     }
 

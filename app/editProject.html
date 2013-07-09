@@ -179,7 +179,7 @@
       <li ng-repeat="tag in json.tags | filter:isOrganizationType" class="control-group">
         <label class="control-label" for="orgType_{{$index}}">Organization Type</label>
         <div class="controls">
-          <select id="orgType_{{$index}}" ng-model="tag.name" ng-options="orgType.org as orgType.title for orgType in orgTypes" class="span6">
+          <select id="orgType_{{$index}}" ng-model="tag.name" ng-options="orgType.orgType as orgType.title for orgType in orgTypes" class="span6">
             <option value="" ></option>
           </select>
           <a class="btn btn-danger" ng-show="!$first" ng-click="deleteTag()">X</a>
