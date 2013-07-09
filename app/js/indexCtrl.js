@@ -37,7 +37,7 @@ function IndexCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     var setIdx = findIndexByKeyValue($scope.projectSets, 'shortName', $scope.routeParams.projectSet);
     if (setIdx < 0) {
       $scope.shared.currentSet = {};
-      $location.path('/');
+      // $location.path('/');
     }
     else {
       $scope.shared.currentSet = $scope.projectSets[setIdx];
