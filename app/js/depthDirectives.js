@@ -17,13 +17,15 @@ Depth.directive('stuck', function ($timeout, $window) {
           if (!secondElement || ! secondElement.attr('id') || secondElement.attr('id') !== 'error-bar') {
             secondElement = element.clone();
             secondElement.attr('id', 'error-bar');
+            secondElement.addClass('hide');
             element.append(secondElement);
           }
           secondElement.children().css({top: top + 'px', position:'fixed'});
+          secondElement.removeClass('hide');
         } 
         else {
           if (secondElement) {
-            secondElement.remove();
+            secondElement.addClass('hide');
           }
         }
       }
