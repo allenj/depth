@@ -3,16 +3,44 @@ var Depth = angular.module('depth', ['ngResource', 'ui.bootstrap', 'directive.af
 
 // Routes
 Depth.config(function($routeProvider) {
-  $routeProvider.
-    when('/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/index/:projectSet', {controller:IndexCtrl, templateUrl:'communityIndex.html'}).
-    when('/docs/:projectSet', {controller:DocsCtrl, templateUrl:'docs.html'}).
-    when('/edit/:projectSet', {controller:DepthCtrl, templateUrl:'editProject.html'}).
-    when('/edit/:itemId/:projectSet', {controller:DepthCtrl, templateUrl:'editProject.html'}).
-    // when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'}).
-    when('/agendas/:projectSet', {controller:AgendaCtrl, templateUrl:'agenda.html'}).
-    when('/view/:projectSet', {controller:DepthCtrl, templateUrl:'viewProjects.html'}).
-    otherwise({redirectTo:'/'});
+  $routeProvider
+    .when('/:projectSet', 
+    {
+      controller:IndexCtrl, 
+      templateUrl:'communityIndex.html'
+    })
+    .when('/index/:projectSet', 
+    {
+      controller:IndexCtrl, 
+      templateUrl:'communityIndex.html'
+    })
+    .when('/docs/:projectSet', 
+    {
+      controller:DocsCtrl, 
+      templateUrl:'docs.html'
+    })
+    .when('/edit/:projectSet', 
+    {
+      controller:DepthCtrl, 
+      templateUrl:'editProject.html'
+    })
+    .when('/edit/:itemId/:projectSet', 
+    {
+      controller:DepthCtrl, 
+      templateUrl:'editProject.html'
+    })
+    // .when('/sbFields', {controller:DepthCtrl, templateUrl:'editSB.html'})
+    .when('/agendas/:projectSet', 
+    {
+      controller:AgendaCtrl, 
+      templateUrl:'agenda.html'
+    })
+    .when('/view/:projectSet', 
+    {
+      controller:DepthCtrl, 
+      templateUrl:'viewProjects.html'
+    })
+    .otherwise({redirectTo:'/'});
 });
 
 // I think this is suppose to create spinners whenever data is loading. It does not work.
