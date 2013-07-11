@@ -14,19 +14,19 @@ Depth.directive('stuck', function ($timeout, $window) {
         // This will only work for elements that span the entire width of the browser
         var secondElement = angular.element('#error-bar');
         if (distanceFromTop < top) {
-          if (!secondElement || ! secondElement.attr('id') || secondElement.attr('id') !== 'error-bar') {
-            secondElement = element.clone();
-            secondElement.attr('id', 'error-bar');
-            secondElement.addClass('hide');
-            element.append(secondElement);
-          }
-          secondElement.children().css({top: top + 'px', position:'fixed'});
+          // if (!secondElement || ! secondElement.attr('id') || secondElement.attr('id') !== 'error-bar') {
+          //   secondElement = element.clone();
+          //   secondElement.attr('id', 'error-bar');
+          //   secondElement.addClass('hide');
+          //   element.append(secondElement);
+          // }
+          // secondElement.children().css({top: top + 'px', position:'fixed'});
           secondElement.removeClass('hide');
         } 
         else {
-          if (secondElement) {
+          // if (secondElement) {
             secondElement.addClass('hide');
-          }
+          // }
         }
       }
       $window.on('scroll', handler);
