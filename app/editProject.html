@@ -4,7 +4,15 @@
       <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
     </li>
   </ul>
+  <div class="hide" id="error-bar" style="top:0px; position:fixed; width: 100%;">
+    <ul class="unstyled" style="width: 100%;">
+      <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+        <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+      </li>
+    </ul>
+  </div>
 </div>
+
 
 <div class="centered-edit container">
   <legend>Choose Project <button class="btn" onclick="show('sort-fields', true); return false;"><i class="icon-chevron-down"></i></button></legend>
