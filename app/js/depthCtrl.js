@@ -561,7 +561,7 @@ function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams
     var json = {};
     json.parentId = $scope.newOrg.parent.id;
     json.title = $scope.newOrg.title;
-    json.tags = [{scheme: "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/OrgLabel", type:"Label", name: $scope.newOrg.parent.org}];
+    json.tags = [{scheme: "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/OrgLabel", type:"Label", name: $scope.newOrg.parent.orgType}];
     json.body = $scope.newOrg.body;
     json.contacts = [{name: $scope.newOrg.contact.name, email: $scope.newOrg.contact.email, type: "Contact"}];
 
