@@ -161,7 +161,7 @@
 
     <legend style="text-align: center;">
       Projects ({{(allProjects | projectsFilter:{orgTypes: filter.orgTypes, orgs: filter.organizations, fys: filter.fiscalYears, projTypes: filter.projectTypes, pis: filter.pis, kws: filter.keywords, projStatuses: filter.projStatuses, agenda: filter.agenda, projects: filter.projects} | filter:generalSearch).length}}) 
-      <button class="btn btn-info" id="show-csv" ng-click="getCsv()">Get CSV</button>
+      <button class="btn btn-info" id="show-csv" ng-click="getCsv()">Generate Spreadsheet Report</button>
       <a class="btn btn-info" id="download" href="#" style="display: none;">Download</a>
     </legend>
     
