@@ -3,8 +3,8 @@
 // The main Depth Controller
 function DepthCtrl($scope, filterFilter, $http, $location, $filter, $routeParams, State) {
   // Set ScienceBase URL
-  // $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
-  $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
+  $scope.sciencebaseUrl = "https://my-beta.usgs.gov/catalog";
+  // $scope.sciencebaseUrl = "https://www.sciencebase.gov/catalog";
 
   // Load config file
   $scope.depthConfig = {};
