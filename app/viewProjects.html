@@ -184,7 +184,7 @@
             <b>{{(proj.dates | filter:"Start")[0].dateString | yearOnly}}</b> {{((proj.dates | filter:"Start").length > 0 && (proj.dates | filter:"End").length > 0) && "-" || ""}}
             <b>{{(proj.dates | filter:"End")[0].dateString | yearOnly}}</b>
           </td>
-          <td><a href="{{sciencebaseUrl}}/item/{{proj.id}}" target="_blank">{{proj.title}}</a></td>
+          <td ng-controller="IndexCtrl"><button class="btn btn-link" style="text-align: left;" ng-click="setRoute('viewProject/{{proj.id}}')">{{proj.title}}</button></td>
           <td>
             <ul class="unstyled" ng-controller="ContactsCtrl">
               <li ng-repeat="pi in proj.contacts | filter:isPrincipalInvestigator">
