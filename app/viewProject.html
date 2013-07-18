@@ -1,0 +1,222 @@
+<div stuck top="0">
+  <ul class="unstyled" style="width: 100%;">
+    <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+      <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+    </li>
+  </ul>
+  <div class="hide" id="error-bar" style="top:0px; position:fixed; width: 100%;">
+    <ul class="unstyled" style="width: 100%;">
+      <li ng-repeat="alert in alerts" class="alert alert-{{alert.type}}">{{alert.msg}}
+        <button type="button" class="close" ng-click='closeAlert($index)'>&times;</button>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="centered-edit container">
+
+  <div id="view-panel" class="form-horizontal">
+
+    <div class="jumbotron">
+      <!-- Project Title -->
+      <h1>{{item.title}}</h1>
+      <a class="btn btn-info" ng-show="item.id"href="{{sciencebaseUrl}}/item/{{item.id}}" target="_blank">View in ScienceBase</a>
+    </div>
+    <hr>
+
+    <legend>Critial Information</legend>
+    <!-- Organization Type -->
+    <div class="span2">
+      <h6>Organization Type:</h6>
+      <ul class="unstyled inline" ng-controller="TagsCtrl">
+        <li ng-repeat="tag in item.tags | filter:isOrganizationType" class="control-group">
+          {{tag.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+    <!-- Organization Name -->
+    <div class="span3">
+      <h6>Organization Name:</h6>
+      <ul class="unstyled inline" ng-controller="TagsCtrl">
+        <li ng-repeat="tag in item.tags | filter:isOrganizationName" class="control-group">
+          {{tag.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+    <!-- Fiscal Year -->
+    <div class="span2">
+      <h6>Fiscal Year(s):</h6>
+      <ul class="unstyled inline" ng-controller="TagsCtrl">
+        <li ng-repeat="tag in item.tags | filter:isFiscalYear" class="control-group">
+          {{tag.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+    <!-- Project Type -->
+    <div class="span2">
+      <h6>Project Type:</h6>
+      <ul class="unstyled inline" ng-controller="TagsCtrl">
+        <li ng-repeat="tag in item.tags | filter:isProjectType" class="control-group">
+          {{tag.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+
+    <legend>People</legend>
+    <!-- Principal Investigator -->
+    <p class="lead">
+      <i>Principal Investigator(s):</i>
+      <ul class="unstyled" ng-controller="ContactsCtrl">
+        <li ng-repeat="contact in item.contacts | filter:isPrincipalInvestigator">
+          <b>{{contact.name}}</b> ({{contact.organization.displayText}}) <a href="mailto:{{contact.email}}">{{contact.email}}</a>
+        </li>
+      </ul>
+    </p>
+    <!-- Cooperators -->
+    <p class="lead">
+      <i>Cooperator(s):</i>
+      <ul class="unstyled" ng-controller="ContactsCtrl">
+        <li ng-repeat="contact in item.contacts | filter:isCooperator">
+          <b>{{contact.name}}</b> ({{contact.organization.displayText}}) <a href="mailto:{{contact.email}}">{{contact.email}}</a>
+        </li>
+      </ul>
+    </p>
+
+    <legend>Funding</legend>
+
+    <!-- Funding Agency -->
+    <div>
+      <h5>Funding Agency(s)</h5>
+      <ul class="unstyled inline" ng-controller="ContactsCtrl">
+        <li ng-repeat="contact in item.contacts | filter:isFundingAgency" class="control-group">
+          {{contact.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- FY Funding -->
+    <div>
+      <h5>Funds</h5>
+      <ul class="unstyled" ng-controller="FacetsCtrl">
+        <li ng-repeat="fund in item.facets[0].funding" class="control-group">
+          {{fund.fiscalYear}}: {{fund.fundingAmount}}
+        </li>
+      </ul>
+    </div>
+
+    <legend>Additional Information</legend>
+
+    <!-- Dates -->
+    <ul class="unstyled" ng-controller="DatesCtrl">
+      <li ng-repeat="date in item.dates" class="control-group">
+        <b>{{date.label}}:</b> {{date.dateString}}
+      </li>
+    </ul>
+
+    <!-- Webpage -->
+    <ul class="unstyled" ng-controller="WeblinksCtrl">
+      <li ng-repeat="weblink in item.webLinks" class="control-group">
+        {{weblink.title}}: <a href="{{weblink.uri}}">{{weblink.uri}}</a>
+      </li>
+    </ul>
+
+    <!-- keywords & locations -->
+    <!-- keywords -->
+    <div>
+      <h5>Keywords</h5>
+      <ul class="unstyled inline" ng-controller="TagsCtrl">
+        <li ng-repeat="tag in item.tags | filter:isKeyword" class="control-group">
+          {{tag.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- locations -->
+    <div>
+      <h5>Locations</h5>
+      <ul class="unstyled inline" ng-controller="TagsCtrl">
+        <li ng-repeat="tag in item.tags | filter:isLocation" class="control-group">
+          {{tag.name}}<span ng-show="!$last">,</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Abstract -->
+    <div>
+      <h5>Abstract</h5>
+      <p>{{item.body}}</p>
+    </div>
+
+    <legend>Project Information</legend>
+
+    <!-- Project Status -->
+    <div>
+      <b>Project Status:</b> {{(item.facets | filter:isProject)[0].projectStatus}} 
+    </div>
+
+    <!-- Project Objectives -->
+    <div>
+      <h5>Project Objectives</h5>
+      <p>{{(item.facets | filter:isProject)[0].objectives}}</p>
+    </div>
+
+    <!-- Summary of Results -->
+    <div>
+      <h5>Summary of Results</h5>
+      <p>{{(item.facets | filter:isProject)[0].summaryOfResults}}</p>
+    </div>
+
+    <legend>Products</legend>
+
+    <!-- Expected Products -->
+    <div>
+      <h5>Expected Product(s)</h5>
+      <ul class="unstyled" ng-controller="FacetsCtrl">
+        <li ng-repeat="product in (item.facets | filter:isProject)[0].projectProducts | filter:isExpectedProduct" class="control-group">
+          {{product.productDescription}}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Delivered Products -->
+    <div>
+      <h5>Delivered Product(s)</h5>
+      <ul class="unstyled" ng-controller="FacetsCtrl">
+        <li ng-repeat="product in (item.facets | filter:isProject)[0].projectProducts | filter:isDeliveredProduct" class="control-group">
+          {{product.productDescription}}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Agendas -->
+    <span ng-show="hasAgendas()" ng-controller="FacetsCtrl">
+      <legend>Science Themes</legend>
+      <table class="" ng-repeat="agenda in (item.facets | filter:isExpando)[0].object.agendas">
+        <caption><b>{{agenda.name}}</b> <a class="btn btn-info" href="{{agenda.url}}" target="_blank">Explanation Document</a></caption>
+        <thead>
+          <tr>
+            <th>Question</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="question in agenda.themes">
+            <td>
+              <label>{{question.number}}. {{question.name}}</label>
+            </td>
+            <td ng-repeat="(theme, value) in question.options | orderBy:theme track by $index" style="width:12%">
+              <a class="btn btn-success" style="width:60%; height:100%" ng-show="question.options[theme]">{{theme}}<br>{{value}}</a>
+              <a class="btn btn-danger" style="width:60%; height:100%" ng-show="!question.options[theme]">{{theme}}<br>{{value}}</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </span>
+
+  </div> <!-- /view-panel -->
+
+
+</div> <!-- /centered-edit -->
+
+<br />
+

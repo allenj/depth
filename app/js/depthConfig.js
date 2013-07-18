@@ -40,6 +40,11 @@ Depth.config(function($routeProvider) {
       controller:DepthCtrl, 
       templateUrl:'viewProjects.html'
     })
+    .when('/viewProject/:itemId/:projectSet',
+    {
+      controller:ViewProjectCtrl,
+      templateUrl:'viewProject.html'
+    })
     .otherwise({redirectTo:'/'});
 });
 
