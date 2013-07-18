@@ -1038,27 +1038,33 @@ function TagsCtrl($scope, State) {
   };
 
   $scope.isFiscalYear = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/FiscalYear");
+    var pattern = new RegExp("http://www.sciencebase.gov/vocab/category/.*/Project/FiscalYear");
+    return pattern.test(tag.scheme);
   };
 
   $scope.isKeyword = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Keyword");
+    var pattern = new RegExp("http://www.sciencebase.gov/vocab/category/.*/Keyword");
+    return pattern.test(tag.scheme);
   };
 
   $scope.isLocation = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Location");
+    var pattern = new RegExp("http://www.sciencebase.gov/vocab/category/.*/Location");
+    return pattern.test(tag.scheme);
   };
 
   $scope.isOrganizationType = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/OrganizationType");
+    var pattern = new RegExp("http://www.sciencebase.gov/vocab/category/.*/Project/OrganizationType");
+    return pattern.test(tag.scheme);
   };
 
   $scope.isOrganizationName = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/OrganizationName");
+    var pattern = new RegExp("http://www.sciencebase.gov/vocab/category/.*/Project/OrganizationName");
+    return pattern.test(tag.scheme);
   };
 
   $scope.isProjectType = function(tag) {
-    return (tag.scheme === "http://www.sciencebase.gov/vocab/category/" + $scope.vocabName + "/Project/ProjectType");
+    var pattern = new RegExp("http://www.sciencebase.gov/vocab/category/.*/Project/ProjectType");
+    return pattern.test(tag.scheme);
   };
 
 }
