@@ -25,7 +25,7 @@
     </div>
     <hr>
 
-    <legend>Critial Information</legend>
+    <legend>Critical Information</legend>
     <!-- Organization Type -->
     <div class="span2">
       <h6>Organization Type:</h6>
@@ -100,7 +100,7 @@
       <h5>Funds</h5>
       <ul class="unstyled" ng-controller="FacetsCtrl">
         <li ng-repeat="fund in item.facets[0].funding" class="control-group">
-          {{fund.fiscalYear}}: {{fund.fundingAmount}}
+          {{fund.fiscalYear}}: {{fund.fundingAmount | currency}}
         </li>
       </ul>
     </div>

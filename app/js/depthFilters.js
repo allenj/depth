@@ -9,7 +9,7 @@ Depth.filter('projectsFilter', function (filterFilter, State) {
       if (validProject && options.orgTypes && options.orgTypes.length > 0) {
         validProject = false;
         angular.forEach (options.orgTypes, function (orgType) {
-          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/"+ vocabName +"/Project/OrganizationType", type: "Label", name: orgType.org}).length > 0) {
+          if (filterFilter(project.tags, {scheme: "http://www.sciencebase.gov/vocab/category/"+ vocabName +"/Project/OrganizationType", type: "Label", name: orgType.orgType}).length > 0) {
             validProject = true;
           }
         });
