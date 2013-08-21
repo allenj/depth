@@ -1,5 +1,6 @@
 
-function ViewProjectCtrl($scope, $routeParams, $cookies, State, Item, $filter) {
+function ViewProjectCtrl($scope, $routeParams, $cookies, State, Item, $filter, AppConfig) {
+  $scope.AppConfig = AppConfig;
   $scope.item = {};
 
   // Get an item from ScienceBase by id
