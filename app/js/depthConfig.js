@@ -70,3 +70,7 @@ Depth.run(function($rootScope, $location, $anchorScroll, $routeParams) {
     $anchorScroll();  
   });
 });
+
+Depth.constant('AppConfig',{
+    sciencebaseUrl: (window.location.hostname=='www.sciencebase.gov') ? 'https://www.sciencebase.gov' : 'https://beta.sciencebase.gov'
+});
